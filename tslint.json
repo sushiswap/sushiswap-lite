@@ -1,0 +1,52 @@
+{
+  "extends": [
+    "tslint:recommended",
+    "tslint-react",
+    "tslint-react-hooks",
+    "tslint-config-prettier"
+  ],
+  "rulesDirectory": [
+    "tslint-plugin-prettier",
+    "tslint-microsoft-contrib"
+  ],
+  "rules": {
+    "prettier": true,
+    "interface-name": false,
+    "ordered-imports": [
+      true,
+      {
+        "grouped-imports": true,
+        "groups": [
+          {
+            "name": "react",
+            "match": "^react",
+            "order": 0
+          },
+          {
+            "name": "expo",
+            "match": "expo",
+            "order": 1
+          }
+        ]
+      }
+    ],
+    "object-literal-sort-keys": false,
+    "no-empty": false,
+    "max-func-body-length": [
+      true,
+      {
+        "func-body-length": 32,
+        "func-expression-body-length": 32,
+        "arrow-body-length": 32,
+        "method-body-length": 32,
+        "ctor-body-length": 32,
+        "ignore-comments": true
+      }
+    ]
+  },
+  "linterOptions": {
+    "exclude": [
+      "**/*.js"
+    ]
+  }
+}

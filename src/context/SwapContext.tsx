@@ -27,7 +27,7 @@ export const SwapContext = React.createContext({
 // tslint:disable-next-line:max-func-body-length
 export const SwapContextProvider = ({ children }) => {
     const { tokens } = useContext(GlobalContext);
-    const { provider, signer, getTokenAllowance, addOnBlockListener, removeOnBlockListener } = useContext(
+    const { provider, signer, address, getTokenAllowance, addOnBlockListener, removeOnBlockListener } = useContext(
         EthersContext
     );
     const { getTrade } = useSDK();
@@ -48,7 +48,7 @@ export const SwapContextProvider = ({ children }) => {
     }, [fromSymbol, toSymbol]);
     useEffect(() => {
         setFromSymbol("");
-    }, [window.ethereum.selectedAddress]);
+    }, [address]);
     useEffect(() => {
         setTrade(undefined);
         setUnsupported(false);

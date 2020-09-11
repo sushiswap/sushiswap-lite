@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 
+import { EventType, Listener } from "@ethersproject/abstract-provider";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import { ROUTER } from "../hooks/useSDK";
@@ -9,6 +10,7 @@ export type OnBlockListener = (block: number) => Promise<void>;
 export const EthersContext = React.createContext({
     provider: undefined as ethers.providers.JsonRpcProvider | undefined,
     signer: undefined as ethers.providers.JsonRpcSigner | undefined,
+    address: null as string | null,
     addOnBlockListener: (listener: OnBlockListener) => {},
     removeOnBlockListener: (listener: OnBlockListener) => {},
     approveToken: async (token: string, spender: string, amount?: ethers.BigNumber) => {
@@ -23,14 +25,27 @@ export const EthersContext = React.createContext({
 export const EthersContextProvider = ({ children }) => {
     const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
+    const [address, setAddress] = useState<string | null>(null);
     const [onBlockListeners, setOnBlockListeners] = useState([] as OnBlockListener[]);
     useAsyncEffect(async () => {
-        await window.ethereum.enable();
-        const web3 = new ethers.providers.Web3Provider(window.ethereum);
-        const alchemy = new ethers.providers.AlchemyProvider(web3.network, process.env.API_KEY);
-        setProvider(alchemy);
-        setSigner(await web3.getSigner());
-    }, []);
+        if (window.ethereum) {
+            const web3 = new ethers.providers.Web3Provider(window.ethereum);
+            const alchemy = new ethers.providers.AlchemyProvider(web3.network, process.env.API_KEY);
+            setProvider(alchemy);
+            setSigner(await web3.getSigner());
+        }
+    }, [window.ethereum]);
+    useEffect(() => {
+        if (window.ethereum) {
+            const onAccountsChanged = () => {
+                setAddress(window.ethereum.selectedAddress);
+            };
+            window.ethereum.on("accountsChanged", onAccountsChanged);
+            return () => {
+                window.ethereum.off("accountsChanged", onAccountsChanged);
+            };
+        }
+    }, [window.ethereum]);
     const approveToken = useCallback(
         async (token: string, spender: string, amount?: ethers.BigNumber) => {
             amount = amount || ethers.constants.MaxUint256;
@@ -87,6 +102,7 @@ export const EthersContextProvider = ({ children }) => {
             value={{
                 provider,
                 signer,
+                address,
                 approveToken,
                 getTokenAllowance,
                 addOnBlockListener,
@@ -123,6 +139,8 @@ declare global {
             send(payload: any, callback: any): any;
             send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any;
             selectedAddress: string;
+            on(eventName: EventType, listener: Listener);
+            off(eventName: EventType, listener: Listener);
         };
     }
 }

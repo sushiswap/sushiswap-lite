@@ -134,9 +134,9 @@ const DarkModeSwitch = () => {
 
 const Status = () => {
     const { borderDark, textMedium, textLight, green } = useColors();
-    const { signer } = useContext(EthersContext);
-    const title = signer ? "Connected " : "Not connected";
-    const color = signer ? green : textLight;
+    const { address } = useContext(EthersContext);
+    const title = address ? "Connected " : "Not connected";
+    const color = address ? green : textLight;
     return (
         <View style={{ position: "absolute", width: "100%", height: "100%" }}>
             <FlexView

@@ -18,12 +18,12 @@ export const GlobalContext = React.createContext({
     updateTokens: async () => {},
     loadingTokens: false,
     tradeHistory: {},
-    addToTradeHistory: async (address, trade) => {}
+    addToTradeHistory: async trade => {}
 });
 
 // tslint:disable-next-line:max-func-body-length
 export const GlobalContextProvider = ({ children }) => {
-    const { provider, signer, addOnBlockListener, removeOnBlockListener } = useContext(EthersContext);
+    const { provider, signer, address, addOnBlockListener, removeOnBlockListener } = useContext(EthersContext);
     const colorScheme = useColorScheme();
     const [darkMode, setDarkMode] = useState(colorScheme === "dark");
     const [tokens, setTokens] = useState([ETH]);
@@ -48,7 +48,7 @@ export const GlobalContextProvider = ({ children }) => {
     useAsyncEffect(async () => {
         setLoadingTokens(true);
         await updateTokens();
-    }, [window.ethereum.selectedAddress]);
+    }, [address]);
     return (
         <GlobalContext.Provider
             value={{
@@ -71,15 +71,17 @@ export const GlobalContextProvider = ({ children }) => {
                 updateTokens,
                 loadingTokens,
                 tradeHistory,
-                addToTradeHistory: async (address: string, trade: Trade) => {
-                    const list = tradeHistory[address] || [];
-                    list.push(trade);
-                    const newHistory = {
-                        ...tradeHistory,
-                        [address]: list
-                    };
-                    await AsyncStorage.setItem("trade_history", JSON.stringify(newHistory));
-                    setTradeHistory(newHistory);
+                addToTradeHistory: async (trade: Trade) => {
+                    if (address) {
+                        const list = tradeHistory[address] || [];
+                        list.push(trade);
+                        const newHistory = {
+                            ...tradeHistory,
+                            [address]: list
+                        };
+                        await AsyncStorage.setItem("trade_history", JSON.stringify(newHistory));
+                        setTradeHistory(newHistory);
+                    }
                 }
             }}>
             {children}

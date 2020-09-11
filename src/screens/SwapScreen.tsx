@@ -6,6 +6,7 @@ import { Hoverable } from "react-native-web-hover";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import Button from "../components/Button";
+import ConnectToWallet from "../components/ConnectToWallet";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import FlexView from "../components/FlexView";
@@ -27,6 +28,10 @@ interface MetamaskError {
 }
 
 const SwapScreen = () => {
+    const { address } = useContext(EthersContext);
+    if (!address) {
+        return <ConnectToWallet />;
+    }
     return (
         <Container>
             <Content>
@@ -394,7 +399,7 @@ const SwapButton = ({ onError, disabled = false }) => {
                 const result = await swap(trade);
                 if (result) {
                     await result.tx.wait();
-                    await addToTradeHistory(await signer.getAddress(), result.trade);
+                    await addToTradeHistory(result.trade);
                     await updateTokens();
                     setFromSymbol("");
                 }

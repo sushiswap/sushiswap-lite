@@ -47,6 +47,9 @@ export const SwapContextProvider = ({ children }) => {
         setFromAmount("");
     }, [fromSymbol, toSymbol]);
     useEffect(() => {
+        setFromSymbol("");
+    }, [window.ethereum.selectedAddress]);
+    useEffect(() => {
         setTrade(undefined);
         setUnsupported(false);
         setFromTokenAllowed(false);

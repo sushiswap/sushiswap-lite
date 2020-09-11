@@ -122,6 +122,7 @@ declare global {
             enable(): void;
             send(payload: any, callback: any): any;
             send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any;
+            selectedAddress: string;
         };
     }
 }

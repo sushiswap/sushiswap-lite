@@ -4,6 +4,7 @@ import { useColorScheme } from "react-native-appearance";
 import { Trade } from "@levx/sushiswap-sdk";
 import AsyncStorage from "@react-native-community/async-storage";
 import { ethers } from "ethers";
+import useAsyncEffect from "use-async-effect";
 import { ETH } from "../constants/tokens";
 import Token from "../model/Token";
 import { EthersContext } from "./EthersContext";
@@ -44,6 +45,10 @@ export const GlobalContextProvider = ({ children }) => {
             removeOnBlockListener(updateTokens);
         };
     }, [updateTokens]);
+    useAsyncEffect(async () => {
+        setLoadingTokens(true);
+        await updateTokens();
+    }, [window.ethereum.selectedAddress]);
     return (
         <GlobalContext.Provider
             value={{

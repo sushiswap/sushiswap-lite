@@ -69,7 +69,7 @@ const Menu = () => {
             style={{
                 height: "100%",
                 alignItems: "flex-end",
-                paddingBottom: 4
+                paddingBottom: 8
             }}>
             <MenuItem title={"SWAP"} routeName={"Home"} />
             <MenuItem title={"POOLS"} routeName={"Pools"} />
@@ -144,10 +144,10 @@ const Status = () => {
                     alignSelf: "center",
                     alignItems: "center",
                     justifyContent: "center",
-                    height: 48,
+                    height: 40,
                     marginTop: 20,
                     paddingHorizontal: Spacing.normal,
-                    borderRadius: 24,
+                    borderRadius: 20,
                     borderWidth: 1,
                     borderColor: borderDark
                 }}>

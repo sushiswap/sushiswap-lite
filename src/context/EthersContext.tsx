@@ -40,6 +40,7 @@ export const EthersContextProvider = ({ children }) => {
             const onAccountsChanged = () => {
                 setAddress(window.ethereum.selectedAddress);
             };
+            onAccountsChanged();
             window.ethereum.on("accountsChanged", onAccountsChanged);
             return () => {
                 window.ethereum.off("accountsChanged", onAccountsChanged);

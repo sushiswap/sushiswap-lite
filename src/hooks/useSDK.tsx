@@ -73,9 +73,38 @@ const useSDK = () => {
         },
         [signer]
     );
+    const wrapETH = useCallback(
+        async (amount: ethers.BigNumber) => {
+            if (signer) {
+                const { abi } = require("@uniswap/v2-periphery/build/IWETH.json");
+                const weth = ethers.ContractFactory.getContract(WETH["1"].address, abi, signer);
+                const gasLimit = await weth.estimateGas.deposit({
+                    value: amount
+                });
+                return await weth.deposit({
+                    value: amount,
+                    gasLimit
+                });
+            }
+        },
+        [signer]
+    );
+    const unwrapETH = useCallback(
+        async (amount: ethers.BigNumber) => {
+            if (signer) {
+                const { abi } = require("@uniswap/v2-periphery/build/IWETH.json");
+                const weth = ethers.ContractFactory.getContract(WETH["1"].address, abi, signer);
+                const gasLimit = await weth.estimateGas.withdraw(amount);
+                return await weth.withdraw(amount, {
+                    gasLimit
+                });
+            }
+        },
+        [signer]
+    );
     const calculateFee = (fromAmount: ethers.BigNumber) => {
         return fromAmount.mul(3).div(1000);
     };
-    return { allowedSlippage, getTrade, swap, calculateFee };
+    return { allowedSlippage, getTrade, swap, wrapETH, unwrapETH, calculateFee };
 };
 export default useSDK;

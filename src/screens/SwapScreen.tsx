@@ -229,6 +229,34 @@ const Subtitle = ({ text }) => {
 
 const TradeInfo = () => {
     const context = useContext(SwapContext);
+    const amount = context.trade?.outputAmount?.toSignificant(8);
+    if (
+        !isEmptyValue(context.fromAmount) &&
+        ((context.fromSymbol === "ETH" && context.toSymbol === "WETH") ||
+            (context.fromSymbol === "WETH" && context.toSymbol === "ETH"))
+    ) {
+        return <WrapInfo />;
+    }
+    if (context.fromSymbol === "" || context.toSymbol === "" || isEmptyValue(context.fromAmount) || !amount) {
+        return <Column />;
+    }
+    return <SwapInfo />;
+};
+
+const WrapInfo = () => {
+    const context = useContext(SwapContext);
+    return (
+        <Column noMargin={true}>
+            <ArrowDown />
+            <Text style={{ fontSize: 30, textAlign: "center" }}>
+                {context.fromAmount} {context.toSymbol}
+            </Text>
+        </Column>
+    );
+};
+
+const SwapInfo = () => {
+    const context = useContext(SwapContext);
     const { calculateFee } = useSDK();
     const amount = context.trade?.outputAmount?.toSignificant(8);
     const price = context.trade?.executionPrice?.toSignificant(8);
@@ -240,9 +268,6 @@ const TradeInfo = () => {
               8
           )
         : "";
-    if (context.fromSymbol === "" || context.toSymbol === "" || isEmptyValue(context.fromAmount) || !amount) {
-        return <Column />;
-    }
     return (
         <Column noMargin={true}>
             <ArrowDown />
@@ -292,12 +317,16 @@ const Controls = () => {
     }
     return (
         <Column>
-            {context.unsupported ? (
-                <UnsupportedButton />
+            {parseBalance(context.fromAmount, context.fromToken.decimals).gt(context.fromToken.balance) ? (
+                <InsufficientBalanceButton />
+            ) : context.fromSymbol === "WETH" && context.toSymbol === "ETH" ? (
+                <UnwrapButton onError={setError} />
+            ) : context.fromSymbol === "ETH" && context.toSymbol === "WETH" ? (
+                <WrapButton onError={setError} />
             ) : context.loading || !context.trade ? (
                 <ActivityIndicator size={"large"} />
-            ) : parseBalance(context.fromAmount, context.fromToken.decimals).gt(context.fromToken.balance) ? (
-                <InsufficientBalanceButton />
+            ) : context.unsupported ? (
+                <UnsupportedButton />
             ) : context.fromSymbol === "ETH" || context.fromTokenAllowed ? (
                 <SwapButton onError={setError} />
             ) : (
@@ -335,8 +364,6 @@ const ApproveButton = ({ onError }) => {
                 await tx.wait();
                 setFromTokenAllowed(true);
             } catch (e) {
-                // tslint:disable-next-line:no-console
-                console.error(e);
                 onError(e);
             } finally {
                 setLoading(false);
@@ -353,7 +380,7 @@ const ApproveButton = ({ onError }) => {
 // tslint:disable-next-line:max-func-body-length
 const SwapButton = ({ onError, disabled = false }) => {
     const { swap } = useSDK();
-    const { setFromSymbol, setToSymbol, fromToken, toToken, fromAmount, trade } = useContext(SwapContext);
+    const { setFromSymbol, fromToken, toToken, fromAmount, trade } = useContext(SwapContext);
     const { addToTradeHistory, updateTokens } = useContext(GlobalContext);
     const { signer } = useContext(EthersContext);
     const [loading, setLoading] = useState(false);
@@ -369,11 +396,8 @@ const SwapButton = ({ onError, disabled = false }) => {
                     await addToTradeHistory(await signer.getAddress(), result.trade);
                     await updateTokens();
                     setFromSymbol("");
-                    setToSymbol("");
                 }
             } catch (e) {
-                // tslint:disable-next-line:no-console
-                console.error(e);
                 onError(e);
             } finally {
                 setLoading(false);
@@ -385,6 +409,60 @@ const SwapButton = ({ onError, disabled = false }) => {
             <Button size={"large"} title={title} disabled={disabled} loading={loading} onPress={onPress} />
         </View>
     );
+};
+
+const WrapButton = ({ onError }) => {
+    const { wrapETH } = useSDK();
+    const { setFromSymbol, fromAmount } = useContext(SwapContext);
+    const { updateTokens } = useContext(GlobalContext);
+    const { signer } = useContext(EthersContext);
+    const [loading, setLoading] = useState(false);
+    const onPress = useCallback(async () => {
+        if (fromAmount && signer) {
+            onError({});
+            setLoading(true);
+            try {
+                const tx = await wrapETH(parseBalance(fromAmount));
+                if (tx) {
+                    await tx.wait();
+                    await updateTokens();
+                    setFromSymbol("");
+                }
+            } catch (e) {
+                onError(e);
+            } finally {
+                setLoading(false);
+            }
+        }
+    }, [fromAmount, signer]);
+    return <Button size={"large"} title={"Wrap"} loading={loading} onPress={onPress} />;
+};
+
+const UnwrapButton = ({ onError }) => {
+    const { unwrapETH } = useSDK();
+    const { setFromSymbol, fromAmount } = useContext(SwapContext);
+    const { updateTokens } = useContext(GlobalContext);
+    const { signer } = useContext(EthersContext);
+    const [loading, setLoading] = useState(false);
+    const onPress = useCallback(async () => {
+        if (fromAmount && signer) {
+            onError({});
+            setLoading(true);
+            try {
+                const tx = await unwrapETH(parseBalance(fromAmount));
+                if (tx) {
+                    await tx.wait();
+                    await updateTokens();
+                    setFromSymbol("");
+                }
+            } catch (e) {
+                onError(e);
+            } finally {
+                setLoading(false);
+            }
+        }
+    }, [fromAmount, signer]);
+    return <Button size={"large"} title={"Unwrap"} loading={loading} onPress={onPress} />;
 };
 
 const ErrorMessage = ({ error }) => (
@@ -421,6 +499,6 @@ const Column = props => <View {...props} style={{ width: 440, marginTop: props.n
 const isEmptyValue = (text: string) =>
     ethers.BigNumber.isBigNumber(text)
         ? ethers.BigNumber.from(text).isZero()
-        : text === "" || text.replaceAll("0", "") === "" || text.endsWith("0.");
+        : text === "" || text.replaceAll("0", "").replaceAll(".", "") === "";
 
 export default SwapScreen;

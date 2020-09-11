@@ -1,16 +1,16 @@
 import { ethers } from "ethers";
 
-export const formatBalance = (value: ethers.BigNumberish, unit: number, maxDecimals: number = 0) => {
-    const formatted = ethers.utils.formatUnits(value, unit);
-    if (maxDecimals > 0) {
+export const formatBalance = (value: ethers.BigNumberish, decimals = 18, maxFraction = 0) => {
+    const formatted = ethers.utils.formatUnits(value, decimals);
+    if (maxFraction > 0) {
         const split = formatted.split(".");
         if (split.length > 1) {
-            return split[0] + "." + split[1].substr(0, maxDecimals);
+            return split[0] + "." + split[1].substr(0, maxFraction);
         }
     }
     return formatted;
 };
 
-export const parseBalance = (value: string, unit: number) => {
-    return ethers.utils.parseUnits(value || "0", unit);
+export const parseBalance = (value: string, decimals = 18) => {
+    return ethers.utils.parseUnits(value || "0", decimals);
 };

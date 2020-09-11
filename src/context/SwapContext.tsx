@@ -62,8 +62,6 @@ export const SwapContextProvider = ({ children }) => {
                         try {
                             setTrade(await getTrade(fromToken, toToken, amount));
                         } catch (e) {
-                            // tslint:disable-next-line:no-console
-                            console.error(e);
                             setUnsupported(true);
                         } finally {
                             setLoading(false);

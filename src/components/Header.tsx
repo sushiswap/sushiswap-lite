@@ -6,6 +6,7 @@ import Switch from "expo-dark-mode-switch";
 import { Link, useRoute } from "@react-navigation/native";
 import { HEADER_HEIGHT, Spacing } from "../constants/dimension";
 import linking from "../constants/linking";
+import { EthersContext } from "../context/EthersContext";
 import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
 import FlexView from "./FlexView";
@@ -21,14 +22,20 @@ const Header = () => {
                 top: 0,
                 width: "100%",
                 height: HEADER_HEIGHT,
-                paddingTop: Spacing.small,
-                paddingHorizontal: Spacing.content,
                 backgroundColor: background
             }}>
-            <FlexView style={{ flex: 1, justifyContent: "space-between", alignItems: "flex-end" }}>
+            <FlexView
+                style={{
+                    flex: 1,
+                    justifyContent: "space-between",
+                    alignItems: "flex-end",
+                    paddingTop: Spacing.small,
+                    paddingHorizontal: Spacing.content
+                }}>
                 <Title />
                 <Menu />
             </FlexView>
+            <Status />
         </View>
     );
 };
@@ -62,7 +69,7 @@ const Menu = () => {
             style={{
                 height: "100%",
                 alignItems: "flex-end",
-                paddingBottom: Spacing.tiny
+                paddingBottom: 4
             }}>
             <MenuItem title={"SWAP"} routeName={"Home"} />
             <MenuItem title={"POOLS"} routeName={"Pools"} />
@@ -80,7 +87,7 @@ const MenuItem = ({ title, routeName }) => {
         setCurrent(route.name === routeName);
     }, [route]);
     return (
-        <Link to={"/" + linking.config.screens[routeName]} style={{ marginLeft: Spacing.normal }}>
+        <Link to={"/" + linking.config.screens[routeName]} style={{ marginLeft: Spacing.normal, marginBottom: 4 }}>
             <View>
                 <Text style={{ fontFamily: "regular", fontSize: 20, color: textDark }}>{title}</Text>
                 {current && (
@@ -109,18 +116,45 @@ const DarkModeSwitch = () => {
         [setDarkMode]
     );
     return (
-        <View style={{ marginLeft: Spacing.normal, marginBottom: -4 }}>
+        <View style={{ marginLeft: Spacing.normal, marginBottom: 0 }}>
             <Switch
                 value={darkMode}
                 onChange={onChange}
                 style={{
                     transform: [
                         {
-                            scale: 0.6
+                            scale: 0.7
                         }
                     ]
                 }}
             />
+        </View>
+    );
+};
+
+const Status = () => {
+    const { borderDark, textMedium, textLight, green } = useColors();
+    const { signer } = useContext(EthersContext);
+    const title = signer ? "Connected " : "Not connected";
+    const color = signer ? green : textLight;
+    return (
+        <View style={{ position: "absolute", width: "100%", height: "100%" }}>
+            <FlexView
+                style={{
+                    alignSelf: "center",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: 48,
+                    marginTop: 20,
+                    paddingHorizontal: Spacing.normal,
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: borderDark
+                }}>
+                <View style={{ backgroundColor: color, width: 6, height: 6, borderRadius: 3, marginRight: 12 }} />
+                <Text style={{ fontSize: 16, color: textMedium, marginRight: 2 }}>{title}</Text>
+                {/*<Icon type={"material-community"} name={"chevron-down"} color={textLight} size={22} />*/}
+            </FlexView>
         </View>
     );
 };

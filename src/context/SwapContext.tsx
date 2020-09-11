@@ -1,9 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 
-import { Trade } from "@uniswap/sdk";
+import { Trade } from "@levx/sushiswap-sdk";
 import { ethers } from "ethers";
-import useAsyncEffect from "use-async-effect";
-import useSDK, { UNISWAP_ROUTER } from "../hooks/useSDK";
+import useSDK from "../hooks/useSDK";
 import Token from "../model/Token";
 import { parseBalance } from "../utils";
 import { EthersContext } from "./EthersContext";
@@ -28,7 +27,9 @@ export const SwapContext = React.createContext({
 // tslint:disable-next-line:max-func-body-length
 export const SwapContextProvider = ({ children }) => {
     const { tokens } = useContext(GlobalContext);
-    const { provider, signer } = useContext(EthersContext);
+    const { provider, signer, getTokenAllowance, addOnBlockListener, removeOnBlockListener } = useContext(
+        EthersContext
+    );
     const { getTrade } = useSDK();
     const [loading, setLoading] = useState(false);
     const [fromSymbol, setFromSymbol] = useState("");
@@ -40,31 +41,40 @@ export const SwapContextProvider = ({ children }) => {
     const fromToken = tokens.find(token => token.symbol === fromSymbol);
     const toToken = tokens.find(token => token.symbol === toSymbol);
     useEffect(() => {
+        if (fromSymbol === "") {
+            setToSymbol("");
+        }
         setFromAmount("");
     }, [fromSymbol, toSymbol]);
-    useAsyncEffect(async () => {
+    useEffect(() => {
+        setTrade(undefined);
+        setUnsupported(false);
+        setFromTokenAllowed(false);
         if (fromSymbol && toSymbol && fromAmount && provider && signer) {
             if (fromToken && toToken) {
-                setLoading(true);
-                setUnsupported(false);
-                setFromTokenAllowed(false);
                 const amount = parseBalance(fromAmount, fromToken.decimals);
-                try {
-                    setTrade(amount.isZero() ? undefined : await getTrade(fromToken, toToken, amount));
-                    const allowance = await provider.send("alchemy_getTokenAllowance", [
-                        {
-                            contract: fromToken.address,
-                            owner: await signer.getAddress(),
-                            spender: UNISWAP_ROUTER
+                if (!amount.isZero()) {
+                    const updateAllowance = async () => {
+                        const allowance = await getTokenAllowance(fromToken.address);
+                        setFromTokenAllowed(ethers.BigNumber.from(allowance).gte(ethers.BigNumber.from(2).pow("128")));
+                    };
+                    const updateTrade = async () => {
+                        try {
+                            setTrade(await getTrade(fromToken, toToken, amount));
+                        } catch (e) {
+                            // tslint:disable-next-line:no-console
+                            console.error(e);
+                            setUnsupported(true);
+                        } finally {
+                            setLoading(false);
                         }
-                    ]);
-                    setFromTokenAllowed(ethers.BigNumber.from(allowance).gte(ethers.BigNumber.from(2).pow("128")));
-                } catch (e) {
-                    // tslint:disable-next-line:no-console
-                    console.error(e);
-                    setUnsupported(true);
-                } finally {
-                    setLoading(false);
+                    };
+                    setLoading(true);
+                    updateAllowance().then(updateTrade);
+                    addOnBlockListener(updateTrade);
+                    return () => {
+                        removeOnBlockListener(updateTrade);
+                    };
                 }
             }
         }

@@ -12,13 +12,14 @@ import {
     TokenAmount,
     Trade,
     WETH
-} from "@uniswap/sdk";
+} from "@levx/sushiswap-sdk";
 import { ethers } from "ethers";
 import { EthersContext } from "../context/EthersContext";
 import Token from "../model/Token";
 
-export const UNISWAP_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
+// export const UNISWAP_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
 export const SUSHISWAP_ROUTER = "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f";
+export const ROUTER = SUSHISWAP_ROUTER;
 
 const convertToken = (token: Token) => {
     return token.symbol === "ETH" ? WETH["1"] : new SToken(ChainId.MAINNET, token.address, token.decimals);
@@ -45,24 +46,23 @@ const useSDK = () => {
         [provider]
     );
     const swap = useCallback(
-        async (fromToken: Token, toToken: Token, fromAmount: ethers.BigNumber) => {
+        async (trade: Trade) => {
             if (signer) {
-                const trade = await getTrade(fromToken, toToken, fromAmount);
                 if (trade) {
                     const params = Router.swapCallParameters(trade, {
-                        feeOnTransfer: true,
+                        feeOnTransfer: false,
                         allowedSlippage,
-                        recipient: ethers.constants.AddressZero,
+                        recipient: await signer.getAddress(),
                         ttl: 60 * 20
                     });
                     const { abi } = require("@uniswap/v2-periphery/build/IUniswapV2Router02.json");
-                    const router = ethers.ContractFactory.getContract(UNISWAP_ROUTER, abi, signer);
+                    const router = ethers.ContractFactory.getContract(ROUTER, abi, signer);
                     const gasLimit = await router.estimateGas[params.methodName](...params.args, {
                         value: params.value
                     });
                     const tx = await router.functions[params.methodName](...params.args, {
                         value: params.value,
-                        gasLimit
+                        gasLimit: gasLimit.mul(120).div(100)
                     });
                     return {
                         trade,

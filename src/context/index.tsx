@@ -6,20 +6,20 @@ import { SwapContextConsumer, SwapContextProvider } from "./SwapContext";
 
 export const ContextProvider = ({ children }) => {
     return (
-        <GlobalContextProvider>
-            <EthersContextProvider>
+        <EthersContextProvider>
+            <GlobalContextProvider>
                 <SwapContextProvider>{children}</SwapContextProvider>
-            </EthersContextProvider>
-        </GlobalContextProvider>
+            </GlobalContextProvider>
+        </EthersContextProvider>
     );
 };
 
 export const ContextConsumer = ({ children }) => {
     return (
-        <GlobalContextConsumer>
-            {globalContext => (
-                <EthersContextConsumer>
-                    {ethersContext => (
+        <EthersContextConsumer>
+            {ethersContext => (
+                <GlobalContextConsumer>
+                    {globalContext => (
                         <SwapContextConsumer>
                             {swapContext =>
                                 children({
@@ -30,8 +30,8 @@ export const ContextConsumer = ({ children }) => {
                             }
                         </SwapContextConsumer>
                     )}
-                </EthersContextConsumer>
+                </GlobalContextConsumer>
             )}
-        </GlobalContextConsumer>
+        </EthersContextConsumer>
     );
 };

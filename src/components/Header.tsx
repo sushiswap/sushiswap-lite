@@ -4,7 +4,7 @@ import { View } from "react-native";
 import Switch from "expo-dark-mode-switch";
 
 import { Link, useRoute } from "@react-navigation/native";
-import { Spacing } from "../constants/dimension";
+import { HEADER_HEIGHT, Spacing } from "../constants/dimension";
 import linking from "../constants/linking";
 import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
@@ -12,8 +12,19 @@ import FlexView from "./FlexView";
 import Text from "./Text";
 
 const Header = () => {
+    const { background } = useColors();
     return (
-        <View style={{ height: 64, marginTop: Spacing.small, marginHorizontal: Spacing.content }}>
+        <View
+            // @ts-ignore
+            style={{
+                position: "fixed",
+                top: 0,
+                width: "100%",
+                height: HEADER_HEIGHT,
+                paddingTop: Spacing.small,
+                paddingHorizontal: Spacing.content,
+                backgroundColor: background
+            }}>
             <FlexView style={{ flex: 1, justifyContent: "space-between", alignItems: "flex-end" }}>
                 <Title />
                 <Menu />

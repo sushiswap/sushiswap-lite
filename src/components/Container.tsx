@@ -1,6 +1,7 @@
 import React, { FC } from "react";
 import { ScrollView, ViewProps } from "react-native";
 
+import { HEADER_HEIGHT } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 
 export interface ContainerProps extends ViewProps {
@@ -14,7 +15,7 @@ const Container: FC<ContainerProps> = props => {
         <ScrollView
             nestedScrollEnabled={true}
             contentContainerStyle={{ flex: 1 }}
-            style={[{ backgroundColor: background }, props.style]}
+            style={[{ backgroundColor: background, marginTop: HEADER_HEIGHT }, props.style]}
             {...props}
         />
     );

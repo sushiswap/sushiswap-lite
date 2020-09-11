@@ -1,5 +1,4 @@
 import React, { useContext, useState } from "react";
-import { View } from "react-native";
 
 import { OpenSans_300Light, OpenSans_400Regular, OpenSans_700Bold } from "@expo-google-fonts/open-sans";
 import { UnicaOne_400Regular } from "@expo-google-fonts/unica-one";
@@ -42,15 +41,8 @@ const App = () => {
 
 const Main = () => {
     const { load } = useContext(GlobalContext);
-    const { background } = useColors();
     useAsyncEffect(load, []);
-    return (
-        <View style={{ alignItems: "center", flex: 1, backgroundColor: background }}>
-            <View style={{ width: 1280, flex: 1 }}>
-                <Navigation />
-            </View>
-        </View>
-    );
+    return <Navigation />;
 };
 
 const Navigation = () => {

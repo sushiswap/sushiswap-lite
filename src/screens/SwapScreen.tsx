@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Image, TouchableHighlight, View } from "react-native";
 import { Icon } from "react-native-elements";
 import { Hoverable } from "react-native-web-hover";
@@ -17,32 +17,27 @@ import { EthersContext } from "../context/EthersContext";
 import { GlobalContext } from "../context/GlobalContext";
 import { SwapContext } from "../context/SwapContext";
 import useColors from "../hooks/useColors";
-import useSDK, { UNISWAP_ROUTER } from "../hooks/useSDK";
+import useSDK, { ROUTER } from "../hooks/useSDK";
 import Token from "../model/Token";
 import { formatBalance, parseBalance } from "../utils";
 
+interface MetamaskError {
+    code?: any;
+    message?: string;
+}
+
 const SwapScreen = () => {
-    const { provider, signer } = useContext(EthersContext);
-    const { setTokens, tradeHistory } = useContext(GlobalContext);
-    const [loading, setLoading] = useState(true);
-    useAsyncEffect(async () => {
-        if (provider && signer) {
-            setLoading(true);
-            await setTokens(await fetchTokens(provider, signer));
-            setLoading(false);
-        }
-    }, [provider, signer, tradeHistory]);
     return (
         <Container>
             <Content>
-                <View style={{ alignItems: "center", marginBottom: Spacing.huge }}>
+                <View style={{ alignItems: "center", marginBottom: Spacing.large }}>
                     <Column>
                         <Text h4={true} style={{ textAlign: "center" }}>
                             🍣 Swap Tokens
                         </Text>
                     </Column>
-                    <TokenColumn from={true} loading={loading} />
-                    <TokenColumn from={false} loading={loading} />
+                    <TokenColumn from={true} />
+                    <TokenColumn from={false} />
                     <TokenInput />
                     <TradeInfo />
                     <Controls />
@@ -52,7 +47,7 @@ const SwapScreen = () => {
     );
 };
 
-const TokenColumn = (props: { from: boolean; loading: boolean }) => {
+const TokenColumn = (props: { from: boolean }) => {
     const context = useContext(SwapContext);
     const [symbol, setSymbol, token] = props.from
         ? [context.fromSymbol, context.setFromSymbol, context.fromToken]
@@ -77,27 +72,48 @@ const TokenColumn = (props: { from: boolean; loading: boolean }) => {
             {token && !expanded ? (
                 <TokenItem token={token} selected={true} onSelectToken={onUnselectToken} />
             ) : (
-                <TokenList from={props.from} loading={props.loading} onSelectToken={onSelectToken} />
+                <TokenList from={props.from} onSelectToken={onSelectToken} />
             )}
         </Column>
     );
 };
 
-const TokenList = (props: { from: boolean; loading: boolean; onSelectToken: (token: Token) => void }) => {
+const TokenList = (props: { from: boolean; onSelectToken: (token: Token) => void }) => {
+    const { loadingTokens } = useContext(GlobalContext);
     const { tokens } = useContext(GlobalContext);
     const context = useContext(SwapContext);
     const renderItem = useCallback(({ item }) => {
-        return <TokenItem token={item} selected={false} onSelectToken={props.onSelectToken} />;
+        return <TokenItem key={item.address} token={item} selected={false} onSelectToken={props.onSelectToken} />;
     }, []);
-    const data = props.loading
-        ? []
-        : props.from
-        ? tokens.filter(token => token.balance && !token.balance.isZero())
-        : tokens.filter(token => token.symbol !== context.fromSymbol);
-    return props.loading ? (
+    const data = useMemo(
+        () =>
+            (props.from
+                ? tokens.filter(token => token.balance && !token.balance.isZero())
+                : tokens.filter(token => token.symbol !== context.fromSymbol)
+            ).sort(
+                (t1, t2) =>
+                    (t2.balance.isZero() ? 0 : 10000000000) -
+                    (t1.balance.isZero() ? 0 : 10000000000) +
+                    t1.symbol.localeCompare(t2.symbol)
+            ),
+        [tokens]
+    );
+    return loadingTokens ? (
         <ActivityIndicator size={"large"} style={{ marginTop: Spacing.large }} />
+    ) : data.length === 0 ? (
+        <EmptyList />
     ) : (
         <FlatList data={data} renderItem={renderItem} ItemSeparatorComponent={Border} />
+    );
+};
+
+const EmptyList = () => {
+    return (
+        <View style={{ margin: Spacing.normal }}>
+            <Text light={true} style={{ textAlign: "center", width: "100%" }}>
+                {"You don't have any token with balance.\nTransfer tokens to your address first."}
+            </Text>
+        </View>
     );
 };
 
@@ -105,7 +121,7 @@ const TokenItem = (props: { token: Token; selected: boolean; onSelectToken: (tok
     const { background, backgroundHovered, textMedium } = useColors();
     const onPress = useCallback(() => {
         props.onSelectToken(props.token);
-    }, []);
+    }, [props.onSelectToken, props.token]);
     return (
         <Hoverable>
             {({ hovered }) => (
@@ -156,6 +172,21 @@ const Border = () => {
 
 const TokenInput = () => {
     const { fromSymbol, toSymbol, fromAmount, setFromAmount, fromToken } = useContext(SwapContext);
+    const onChangeText = useCallback(
+        (text: string) => {
+            if (fromToken) {
+                try {
+                    parseBalance(text, fromToken.decimals);
+                    setFromAmount(text);
+                } catch (e) {
+                    if (text.endsWith(".") && text.indexOf(".") === text.length - 1) {
+                        setFromAmount(text);
+                    }
+                }
+            }
+        },
+        [fromToken]
+    );
     if (fromSymbol === "" || toSymbol === "") {
         return <Column />;
     }
@@ -163,7 +194,7 @@ const TokenInput = () => {
         <Column>
             <Subtitle text={"3. How much " + (fromToken?.symbol || "tokens") + " do you want to SELL?"} />
             <View style={{ marginHorizontal: Spacing.small }}>
-                <Input value={fromAmount} onChangeText={setFromAmount} placeholder={"0.0"} />
+                <Input value={fromAmount} onChangeText={onChangeText} placeholder={"0.0"} />
                 {fromToken?.balance?.gt(0) && <MaxButton token={fromToken} setAmount={setFromAmount} />}
             </View>
         </Column>
@@ -190,7 +221,7 @@ const MaxButton = (props: { token: Token; setAmount }) => {
 
 const Subtitle = ({ text }) => {
     return (
-        <Text fontWeight={"bold"} medium={true} style={{ marginBottom: Spacing.normal, fontSize: 20 }}>
+        <Text fontWeight={"bold"} medium={true} style={{ marginBottom: Spacing.normal, fontSize: 22 }}>
             {text}
         </Text>
     );
@@ -218,7 +249,10 @@ const TradeInfo = () => {
             <Text style={{ fontSize: 30, textAlign: "center", marginBottom: Spacing.normal }}>
                 {amount} {context.toSymbol}
             </Text>
-            <Row label={"Price"} text={price ? price + " " + context.toSymbol + " / " + context.fromSymbol : "..."} />
+            <Row
+                label={"Price"}
+                text={price ? price + " " + context.toSymbol + "  = 1 " + context.fromSymbol : "..."}
+            />
             <Row label={"Price Impact"} text={impact ? impact + "%" : "..."} />
             <Row label={"Fee (0.30%)"} text={fee ? fee + " " + context.fromSymbol : "..."} />
         </Column>
@@ -251,8 +285,8 @@ const ArrowRight = () => {
 
 const Controls = () => {
     const context = useContext(SwapContext);
-    const [error, setError] = useState("");
-    useAsyncEffect(() => setError(""), [context.fromSymbol, context.toSymbol, context.fromAmount]);
+    const [error, setError] = useState<MetamaskError>({});
+    useAsyncEffect(() => setError({}), [context.fromSymbol, context.toSymbol, context.fromAmount]);
     if (context.toSymbol === "" || isEmptyValue(context.fromAmount) || !context.fromToken) {
         return <Column />;
     }
@@ -273,9 +307,7 @@ const Controls = () => {
                     <SwapButton onError={setError} disabled={true} />
                 </FlexView>
             )}
-            <Text note={true} style={{ color: "red", margin: Spacing.tiny }}>
-                {error}
-            </Text>
+            {error.message && error.code !== 4001 && <ErrorMessage error={error} />}
         </Column>
     );
 };
@@ -296,16 +328,16 @@ const ApproveButton = ({ onError }) => {
     const [loading, setLoading] = useState(false);
     const onPress = useCallback(async () => {
         if (fromToken) {
-            onError("");
+            onError({});
             setLoading(true);
             try {
-                const tx = await approveToken(fromToken.address, UNISWAP_ROUTER);
+                const tx = await approveToken(fromToken.address, ROUTER);
                 await tx.wait();
                 setFromTokenAllowed(true);
             } catch (e) {
                 // tslint:disable-next-line:no-console
                 console.error(e);
-                onError(e.message.split("(")[0]);
+                onError(e);
             } finally {
                 setLoading(false);
             }
@@ -321,39 +353,57 @@ const ApproveButton = ({ onError }) => {
 // tslint:disable-next-line:max-func-body-length
 const SwapButton = ({ onError, disabled = false }) => {
     const { swap } = useSDK();
-    const { setFromSymbol, setToSymbol, fromToken, toToken, fromAmount } = useContext(SwapContext);
-    const { addToTradeHistory } = useContext(GlobalContext);
+    const { setFromSymbol, setToSymbol, fromToken, toToken, fromAmount, trade } = useContext(SwapContext);
+    const { addToTradeHistory, updateTokens } = useContext(GlobalContext);
     const { signer } = useContext(EthersContext);
     const [loading, setLoading] = useState(false);
     const title = "Swap";
     const onPress = useCallback(async () => {
-        if (fromToken && toToken && fromAmount && signer) {
-            onError("");
+        if (fromToken && toToken && fromAmount && signer && trade) {
+            onError({});
             setLoading(true);
             try {
-                const amount = parseBalance(fromAmount, fromToken.decimals);
-                const result = await swap(fromToken, toToken, amount);
+                const result = await swap(trade);
                 if (result) {
                     await result.tx.wait();
                     await addToTradeHistory(await signer.getAddress(), result.trade);
+                    await updateTokens();
                     setFromSymbol("");
                     setToSymbol("");
                 }
             } catch (e) {
                 // tslint:disable-next-line:no-console
                 console.error(e);
-                onError(e.message.split("(")[0]);
+                onError(e);
             } finally {
                 setLoading(false);
             }
         }
-    }, [fromToken, toToken, fromAmount, signer]);
+    }, [fromToken, toToken, fromAmount, signer, trade]);
     return (
         <View style={{ flex: 1 }}>
             <Button size={"large"} title={title} disabled={disabled} loading={loading} onPress={onPress} />
         </View>
     );
 };
+
+const ErrorMessage = ({ error }) => (
+    <View
+        style={{
+            borderColor: "red",
+            borderWidth: 1,
+            width: "100%",
+            padding: Spacing.tiny,
+            marginTop: Spacing.small
+        }}>
+        <Text fontWeight={"bold"} style={{ color: "red", fontSize: 14 }}>
+            Error Code {error.code}
+        </Text>
+        <Text note={true} style={{ color: "red", fontSize: 14 }}>
+            {error.message}
+        </Text>
+    </View>
+);
 
 const Row = ({ label, text }) => {
     return (
@@ -369,28 +419,8 @@ const Row = ({ label, text }) => {
 const Column = props => <View {...props} style={{ width: 440, marginTop: props.noMargin ? 0 : Spacing.large }} />;
 
 const isEmptyValue = (text: string) =>
-    ethers.BigNumber.isBigNumber(text) ? ethers.BigNumber.from(text).isZero() : text === "" || text === "0";
-
-const fetchTokens = async (provider: ethers.providers.JsonRpcProvider, signer: ethers.providers.JsonRpcSigner) => {
-    const response = await fetch("/tokens.json");
-    const json = await response.json();
-    const tokens = json.tokens;
-
-    const account = await signer.getAddress();
-    const balance = await provider.getBalance(account);
-    const balances = await provider.send("alchemy_getTokenBalances", [account, tokens.map(token => token.address)]);
-    return [
-        {
-            ...ETH,
-            balance
-        },
-        ...tokens.map((token, i) => ({
-            ...token,
-            balance: ethers.BigNumber.from(balances.tokenBalances[i].tokenBalance || 0)
-        }))
-    ].sort((t1, t2) => {
-        return (t2.balance.isZero() ? 0 : 1) - (t1.balance.isZero() ? 0 : 1);
-    });
-};
+    ethers.BigNumber.isBigNumber(text)
+        ? ethers.BigNumber.from(text).isZero()
+        : text === "" || text.replaceAll("0", "") === "" || text.endsWith("0.");
 
 export default SwapScreen;

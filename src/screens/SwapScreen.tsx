@@ -207,7 +207,8 @@ const MaxButton = (props: { token: Token; setAmount }) => {
             let balance = props.token.balance;
             if (props.token.symbol === "ETH") {
                 // Subtract 0.01 ETH for gas fee
-                balance = balance.sub(ethers.BigNumber.from(10).pow(16));
+                const fee = ethers.BigNumber.from(10).pow(16);
+                balance = balance.gt(fee) ? balance.sub(fee) : balance;
             }
             props.setAmount(formatBalance(balance, props.token.decimals));
         }

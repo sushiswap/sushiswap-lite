@@ -225,7 +225,7 @@ const MaxButton = (props: { token: Token; setAmount }) => {
 
 const Subtitle = ({ text }) => {
     return (
-        <Text fontWeight={"bold"} medium={true} style={{ marginBottom: Spacing.normal, fontSize: 22 }}>
+        <Text fontWeight={"bold"} medium={true} style={{ marginBottom: Spacing.normal, fontSize: 20 }}>
             {text}
         </Text>
     );

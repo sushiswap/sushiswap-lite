@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { View } from "react-native";
+import { Image, View } from "react-native";
 
 import Switch from "expo-dark-mode-switch";
 
@@ -43,21 +43,19 @@ export const Title = () => {
     const { darkMode } = useContext(GlobalContext);
     const { primary, white } = useColors();
     return (
-        <FlexView style={{ alignItems: "flex-end" }}>
+        <View style={{ alignSelf: "flex-end", alignItems: "center" }}>
             <Link to={"/"}>
                 <Text style={{ fontFamily: "title", fontSize: 40, color: darkMode ? white : primary }}>SushiSwap</Text>
             </Link>
-            <Text
-                style={{
-                    fontFamily: "light",
-                    fontSize: 16,
-                    color: darkMode ? white : primary,
-                    paddingLeft: 4,
-                    paddingBottom: 4
-                }}>
-                .levx.app
-            </Text>
-        </FlexView>
+            <Image
+                source={
+                    darkMode
+                        ? require("../../assets/levx-typography-dark.png")
+                        : require("../../assets/levx-typography.png")
+                }
+                style={{ width: 76, height: 13 }}
+            />
+        </View>
     );
 };
 
@@ -84,9 +82,9 @@ const MenuItem = ({ title, routeName }) => {
         setCurrent(route.name === routeName);
     }, [route]);
     return (
-        <Link to={"/" + linking.config.screens[routeName]} style={{ marginLeft: Spacing.normal, marginBottom: 4 }}>
+        <Link to={"/" + linking.config.screens[routeName]} style={{ marginLeft: Spacing.small, marginBottom: 4 }}>
             <View>
-                <Text style={{ fontFamily: "regular", fontSize: 20, color: textDark }}>{title}</Text>
+                <Text style={{ fontFamily: "regular", fontSize: 20, color: textDark, padding: 4 }}>{title}</Text>
                 {current && (
                     <View
                         style={{
@@ -113,7 +111,7 @@ const DarkModeSwitch = () => {
         [setDarkMode]
     );
     return (
-        <View style={{ marginLeft: Spacing.normal, marginBottom: 0 }}>
+        <View style={{ marginLeft: Spacing.small, marginBottom: 4 }}>
             <Switch
                 value={darkMode}
                 onChange={onChange}

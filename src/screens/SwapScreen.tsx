@@ -6,7 +6,6 @@ import { Hoverable } from "react-native-web-hover";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import Button from "../components/Button";
-import ConnectToWallet from "../components/ConnectToWallet";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import FlexView from "../components/FlexView";
@@ -21,6 +20,7 @@ import useColors from "../hooks/useColors";
 import useSDK, { ROUTER } from "../hooks/useSDK";
 import Token from "../model/Token";
 import { formatBalance, parseBalance } from "../utils";
+import Screen from "./Screen";
 
 interface MetamaskError {
     code?: any;
@@ -28,27 +28,25 @@ interface MetamaskError {
 }
 
 const SwapScreen = () => {
-    const { address } = useContext(EthersContext);
-    if (!address) {
-        return <ConnectToWallet />;
-    }
     return (
-        <Container>
-            <Content>
-                <View style={{ alignItems: "center", marginBottom: Spacing.large }}>
-                    <Column>
-                        <Text h4={true} style={{ textAlign: "center" }}>
-                            🍣 Swap Tokens
-                        </Text>
-                    </Column>
-                    <TokenColumn from={true} />
-                    <TokenColumn from={false} />
-                    <TokenInput />
-                    <TradeInfo />
-                    <Controls />
-                </View>
-            </Content>
-        </Container>
+        <Screen>
+            <Container>
+                <Content>
+                    <View style={{ alignItems: "center", marginBottom: Spacing.large }}>
+                        <Column>
+                            <Text h4={true} style={{ textAlign: "center" }}>
+                                🍣 Swap Tokens
+                            </Text>
+                        </Column>
+                        <TokenColumn from={true} />
+                        <TokenColumn from={false} />
+                        <TokenInput />
+                        <TradeInfo />
+                        <Controls />
+                    </View>
+                </Content>
+            </Container>
+        </Screen>
     );
 };
 

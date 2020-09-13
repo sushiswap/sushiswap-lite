@@ -10,6 +10,7 @@ export type OnBlockListener = (block: number) => Promise<void>;
 export const EthersContext = React.createContext({
     provider: undefined as ethers.providers.JsonRpcProvider | undefined,
     signer: undefined as ethers.providers.JsonRpcSigner | undefined,
+    chainId: 0,
     address: null as string | null,
     addOnBlockListener: (listener: OnBlockListener) => {},
     removeOnBlockListener: (listener: OnBlockListener) => {},
@@ -25,7 +26,8 @@ export const EthersContext = React.createContext({
 export const EthersContextProvider = ({ children }) => {
     const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
-    const [address, setAddress] = useState<string | null>(null);
+    const [chainId, setChainId] = useState<number>(1);
+    const [address, setAddress] = useState<string | null>(ethers.constants.AddressZero);
     const [onBlockListeners, setOnBlockListeners] = useState([] as OnBlockListener[]);
     useAsyncEffect(async () => {
         if (window.ethereum) {
@@ -40,13 +42,22 @@ export const EthersContextProvider = ({ children }) => {
             const onAccountsChanged = () => {
                 setAddress(window.ethereum.selectedAddress);
             };
+            const onChainChanged = async () => {
+                const network = await signer?.provider?.getNetwork();
+                if (network) {
+                    setChainId(network.chainId);
+                }
+            };
             onAccountsChanged();
+            onChainChanged();
             window.ethereum.on("accountsChanged", onAccountsChanged);
+            window.ethereum.on("chainChanged", onChainChanged);
             return () => {
                 window.ethereum.off("accountsChanged", onAccountsChanged);
+                window.ethereum.off("chainChanged", onAccountsChanged);
             };
         }
-    }, [window.ethereum]);
+    }, [window.ethereum, signer]);
     const approveToken = useCallback(
         async (token: string, spender: string, amount?: ethers.BigNumber) => {
             amount = amount || ethers.constants.MaxUint256;
@@ -86,7 +97,7 @@ export const EthersContextProvider = ({ children }) => {
         [onBlockListeners]
     );
     useEffect(() => {
-        if (provider && signer) {
+        if (provider && signer && chainId === 1) {
             const onBlock = async (block: number) => {
                 for (const listener of onBlockListeners) {
                     await listener?.(block);
@@ -97,12 +108,13 @@ export const EthersContextProvider = ({ children }) => {
                 provider.off("block", onBlock);
             };
         }
-    }, [provider, signer, onBlockListeners]);
+    }, [provider, signer, chainId, onBlockListeners]);
     return (
         <EthersContext.Provider
             value={{
                 provider,
                 signer,
+                chainId,
                 address,
                 approveToken,
                 getTokenAllowance,

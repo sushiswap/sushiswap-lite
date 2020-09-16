@@ -16,7 +16,7 @@ import linking from "./src/constants/linking";
 import { ContextProvider } from "./src/context";
 import { GlobalContext } from "./src/context/GlobalContext";
 import useColors from "./src/hooks/useColors";
-import PoolsScreen from "./src/screens/PoolsScreen";
+import LiquidityScreen from "./src/screens/LiquidityScreen";
 import SwapScreen from "./src/screens/SwapScreen";
 import YieldScreen from "./src/screens/YieldScreen";
 
@@ -62,10 +62,11 @@ const Navigation = () => {
         <NavigationContainer theme={theme} linking={linking}>
             <Stack.Navigator
                 screenOptions={{
-                    header: Header
+                    header: Header,
+                    title: "SushiSwap by LevX"
                 }}>
                 <Stack.Screen name="Home" component={SwapScreen} />
-                <Stack.Screen name="Pools" component={PoolsScreen} />
+                <Stack.Screen name="Liquidity" component={LiquidityScreen} />
                 <Stack.Screen name="Yield" component={YieldScreen} />
             </Stack.Navigator>
         </NavigationContainer>

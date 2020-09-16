@@ -67,7 +67,7 @@ const Menu = () => {
                 alignItems: "flex-end"
             }}>
             <MenuItem title={"SWAP"} routeName={"Home"} />
-            <MenuItem title={"POOLS"} routeName={"Pools"} />
+            <MenuItem title={"LIQUIDITY"} routeName={"Liquidity"} />
             <MenuItem title={"YIELD"} routeName={"Yield"} />
             <DarkModeSwitch />
         </FlexView>

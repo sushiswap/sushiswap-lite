@@ -3,7 +3,7 @@ const linking = {
     config: {
         screens: {
             Home: "",
-            Pools: "pools",
+            Liquidity: "liquidity",
             Yield: "yield"
         }
     }

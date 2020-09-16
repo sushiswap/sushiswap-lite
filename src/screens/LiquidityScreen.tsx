@@ -14,7 +14,7 @@ import useColors from "../hooks/useColors";
 import useRemoveLiquidityState from "../hooks/useRemoveLiquidityState";
 import Screen from "./Screen";
 
-const PoolsScreen = () => {
+const LiquidityScreen = () => {
     const addLiquidityState = useAddLiquidityState();
     const removeLiquidityState = useRemoveLiquidityState();
     return (
@@ -58,4 +58,4 @@ const Line = () => {
     return <View style={{ height: 1, flex: 1, backgroundColor: border }} />;
 };
 
-export default PoolsScreen;
+export default LiquidityScreen;

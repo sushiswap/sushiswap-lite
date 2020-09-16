@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { EventType, Listener } from "@ethersproject/abstract-provider";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
-import { ROUTER } from "../hooks/useSDK";
 
 export type OnBlockListener = (block: number) => Promise<void>;
 
@@ -12,12 +11,12 @@ export const EthersContext = React.createContext({
     signer: undefined as ethers.providers.JsonRpcSigner | undefined,
     chainId: 0,
     address: null as string | null,
-    addOnBlockListener: (listener: OnBlockListener) => {},
-    removeOnBlockListener: (listener: OnBlockListener) => {},
+    addOnBlockListener: (name: string, listener: OnBlockListener) => {},
+    removeOnBlockListener: (name: string) => {},
     approveToken: async (token: string, spender: string, amount?: ethers.BigNumber) => {
         return {} as ethers.providers.TransactionResponse;
     },
-    getTokenAllowance: async (token: string) => {
+    getTokenAllowance: async (token: string, spender: string) => {
         return ethers.constants.Zero as ethers.BigNumber | undefined;
     }
 });
@@ -28,7 +27,7 @@ export const EthersContextProvider = ({ children }) => {
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
     const [chainId, setChainId] = useState<number>(1);
     const [address, setAddress] = useState<string | null>(ethers.constants.AddressZero);
-    const [onBlockListeners, setOnBlockListeners] = useState([] as OnBlockListener[]);
+    const [onBlockListeners, setOnBlockListeners] = useState<{ [name: string]: OnBlockListener }>({});
     useAsyncEffect(async () => {
         if (window.ethereum) {
             const web3 = new ethers.providers.Web3Provider(window.ethereum);
@@ -71,13 +70,13 @@ export const EthersContextProvider = ({ children }) => {
         [signer]
     );
     const getTokenAllowance = useCallback(
-        async (token: string) => {
+        async (token: string, spender: string) => {
             if (provider && signer) {
                 return await provider.send("alchemy_getTokenAllowance", [
                     {
                         contract: token,
                         owner: await signer.getAddress(),
-                        spender: ROUTER
+                        spender
                     }
                 ]);
             }
@@ -85,22 +84,23 @@ export const EthersContextProvider = ({ children }) => {
         [provider, signer]
     );
     const addOnBlockListener = useCallback(
-        listener => {
-            setOnBlockListeners([...onBlockListeners, listener]);
+        (name, listener) => {
+            setOnBlockListeners({ ...onBlockListeners, [name]: listener });
         },
         [onBlockListeners]
     );
     const removeOnBlockListener = useCallback(
-        l => {
-            setOnBlockListeners(onBlockListeners.filter(listener => listener !== l));
+        name => {
+            delete onBlockListeners[name];
+            setOnBlockListeners(onBlockListeners);
         },
         [onBlockListeners]
     );
     useEffect(() => {
         if (provider && signer && chainId === 1) {
             const onBlock = async (block: number) => {
-                for (const listener of onBlockListeners) {
-                    await listener?.(block);
+                for (const listener of Object.entries(onBlockListeners)) {
+                    await listener[1]?.(block);
                 }
             };
             provider.on("block", onBlock);

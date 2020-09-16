@@ -14,3 +14,8 @@ export const formatBalance = (value: ethers.BigNumberish, decimals = 18, maxFrac
 export const parseBalance = (value: string, decimals = 18) => {
     return ethers.utils.parseUnits(value || "0", decimals);
 };
+
+export const isEmptyValue = (text: string) =>
+    ethers.BigNumber.isBigNumber(text)
+        ? ethers.BigNumber.from(text).isZero()
+        : text === "" || text.replaceAll("0", "").replaceAll(".", "") === "";

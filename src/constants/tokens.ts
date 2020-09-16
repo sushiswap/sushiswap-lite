@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import Token from "../model/Token";
+import Token from "../types/Token";
 
 export const ETH: Token = {
     address: ethers.constants.AddressZero,

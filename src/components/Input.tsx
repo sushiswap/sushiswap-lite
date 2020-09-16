@@ -50,13 +50,13 @@ const Input: FC<InputProps> = props => {
             {...props}
             inputStyle={[
                 // @ts-ignore
-                { fontSize, fontFamily: "regular", paddingBottom: 4, color, outline: "none", marginTop: Spacing.tiny },
+                { fontSize, fontFamily: "regular", paddingBottom: 4, color, outline: "none", marginTop: 0 },
                 props.inputStyle
             ]}
             labelStyle={[{ color: textMedium }, props.labelStyle]}
             placeholderTextColor={props.placeholderTextColor || textLight}
             errorStyle={props.onError ? { height: 0 } : props.errorStyle}
-            containerStyle={[{ paddingHorizontal: 0 }, props.containerStyle]}
+            containerStyle={[{ paddingHorizontal: 0, marginTop: Spacing.tiny }, props.containerStyle]}
             onChangeText={onChangeText}
         />
     );

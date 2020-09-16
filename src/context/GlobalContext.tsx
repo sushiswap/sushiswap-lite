@@ -1,12 +1,12 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { useColorScheme } from "react-native-appearance";
 
 import { Trade } from "@levx/sushiswap-sdk";
 import AsyncStorage from "@react-native-community/async-storage";
-import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import { ETH } from "../constants/tokens";
-import Token from "../model/Token";
+import useSDK from "../hooks/useSDK";
+import Token from "../types/Token";
 import { EthersContext } from "./EthersContext";
 
 export const GlobalContext = React.createContext({
@@ -24,31 +24,35 @@ export const GlobalContext = React.createContext({
 // tslint:disable-next-line:max-func-body-length
 export const GlobalContextProvider = ({ children }) => {
     const { provider, signer, address, addOnBlockListener, removeOnBlockListener } = useContext(EthersContext);
+    const { getTokensWithBalances } = useSDK();
     const colorScheme = useColorScheme();
     const [darkMode, setDarkMode] = useState(colorScheme === "dark");
     const [tokens, setTokens] = useState([ETH]);
     const [loadingTokens, setLoadingTokens] = useState(true);
     const [tradeHistory, setTradeHistory] = useState([] as Trade[]);
-    const updateTokens = useCallback(async () => {
-        if (provider && signer) {
-            try {
-                await setTokens(await fetchTokens(provider, signer));
-            } finally {
-                setLoadingTokens(false);
+    const updateTokens = async () => {
+        try {
+            const data = await getTokensWithBalances();
+            if (data) {
+                await setTokens(data);
             }
+        } finally {
+            setLoadingTokens(false);
         }
-    }, [provider, signer, fetchTokens]);
-    useEffect(() => {
-        updateTokens();
-        addOnBlockListener(updateTokens);
-        return () => {
-            removeOnBlockListener(updateTokens);
-        };
-    }, [updateTokens]);
+    };
+    // useEffect(() => {
+    //     updateTokens();
+    //     addOnBlockListener("updateTokens()", updateTokens);
+    //     return () => {
+    //         removeOnBlockListener("updateTokens()");
+    //     };
+    // }, [updateTokens]);
     useAsyncEffect(async () => {
-        setLoadingTokens(true);
-        await updateTokens();
-    }, [address]);
+        if (provider && signer) {
+            setLoadingTokens(true);
+            await updateTokens();
+        }
+    }, [provider, signer, address]);
     return (
         <GlobalContext.Provider
             value={{
@@ -87,30 +91,6 @@ export const GlobalContextProvider = ({ children }) => {
             {children}
         </GlobalContext.Provider>
     );
-};
-
-const fetchTokens = async (provider: ethers.providers.JsonRpcProvider, signer: ethers.providers.JsonRpcSigner) => {
-    const response = await fetch("/tokens.json");
-    const json = await response.json();
-    const tokens = json.tokens;
-
-    const account = await signer.getAddress();
-    const balances = await provider.send("alchemy_getTokenBalances", [account, tokens.map(token => token.address)]);
-    return [
-        {
-            ...ETH,
-            balance: await provider.getBalance(account)
-        },
-        ...tokens.map((token, i) => ({
-            ...token,
-            balance: ethers.BigNumber.from(balances.tokenBalances[i].tokenBalance || 0)
-        }))
-    ].sort((t1, t2) => {
-        return t2.balance
-            .sub(t1.balance)
-            .div(ethers.BigNumber.from(10).pow(10))
-            .toNumber();
-    });
 };
 
 export const GlobalContextConsumer = GlobalContext.Consumer;

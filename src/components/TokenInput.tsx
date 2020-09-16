@@ -23,7 +23,7 @@ export interface TokenInputProps {
 const TokenInput: FC<TokenInputProps> = props => {
     const onChangeText = useCallback(
         (text: string) => {
-            if (props.token) {
+            if (props.token && props.onAmountChanged) {
                 try {
                     parseBalance(text, props.token.decimals);
                     props.onAmountChanged(text);
@@ -34,7 +34,7 @@ const TokenInput: FC<TokenInputProps> = props => {
                 }
             }
         },
-        [props.token]
+        [props.token, props.onAmountChanged]
     );
     if (props.hidden) {
         return <Column noTopMargin={true} />;
@@ -80,8 +80,14 @@ const MaxButton = (props: { token: Token; updateAmount; onBlur }) => {
         }
     }, [pressed]);
     return (
-        <View style={{ position: "absolute", right: 0, bottom: 16 }}>
-            <Button type={"clear"} size={"small"} title={"MAX"} fontWeight={"bold"} onPress={onPressMax} />
+        <View style={{ position: "absolute", right: 0, bottom: 12 }}>
+            <Button
+                type={"clear"}
+                title={"MAX"}
+                fontWeight={"bold"}
+                onPress={onPressMax}
+                buttonStyle={{ paddingHorizontal: 0 }}
+            />
         </View>
     );
 };

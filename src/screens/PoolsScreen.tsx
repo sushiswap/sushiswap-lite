@@ -17,16 +17,14 @@ import Screen from "./Screen";
 const PoolsScreen = () => {
     const addLiquidityState = useAddLiquidityState();
     const removeLiquidityState = useRemoveLiquidityState();
-    const showAdd = !removeLiquidityState.selectedLPToken;
-    const showRemove = addLiquidityState.fromSymbol === "";
     return (
         <Screen>
             <Container>
                 <Content>
                     <View style={{ alignItems: "center", marginBottom: Spacing.large }}>
-                        {showAdd && <AddLiquidity state={addLiquidityState} />}
-                        {showAdd && showRemove && <OR />}
-                        {showRemove && <RemoveLiquidity state={removeLiquidityState} />}
+                        <AddLiquidity state={addLiquidityState} />
+                        <OR />
+                        <RemoveLiquidity state={removeLiquidityState} />
                     </View>
                 </Content>
             </Container>

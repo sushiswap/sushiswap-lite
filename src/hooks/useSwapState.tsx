@@ -72,7 +72,7 @@ const useSwapState: () => SwapState = () => {
 
     return {
         ...state,
-        loading,
+        loading: loading || state.loading,
         trade,
         unsupported,
         onSwap,

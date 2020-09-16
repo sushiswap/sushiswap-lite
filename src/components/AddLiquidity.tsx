@@ -9,7 +9,7 @@ import { GlobalContext } from "../context/GlobalContext";
 import { AddLiquidityState } from "../hooks/useAddLiquidityState";
 import useColors from "../hooks/useColors";
 import MetamaskError from "../types/MetamaskError";
-import { formatBalance, isEmptyValue, parseBalance } from "../utils";
+import { convertAmount, formatBalance, isEmptyValue, parseBalance } from "../utils";
 import ApproveButton from "./ApproveButton";
 import Button from "./Button";
 import Column from "./Column";
@@ -21,63 +21,80 @@ import TokenInput from "./TokenInput";
 import TokenSelect from "./TokenSelect";
 import UnsupportedButton from "./UnsupportedButton";
 
-// tslint:disable-next-line:max-func-body-length
-const AddLiquidity = ({ state }: { state: AddLiquidityState }) => {
+const AddLiquidity = ({ state }: { state: AddLiquidityState }) => (
+    <>
+        <Column>
+            <Text h4={true} style={{ textAlign: "center" }}>
+                🔥 Add Liquidity
+            </Text>
+        </Column>
+        <TokenSelect
+            title={"1. Select the 1st token of the liquidity pool"}
+            hidden={false}
+            symbol={state.fromSymbol}
+            onChangeSymbol={state.setFromSymbol}
+            filterTokens={token => token.balance && !token.balance.isZero()}
+        />
+        <TokenSelect
+            title={"2. Select the 2nd token of the liquidity pool"}
+            hidden={state.fromSymbol === ""}
+            symbol={state.toSymbol}
+            onChangeSymbol={state.setToSymbol}
+            filterTokens={token => token.symbol !== state.fromSymbol && token.balance && !token.balance.isZero()}
+        />
+        <FromTokenInput state={state} />
+        <ToTokenInput state={state} />
+        <PriceInfo state={state} />
+        <Controls state={state} />
+    </>
+);
+
+const FromTokenInput = ({ state }: { state: AddLiquidityState }) => {
+    const onAmountChanged = useCallback(
+        (newAmount: string) => {
+            state.setFromAmount(newAmount);
+            if (state.fromTokenPrice && state.fromToken) {
+                state.setToAmount(state.fromTokenPrice.quote(convertAmount(state.fromToken, newAmount)).toExact());
+            }
+        },
+        [state.fromTokenPrice, state.fromToken]
+    );
     return (
-        <>
-            <Column>
-                <Text h4={true} style={{ textAlign: "center" }}>
-                    🔥 Add Liquidity
-                </Text>
-            </Column>
-            <TokenSelect
-                title={"1. Select the 1st token of the liquidity pool"}
-                hidden={false}
-                symbol={state.fromSymbol}
-                onChangeSymbol={state.setFromSymbol}
-                filterTokens={token => token.balance && !token.balance.isZero()}
-            />
-            <TokenSelect
-                title={"2. Select the 2nd token of the liquidity pool"}
-                hidden={state.fromSymbol === ""}
-                symbol={state.toSymbol}
-                onChangeSymbol={state.setToSymbol}
-                filterTokens={token => token.symbol !== state.fromSymbol && token.balance && !token.balance.isZero()}
-            />
-            {state.fromToken && state.toToken && !state.pair && (
-                <Column>
-                    <ActivityIndicator size={"large"} />
-                </Column>
-            )}
-            <TokenInput
-                title={"3. How much " + state.fromSymbol + "-" + state.toSymbol + " do you want to supply?"}
-                token={state.fromToken}
-                hidden={!state.fromToken || !state.toToken || !state.pair}
-                amount={state.fromAmount}
-                onAmountChanged={state.setFromAmount}
-                onBlur={state.updateToAmount}
-            />
-            <TokenInput
-                token={state.toToken}
-                hidden={!state.fromToken || !state.toToken || !state.pair}
-                amount={state.toAmount}
-                onAmountChanged={state.setToAmount}
-                onBlur={state.updateFromAmount}
-            />
-            <AddLiquidityInfo state={state} />
-            <Controls state={state} />
-        </>
+        <TokenInput
+            title={"3. How much " + state.fromSymbol + "-" + state.toSymbol + " do you want to supply?"}
+            token={state.fromToken}
+            hidden={!state.fromToken || !state.toToken}
+            amount={state.fromAmount}
+            onAmountChanged={onAmountChanged}
+        />
     );
 };
 
-const AddLiquidityInfo = ({ state }: { state: AddLiquidityState }) => {
+const ToTokenInput = ({ state }: { state: AddLiquidityState }) => {
+    const onAmountChanged = useCallback(
+        (newAmount: string) => {
+            state.setToAmount(newAmount);
+            if (state.toTokenPrice && state.toToken) {
+                state.setFromAmount(state.toTokenPrice.quote(convertAmount(state.toToken, newAmount)).toExact());
+            }
+        },
+        [state.toTokenPrice, state.toToken]
+    );
+    return (
+        <TokenInput
+            token={state.toToken}
+            hidden={!state.fromToken || !state.toToken}
+            amount={state.toAmount}
+            onAmountChanged={onAmountChanged}
+        />
+    );
+};
+
+const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
     const { darkMode } = useContext(GlobalContext);
     const { primary, secondary } = useColors();
-    if (state.fromSymbol === "" || state.toSymbol === "" || isEmptyValue(state.fromAmount)) {
-        return <Column noTopMargin={true} />;
-    }
-    if (!state.pair) {
-        const createdPrice = formatBalance(
+    if (!isEmptyValue(state.fromAmount) && !state.loading && !state.fromTokenPrice) {
+        const initialPrice = formatBalance(
             parseBalance(state.toAmount, state.toToken?.decimals)
                 .mul(ethers.BigNumber.from(10).pow(8))
                 .div(parseBalance(state.fromAmount, state.fromToken?.decimals)),
@@ -90,18 +107,25 @@ const AddLiquidityInfo = ({ state }: { state: AddLiquidityState }) => {
                         "The ratio of tokens you add will set the price of this pool."}
                 </Text>
                 {!!state.fromAmount && !!state.toAmount && (
-                    <Row label={"Price"} text={createdPrice + " " + state.toSymbol + "  = 1 " + state.fromSymbol} />
+                    <PriceRow price={initialPrice} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
                 )}
             </Column>
         );
     }
-    const price = state.pair.token0Price.toSignificant(8) + " " + state.toSymbol + "  = 1 " + state.fromSymbol;
+    if (!state.fromToken || !state.toToken || !state.fromTokenPrice) {
+        return <Column noTopMargin={true} />;
+    }
+    const price = state.fromTokenPrice.toSignificant(8);
     return (
         <Column noTopMargin={true}>
-            <Row label={"Price"} text={price} />
+            <PriceRow price={price} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
         </Column>
     );
 };
+
+const PriceRow = ({ price, fromSymbol, toSymbol }) => (
+    <Row label={"Price"} text={price + " " + toSymbol + " = 1 " + fromSymbol} />
+);
 
 const Row = ({ label, text }) => {
     return (
@@ -118,44 +142,42 @@ const Row = ({ label, text }) => {
 const Controls = ({ state }: { state: AddLiquidityState }) => {
     const [error, setError] = useState<MetamaskError>({});
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
-    if (!state.fromToken || !state.toToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount)) {
+    if (!state.fromToken || !state.toToken) {
         return <Column noTopMargin={true} />;
     }
     const insufficientFromToken = parseBalance(state.fromAmount, state.fromToken.decimals).gt(state.fromToken.balance);
     const insufficientToToken = parseBalance(state.toAmount, state.toToken.decimals).gt(state.toToken.balance);
     const fromApproveRequired = state.fromSymbol !== "ETH" && !state.fromTokenAllowed;
     const toApproveRequired = state.toSymbol !== "ETH" && !state.toTokenAllowed;
+    const disabled =
+        fromApproveRequired || toApproveRequired || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount);
     return (
         <Column>
-            {insufficientFromToken || insufficientToToken ? (
-                <InsufficientBalanceButton state={state} />
-            ) : state.loading || state.loadingAllowance ? (
+            {insufficientFromToken ? (
+                <InsufficientBalanceButton symbol={state.fromSymbol} />
+            ) : insufficientToToken ? (
+                <InsufficientBalanceButton symbol={state.toSymbol} />
+            ) : state.loading || !state.fromTokenPrice ? (
                 <ActivityIndicator size={"large"} />
             ) : (state.fromSymbol === "ETH" && state.toSymbol === "WETH") ||
               (state.fromSymbol === "WETH" && state.toSymbol === "ETH") ? (
                 <UnsupportedButton state={state} />
             ) : (
                 <>
-                    {fromApproveRequired && (
-                        <ApproveButton
-                            token={state.fromToken}
-                            onSuccess={() => state.setFromTokenAllowed(true)}
-                            onError={setError}
-                        />
-                    )}
-                    {toApproveRequired && (
-                        <ApproveButton
-                            token={state.toToken}
-                            onSuccess={() => state.setToTokenAllowed(true)}
-                            onError={setError}
-                        />
-                    )}
-                    {(fromApproveRequired || toApproveRequired) && <ArrowDown />}
-                    <SupplyButton
-                        state={state}
+                    <ApproveButton
+                        token={state.fromToken}
+                        onSuccess={() => state.setFromTokenAllowed(true)}
                         onError={setError}
-                        disabled={fromApproveRequired || toApproveRequired}
+                        hidden={!fromApproveRequired}
                     />
+                    <ApproveButton
+                        token={state.toToken}
+                        onSuccess={() => state.setToTokenAllowed(true)}
+                        onError={setError}
+                        hidden={!toApproveRequired}
+                    />
+                    {(fromApproveRequired || toApproveRequired) && <ArrowDown />}
+                    <SupplyButton state={state} onError={setError} disabled={disabled} />
                 </>
             )}
             {error.message && error.code !== 4001 && <ErrorMessage error={error} />}

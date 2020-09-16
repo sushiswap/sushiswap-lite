@@ -1,7 +1,6 @@
 import { useCallback, useContext } from "react";
 
 import {
-    ChainId,
     CurrencyAmount,
     ETHER,
     FACTORY_ADDRESS,
@@ -21,14 +20,11 @@ import { EthersContext } from "../context/EthersContext";
 import { GlobalContext } from "../context/GlobalContext";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
+import { convertToken } from "../utils";
 
 // export const UNISWAP_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
 export const SUSHISWAP_ROUTER = "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f";
 export const ROUTER = SUSHISWAP_ROUTER;
-
-const convertToken = (token: Token) => {
-    return token.symbol === "ETH" ? WETH["1"] : new SDKToken(ChainId.MAINNET, token.address, token.decimals);
-};
 
 // tslint:disable-next-line:max-func-body-length
 const useSDK = () => {
@@ -171,12 +167,13 @@ const useSDK = () => {
         [signer]
     );
 
-    const getPair = useCallback(
+    const getPrices = useCallback(
         async (fromToken: Token, toToken: Token) => {
             if (provider) {
                 const from = convertToken(fromToken);
                 const to = convertToken(toToken);
-                return await Fetcher.fetchPairData(from, to, provider);
+                const pair = await Fetcher.fetchPairData(from, to, provider);
+                return [pair.priceOf(from), pair.priceOf(to)];
             }
         },
         [provider]
@@ -186,25 +183,45 @@ const useSDK = () => {
         async (fromToken: Token, toToken: Token, fromAmount: ethers.BigNumber, toAmount: ethers.BigNumber) => {
             if (signer) {
                 const router = getRouter(signer);
-                const minAmount = (amount: ethers.BigNumber) => {
-                    return amount.sub(
-                        amount.mul(allowedSlippage.numerator.toString()).div(allowedSlippage.denominator.toString())
-                    );
-                };
                 const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + ttl).toString(16)}`;
                 const args = [
                     fromToken.address,
                     toToken.address,
                     fromAmount,
                     toAmount,
-                    minAmount(fromAmount),
-                    minAmount(toAmount),
+                    minAmount(fromAmount, allowedSlippage),
+                    minAmount(toAmount, allowedSlippage),
                     await signer.getAddress(),
                     deadline
                 ];
                 const gasLimit = await router.estimateGas.addLiquidity(...args);
                 return await router.functions.addLiquidity(...args, {
                     gasLimit: gasLimit.mul(120).div(100)
+                });
+            }
+        },
+        [signer]
+    );
+
+    const addLiquidityETH = useCallback(
+        async (token: Token, amount: ethers.BigNumber, amountETH: ethers.BigNumber) => {
+            if (signer) {
+                const router = getRouter(signer);
+                const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + ttl).toString(16)}`;
+                const args = [
+                    token.address,
+                    amount,
+                    minAmount(amount, allowedSlippage),
+                    minAmount(amountETH, allowedSlippage),
+                    await signer.getAddress(),
+                    deadline
+                ];
+                const gasLimit = await router.estimateGas.addLiquidityETH(...args, {
+                    value: amountETH
+                });
+                return await router.functions.addLiquidityETH(...args, {
+                    gasLimit: gasLimit.mul(120).div(100),
+                    value: amountETH
                 });
             }
         },
@@ -223,8 +240,9 @@ const useSDK = () => {
         swap,
         wrapETH,
         unwrapETH,
-        getPair,
+        getPrices,
         addLiquidity,
+        addLiquidityETH,
         calculateFee
     };
 };
@@ -260,4 +278,7 @@ const getTokensForPair = (pair: string, chainId: number, tokens: Token[]) => {
     }
 };
 
+const minAmount = (amount: ethers.BigNumber, percent: Percent) => {
+    return amount.sub(amount.mul(percent.numerator.toString()).div(percent.denominator.toString()));
+};
 export default useSDK;

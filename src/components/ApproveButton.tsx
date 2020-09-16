@@ -1,37 +1,40 @@
-import React, { useCallback, useContext, useState } from "react";
+import React, { FC, useCallback, useContext, useState } from "react";
+import { View } from "react-native";
 
 import { EthersContext } from "../context/EthersContext";
 import { ROUTER } from "../hooks/useSDK";
 import Token from "../types/Token";
 import Button from "./Button";
 
-const ApproveButton = ({
-    token,
-    onSuccess,
-    onError
-}: {
+export interface ApproveButtonProps {
     token: Token;
     onSuccess: () => void;
     onError: (e) => void;
-}) => {
+    hidden?: boolean;
+}
+
+const ApproveButton: FC<ApproveButtonProps> = props => {
     const { approveToken } = useContext(EthersContext);
     const [loading, setLoading] = useState(false);
     const onPress = useCallback(async () => {
-        if (token) {
-            onError({});
+        if (props.token) {
+            props.onError({});
             setLoading(true);
             try {
-                const tx = await approveToken(token.address, ROUTER);
+                const tx = await approveToken(props.token.address, ROUTER);
                 await tx.wait();
-                onSuccess();
+                props.onSuccess();
             } catch (e) {
-                onError(e);
+                props.onError(e);
             } finally {
                 setLoading(false);
             }
         }
-    }, [token]);
-    return <Button size={"large"} title={"Approve " + token?.symbol} onPress={onPress} loading={loading} />;
+    }, [props.token]);
+    if (props.hidden) {
+        return <View />;
+    }
+    return <Button size={"large"} title={"Approve " + props.token?.symbol} onPress={onPress} loading={loading} />;
 };
 
 export default ApproveButton;

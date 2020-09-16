@@ -141,27 +141,24 @@ const Controls = ({ state }: { state: SwapState }) => {
     return (
         <Column>
             {parseBalance(state.fromAmount, state.fromToken.decimals).gt(state.fromToken.balance) ? (
-                <InsufficientBalanceButton state={state} />
+                <InsufficientBalanceButton symbol={state.fromSymbol} />
             ) : state.fromSymbol === "WETH" && state.toSymbol === "ETH" ? (
                 <UnwrapButton state={state} onError={setError} />
             ) : state.fromSymbol === "ETH" && state.toSymbol === "WETH" ? (
                 <WrapButton state={state} onError={setError} />
             ) : state.unsupported ? (
                 <UnsupportedButton state={state} />
-            ) : state.loading || state.loadingAllowance || !state.trade ? (
+            ) : state.loading || !state.trade ? (
                 <ActivityIndicator size={"large"} />
             ) : (
                 <>
-                    {approveRequired && (
-                        <>
-                            <ApproveButton
-                                token={state.fromToken}
-                                onSuccess={() => state.setFromTokenAllowed(true)}
-                                onError={setError}
-                            />
-                            <ArrowDown />
-                        </>
-                    )}
+                    <ApproveButton
+                        token={state.fromToken}
+                        onSuccess={() => state.setFromTokenAllowed(true)}
+                        onError={setError}
+                        hidden={!approveRequired}
+                    />
+                    {approveRequired && <ArrowDown />}
                     <SwapButton state={state} onError={setError} disabled={approveRequired} />
                 </>
             )}

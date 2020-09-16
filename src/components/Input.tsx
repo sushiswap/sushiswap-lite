@@ -23,28 +23,31 @@ const Input: FC<InputProps> = props => {
     const size = props.size || "normal";
     const color = props.color || textDark;
     const fontSize = size === "small" ? 24 : size === "large" ? 36 : 30;
-    const onChangeText = useCallback((text: string) => {
-        props.onChangeText?.(text);
-        props.onError?.("");
-        const errors = [] as string[];
-        if (text !== "" && props.forbidden) {
-            props.forbidden.forEach(validation => {
-                if (text.match(validation.regexp)) {
-                    errors.push(validation.error);
-                }
-            });
-        }
-        if (text !== "" && props.allowed) {
-            props.allowed.forEach(validation => {
-                if (!text.match(validation.regexp)) {
-                    errors.push(validation.error);
-                }
-            });
-        }
-        if (errors.length > 0) {
-            props.onError?.(errors.join("\n"));
-        }
-    }, []);
+    const onChangeText = useCallback(
+        (text: string) => {
+            props.onChangeText?.(text);
+            props.onError?.("");
+            const errors = [] as string[];
+            if (text !== "" && props.forbidden) {
+                props.forbidden.forEach(validation => {
+                    if (text.match(validation.regexp)) {
+                        errors.push(validation.error);
+                    }
+                });
+            }
+            if (text !== "" && props.allowed) {
+                props.allowed.forEach(validation => {
+                    if (!text.match(validation.regexp)) {
+                        errors.push(validation.error);
+                    }
+                });
+            }
+            if (errors.length > 0) {
+                props.onError?.(errors.join("\n"));
+            }
+        },
+        [props.onChangeText, props.onError, props.forbidden, props.allowed]
+    );
     return (
         <NativeInput
             {...props}

@@ -23,8 +23,7 @@ export interface TokenPairState {
     setFromTokenAllowed: (allowed: boolean) => void;
     toTokenAllowed: boolean;
     setToTokenAllowed: (allowed: boolean) => void;
-    loadingAllowance: boolean;
-    setLoadingAllowance: (loading: boolean) => void;
+    loading: boolean;
     onWrap: () => Promise<void>;
     wrapping: boolean;
     onUnwrap: () => Promise<void>;
@@ -42,7 +41,7 @@ const useTokenPairState: () => TokenPairState = () => {
     const [toAmount, setToAmount] = useState("");
     const [fromTokenAllowed, setFromTokenAllowed] = useState(false);
     const [toTokenAllowed, setToTokenAllowed] = useState(false);
-    const [loadingAllowance, setLoadingAllowance] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [wrapping, setWrapping] = useState(false);
     const [unwrapping, setUnwrapping] = useState(false);
 
@@ -63,21 +62,23 @@ const useTokenPairState: () => TokenPairState = () => {
 
     useAsyncEffect(async () => {
         if (fromToken && toToken && provider && signer) {
-            if (fromToken.symbol !== "ETH") {
-                setFromTokenAllowed(false);
-                setToTokenAllowed(false);
-                setLoadingAllowance(true);
-                try {
-                    const minAllowance = ethers.BigNumber.from(2)
-                        .pow(96)
-                        .sub(1);
+            setFromTokenAllowed(false);
+            setToTokenAllowed(false);
+            setLoading(true);
+            try {
+                const minAllowance = ethers.BigNumber.from(2)
+                    .pow(96)
+                    .sub(1);
+                if (fromToken.symbol !== "ETH") {
                     const fromAllowance = await getTokenAllowance(fromToken.address, ROUTER);
-                    const toAllowance = await getTokenAllowance(toToken.address, ROUTER);
                     setFromTokenAllowed(ethers.BigNumber.from(fromAllowance).gte(minAllowance));
-                    setToTokenAllowed(ethers.BigNumber.from(toAllowance).gte(minAllowance));
-                } finally {
-                    setLoadingAllowance(false);
                 }
+                if (toToken.symbol !== "ETH") {
+                    const toAllowance = await getTokenAllowance(toToken.address, ROUTER);
+                    setToTokenAllowed(ethers.BigNumber.from(toAllowance).gte(minAllowance));
+                }
+            } finally {
+                setLoading(false);
             }
         }
     }, [fromToken, toToken, provider, signer]);
@@ -129,8 +130,7 @@ const useTokenPairState: () => TokenPairState = () => {
         setFromTokenAllowed,
         toTokenAllowed,
         setToTokenAllowed,
-        loadingAllowance,
-        setLoadingAllowance,
+        loading,
         onWrap,
         wrapping,
         onUnwrap,

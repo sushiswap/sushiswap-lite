@@ -1,6 +1,7 @@
 import React, { FC, useCallback, useContext, useState } from "react";
 import { View } from "react-native";
 
+import { Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
 import { ROUTER } from "../hooks/useSDK";
 import Token from "../types/Token";
@@ -34,7 +35,15 @@ const ApproveButton: FC<ApproveButtonProps> = props => {
     if (props.hidden) {
         return <View />;
     }
-    return <Button size={"large"} title={"Approve " + props.token?.symbol} onPress={onPress} loading={loading} />;
+    return (
+        <Button
+            size={"large"}
+            title={"Approve " + (props.token?.symbol || "")}
+            onPress={onPress}
+            loading={loading}
+            style={{ marginBottom: Spacing.small }}
+        />
+    );
 };
 
 export default ApproveButton;

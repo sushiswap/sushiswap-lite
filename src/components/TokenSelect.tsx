@@ -102,10 +102,10 @@ const TokenItem = (props: { token: Token; selected: boolean; onSelectToken: (tok
                                 source={{ uri: props.token.logoURI }}
                                 style={{ width: 24, height: 24, backgroundColor: "white", borderRadius: 12 }}
                             />
-                            <Text light={true} style={{ marginLeft: Spacing.small, fontSize: 20, color: textMedium }}>
+                            <Text light={true} style={{ marginLeft: Spacing.small, fontSize: 22, color: textMedium }}>
                                 {props.token.symbol}
                             </Text>
-                            <Text light={true} style={{ flex: 1, textAlign: "right", fontSize: 20, color: textMedium }}>
+                            <Text light={true} style={{ flex: 1, textAlign: "right", fontSize: 22, color: textMedium }}>
                                 {formatBalance(props.token.balance, props.token.decimals, 8)}
                             </Text>
                             {props.selected ? <CloseIcon /> : <SelectIcon />}

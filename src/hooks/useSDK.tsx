@@ -33,7 +33,7 @@ const useSDK = () => {
     const allowedSlippage = new Percent("50", "10000"); // 0.05%
     const ttl = 60 * 20;
 
-    const getTokensWithBalances = async () => {
+    const getTokens = async () => {
         if (provider && signer) {
             const response = await fetch("/tokens.json");
             const json = await response.json();
@@ -61,7 +61,7 @@ const useSDK = () => {
         }
     };
 
-    const getLPTokensWithBalances = async () => {
+    const getMyLPTokens = async () => {
         if (provider && signer && tokens) {
             const factory = getFactory(signer);
             const length = await factory.allPairsLength();
@@ -81,12 +81,11 @@ const useSDK = () => {
                     if (!tokensForPair) {
                         return null;
                     }
-                    return {
-                        address: pair,
-                        decimals: 18,
-                        ...tokensForPair,
-                        balance
-                    } as LPToken;
+                    const { abi } = require("@uniswap/v2-core/build/IERC20.json");
+                    const erc20 = ethers.ContractFactory.getContract(pair, abi, signer);
+                    const decimals = Number(await erc20.decimals());
+                    const totalSupply = await erc20.totalSupply();
+                    return { address: pair, decimals, balance, ...tokensForPair, totalSupply } as LPToken;
                 })
             );
             return result.filter(token => !!token) as LPToken[];
@@ -167,13 +166,12 @@ const useSDK = () => {
         [signer]
     );
 
-    const getPrices = useCallback(
+    const getPair = useCallback(
         async (fromToken: Token, toToken: Token) => {
             if (provider) {
                 const from = convertToken(fromToken);
                 const to = convertToken(toToken);
-                const pair = await Fetcher.fetchPairData(from, to, provider);
-                return [pair.priceOf(from), pair.priceOf(to)];
+                return await Fetcher.fetchPairData(from, to, provider);
             }
         },
         [provider]
@@ -196,6 +194,57 @@ const useSDK = () => {
                 ];
                 const gasLimit = await router.estimateGas.addLiquidity(...args);
                 return await router.functions.addLiquidity(...args, {
+                    gasLimit: gasLimit.mul(120).div(100)
+                });
+            }
+        },
+        [signer]
+    );
+
+    const removeLiquidityETH = useCallback(
+        async (token: Token, liquidity: ethers.BigNumber, amount: ethers.BigNumber, amountETH: ethers.BigNumber) => {
+            if (signer) {
+                const router = getRouter(signer);
+                const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + ttl).toString(16)}`;
+                const args = [
+                    token.address,
+                    liquidity,
+                    minAmount(amount, allowedSlippage),
+                    minAmount(amountETH, allowedSlippage),
+                    await signer.getAddress(),
+                    deadline
+                ];
+                const gasLimit = await router.estimateGas.removeLiquidityETH(...args);
+                return await router.functions.removeLiquidityETH(...args, {
+                    gasLimit: gasLimit.mul(120).div(100)
+                });
+            }
+        },
+        [signer]
+    );
+
+    const removeLiquidity = useCallback(
+        async (
+            fromToken: Token,
+            toToken: Token,
+            liquidity: ethers.BigNumber,
+            fromAmount: ethers.BigNumber,
+            toAmount: ethers.BigNumber
+        ) => {
+            if (signer) {
+                const router = getRouter(signer);
+                const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + ttl).toString(16)}`;
+                const args = [
+                    fromToken.address,
+                    toToken.address,
+                    liquidity,
+                    minAmount(fromAmount, allowedSlippage),
+                    minAmount(toAmount, allowedSlippage),
+                    await signer.getAddress(),
+                    deadline
+                ];
+                const gasLimit = await router.estimateGas.removeLiquidity(...args);
+                return await router.functions.removeLiquidity(...args, {
                     gasLimit: gasLimit.mul(120).div(100)
                 });
             }
@@ -234,15 +283,17 @@ const useSDK = () => {
 
     return {
         allowedSlippage,
-        getTokensWithBalances,
-        getLPTokensWithBalances,
+        getTokens,
+        getMyLPTokens,
         getTrade,
         swap,
         wrapETH,
         unwrapETH,
-        getPrices,
+        getPair,
         addLiquidity,
         addLiquidityETH,
+        removeLiquidity,
+        removeLiquidityETH,
         calculateFee
     };
 };

@@ -1,6 +1,5 @@
 import React, { useCallback, useContext, useState } from "react";
 import { ActivityIndicator } from "react-native";
-import { Icon } from "react-native-elements";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
@@ -9,7 +8,7 @@ import { GlobalContext } from "../context/GlobalContext";
 import { AddLiquidityState } from "../hooks/useAddLiquidityState";
 import useColors from "../hooks/useColors";
 import MetamaskError from "../types/MetamaskError";
-import { convertAmount, formatBalance, isEmptyValue, parseBalance } from "../utils";
+import { convertAmount, convertToken, formatBalance, isEmptyValue, parseBalance } from "../utils";
 import ApproveButton from "./ApproveButton";
 import Button from "./Button";
 import Column from "./Column";
@@ -53,15 +52,16 @@ const FromTokenInput = ({ state }: { state: AddLiquidityState }) => {
     const onAmountChanged = useCallback(
         (newAmount: string) => {
             state.setFromAmount(newAmount);
-            if (state.fromTokenPrice && state.fromToken) {
-                state.setToAmount(state.fromTokenPrice.quote(convertAmount(state.fromToken, newAmount)).toExact());
+            if (state.pair && state.fromToken) {
+                const fromPrice = state.pair.priceOf(convertToken(state.fromToken));
+                state.setToAmount(fromPrice.quote(convertAmount(state.fromToken, newAmount)).toExact());
             }
         },
-        [state.fromTokenPrice, state.fromToken]
+        [state.pair, state.fromToken]
     );
     return (
         <TokenInput
-            title={"3. How much " + state.fromSymbol + "-" + state.toSymbol + " do you want to supply?"}
+            title={"3. How many " + state.fromSymbol + "-" + state.toSymbol + " do you want to supply?"}
             token={state.fromToken}
             hidden={!state.fromToken || !state.toToken}
             amount={state.fromAmount}
@@ -74,11 +74,12 @@ const ToTokenInput = ({ state }: { state: AddLiquidityState }) => {
     const onAmountChanged = useCallback(
         (newAmount: string) => {
             state.setToAmount(newAmount);
-            if (state.toTokenPrice && state.toToken) {
-                state.setFromAmount(state.toTokenPrice.quote(convertAmount(state.toToken, newAmount)).toExact());
+            if (state.pair && state.toToken) {
+                const toPrice = state.pair.priceOf(convertToken(state.toToken));
+                state.setToAmount(toPrice.quote(convertAmount(state.toToken, newAmount)).toExact());
             }
         },
-        [state.toTokenPrice, state.toToken]
+        [state.pair, state.toToken]
     );
     return (
         <TokenInput
@@ -93,7 +94,7 @@ const ToTokenInput = ({ state }: { state: AddLiquidityState }) => {
 const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
     const { darkMode } = useContext(GlobalContext);
     const { primary, secondary } = useColors();
-    if (!isEmptyValue(state.fromAmount) && !state.loading && !state.fromTokenPrice) {
+    if (!isEmptyValue(state.fromAmount) && !state.loading && !state.pair) {
         const initialPrice = formatBalance(
             parseBalance(state.toAmount, state.toToken?.decimals)
                 .mul(ethers.BigNumber.from(10).pow(8))
@@ -112,10 +113,10 @@ const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
             </Column>
         );
     }
-    if (!state.fromToken || !state.toToken || !state.fromTokenPrice) {
+    if (!state.fromToken || !state.toToken || !state.pair) {
         return <Column noTopMargin={true} />;
     }
-    const price = state.fromTokenPrice.toSignificant(8);
+    const price = state.pair.priceOf(convertToken(state.fromToken)).toSignificant(8);
     return (
         <Column noTopMargin={true}>
             <PriceRow price={price} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
@@ -157,7 +158,7 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
                 <InsufficientBalanceButton symbol={state.fromSymbol} />
             ) : insufficientToToken ? (
                 <InsufficientBalanceButton symbol={state.toSymbol} />
-            ) : state.loading || !state.fromTokenPrice ? (
+            ) : state.loading || !state.pair ? (
                 <ActivityIndicator size={"large"} />
             ) : (state.fromSymbol === "ETH" && state.toSymbol === "WETH") ||
               (state.fromSymbol === "WETH" && state.toSymbol === "ETH") ? (
@@ -176,18 +177,12 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
                         onError={setError}
                         hidden={!toApproveRequired}
                     />
-                    {(fromApproveRequired || toApproveRequired) && <ArrowDown />}
                     <SupplyButton state={state} onError={setError} disabled={disabled} />
                 </>
             )}
             {error.message && error.code !== 4001 && <ErrorMessage error={error} />}
         </Column>
     );
-};
-
-const ArrowDown = () => {
-    const { textLight } = useColors();
-    return <Icon type={"material-community"} name={"arrow-down"} color={textLight} style={{ margin: Spacing.tiny }} />;
 };
 
 const SupplyButton = ({

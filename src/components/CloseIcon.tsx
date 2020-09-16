@@ -6,7 +6,7 @@ import useColors from "../hooks/useColors";
 
 const CloseIcon = () => {
     const { textLight } = useColors();
-    return <Icon type={"material-community"} name={"close"} color={textLight} style={{ marginLeft: Spacing.small }} />;
+    return <Icon type={"material-community"} name={"close"} color={textLight} style={{ marginLeft: Spacing.tiny }} />;
 };
 
 export default CloseIcon;

@@ -62,7 +62,7 @@ const Swap = () => {
                 filterTokens={token => token.symbol !== state.fromSymbol}
             />
             <TokenInput
-                title={"3. How much " + (state.fromSymbol || "tokens") + " do you want to SELL?"}
+                title={"3. How many " + (state.fromSymbol || "tokens") + " do you want to SELL?"}
                 token={state.fromToken}
                 hidden={!state.fromToken}
                 amount={state.fromAmount}
@@ -158,7 +158,6 @@ const Controls = ({ state }: { state: SwapState }) => {
                         onError={setError}
                         hidden={!approveRequired}
                     />
-                    {approveRequired && <ArrowDown />}
                     <SwapButton state={state} onError={setError} disabled={approveRequired} />
                 </>
             )}

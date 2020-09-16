@@ -13,7 +13,7 @@ const SelectIcon = () => {
             type={"material-community"}
             name={"chevron-right"}
             color={darkMode ? secondary : primary}
-            style={{ marginLeft: Spacing.small }}
+            style={{ marginLeft: Spacing.tiny }}
         />
     );
 };

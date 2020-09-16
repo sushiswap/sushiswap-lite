@@ -1,4 +1,4 @@
-import { ChainId, Token as SDKToken, TokenAmount, WETH } from "@levx/sushiswap-sdk";
+import { ChainId, CurrencyAmount, Token as SDKToken, TokenAmount, WETH } from "@levx/sushiswap-sdk";
 import { ethers } from "ethers";
 import Token from "../types/Token";
 
@@ -28,4 +28,8 @@ export const convertToken = (token: Token) => {
 
 export const convertAmount = (token: Token, amount: string) => {
     return new TokenAmount(convertToken(token), parseBalance(amount, token.decimals).toString());
+};
+
+export const parseCurrencyAmount = (value: CurrencyAmount, decimals = 18) => {
+    return ethers.BigNumber.from(parseBalance(value.toExact(), decimals));
 };

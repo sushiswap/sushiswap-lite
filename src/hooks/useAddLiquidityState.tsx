@@ -1,51 +1,23 @@
 import { useCallback, useContext, useState } from "react";
 
-import { Price } from "@levx/sushiswap-sdk";
-import useAsyncEffect from "use-async-effect";
 import { EthersContext } from "../context/EthersContext";
 import { GlobalContext } from "../context/GlobalContext";
 import { parseBalance } from "../utils";
+import useLiquidityState, { LiquidityState } from "./useLiquidityState";
 import useSDK from "./useSDK";
-import useTokenPairState, { TokenPairState } from "./useTokenPairState";
 
-export interface AddLiquidityState extends TokenPairState {
-    loading: boolean;
-    fromTokenPrice?: Price;
-    toTokenPrice?: Price;
+export interface AddLiquidityState extends LiquidityState {
     onAdd: () => Promise<void>;
     adding: boolean;
 }
 
 // tslint:disable-next-line:max-func-body-length
 const useAddLiquidityState: () => AddLiquidityState = () => {
-    const state = useTokenPairState();
-    const { provider, signer } = useContext(EthersContext);
+    const state = useLiquidityState();
+    const { signer } = useContext(EthersContext);
     const { updateTokens } = useContext(GlobalContext);
-    const [loading, setLoading] = useState(false);
-    const [fromTokenPrice, setFromTokenPrice] = useState<Price>();
-    const [toTokenPrice, setToTokenPrice] = useState<Price>();
     const [adding, setAdding] = useState(false);
-    const { getPrices, addLiquidity, addLiquidityETH } = useSDK();
-
-    useAsyncEffect(async () => {
-        setFromTokenPrice(undefined);
-        setToTokenPrice(undefined);
-        if (state.fromToken && state.toToken && provider && signer) {
-            setLoading(true);
-            if (state.fromToken && state.toToken) {
-                try {
-                    const prices = await getPrices(state.fromToken, state.toToken);
-                    if (prices) {
-                        setFromTokenPrice(prices[0]);
-                        setToTokenPrice(prices[1]);
-                    }
-                } catch (e) {
-                } finally {
-                    setLoading(false);
-                }
-            }
-        }
-    }, [state.fromSymbol, state.toSymbol, provider, signer, getPrices]);
+    const { addLiquidity, addLiquidityETH } = useSDK();
 
     const onAdd = useCallback(async () => {
         if (state.fromToken && state.toToken && state.fromAmount && state.toAmount && signer) {
@@ -74,9 +46,6 @@ const useAddLiquidityState: () => AddLiquidityState = () => {
 
     return {
         ...state,
-        loading: loading || state.loading,
-        fromTokenPrice,
-        toTokenPrice,
         onAdd,
         adding
     };

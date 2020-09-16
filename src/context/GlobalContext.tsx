@@ -24,7 +24,7 @@ export const GlobalContext = React.createContext({
 // tslint:disable-next-line:max-func-body-length
 export const GlobalContextProvider = ({ children }) => {
     const { provider, signer, address, addOnBlockListener, removeOnBlockListener } = useContext(EthersContext);
-    const { getTokensWithBalances } = useSDK();
+    const { getTokens } = useSDK();
     const colorScheme = useColorScheme();
     const [darkMode, setDarkMode] = useState(colorScheme === "dark");
     const [tokens, setTokens] = useState([ETH]);
@@ -32,7 +32,7 @@ export const GlobalContextProvider = ({ children }) => {
     const [tradeHistory, setTradeHistory] = useState([] as Trade[]);
     const updateTokens = async () => {
         try {
-            const data = await getTokensWithBalances();
+            const data = await getTokens();
             if (data) {
                 await setTokens(data);
             }

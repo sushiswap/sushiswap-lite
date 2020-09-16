@@ -1,10 +1,8 @@
 import { ethers } from "ethers";
 import Token from "./Token";
 
-export default interface LPToken {
-    address: string;
-    decimals: number;
+export default interface LPToken extends Token {
     tokenA: Token;
     tokenB: Token;
-    balance: ethers.BigNumber;
+    totalSupply: ethers.BigNumber;
 }

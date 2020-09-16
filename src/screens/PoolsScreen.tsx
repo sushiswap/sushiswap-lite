@@ -21,9 +21,9 @@ const PoolsScreen = () => {
         <Screen>
             <Container>
                 <Content>
-                    <View style={{ alignItems: "center", marginBottom: Spacing.large }}>
-                        <AddLiquidity state={addLiquidityState} />
-                        <OR />
+                    <View style={{ alignItems: "center", marginBottom: Spacing.huge * 2 }}>
+                        {!removeLiquidityState.selectedLPToken && <AddLiquidity state={addLiquidityState} />}
+                        {!removeLiquidityState.selectedLPToken && <OR />}
                         <RemoveLiquidity state={removeLiquidityState} />
                     </View>
                 </Content>

@@ -1,7 +1,6 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { Pair } from "@levx/sushiswap-sdk";
-import useAsyncEffect from "use-async-effect";
 import { EthersContext } from "../context/EthersContext";
 import useSDK from "./useSDK";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";
@@ -14,25 +13,35 @@ export interface LiquidityState extends TokenPairState {
 // tslint:disable-next-line:max-func-body-length
 const useLiquidityState: () => LiquidityState = () => {
     const state = useTokenPairState();
-    const { provider, signer } = useContext(EthersContext);
+    const { provider, addOnBlockListener, removeOnBlockListener } = useContext(EthersContext);
     const [loading, setLoading] = useState(false);
     const [pair, setPair] = useState<Pair>();
     const { getPair } = useSDK();
 
-    useAsyncEffect(async () => {
-        setPair(undefined);
-        if (state.fromToken && state.toToken && provider && signer) {
-            setLoading(true);
-            if (state.fromToken && state.toToken) {
-                try {
-                    setPair(await getPair(state.fromToken, state.toToken));
-                } catch (e) {
-                } finally {
-                    setLoading(false);
+    useEffect(() => {
+        if (state.fromSymbol && state.toSymbol) {
+            const updatePair = async () => {
+                if (state.fromToken && state.toToken && provider) {
+                    setLoading(true);
+                    setPair(undefined);
+                    try {
+                        setPair(await getPair(state.fromToken, state.toToken));
+                    } catch (e) {
+                    } finally {
+                        setLoading(false);
+                    }
                 }
-            }
+            };
+
+            updatePair();
+            const name = "updatePair(" + state.fromSymbol + "," + state.toSymbol + ")";
+
+            addOnBlockListener(name, updatePair);
+            return () => {
+                removeOnBlockListener(name);
+            };
         }
-    }, [state.fromToken, state.toToken, provider, signer, getPair]);
+    }, [state.fromSymbol, state.toSymbol]);
 
     return {
         ...state,

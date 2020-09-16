@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { View } from "react-native";
 import { Icon } from "react-native-elements";
 
 import useAsyncEffect from "use-async-effect";
@@ -9,6 +9,7 @@ import Column from "../components/Column";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
+import FetchingButton from "../components/FetchingButton";
 import FlexView from "../components/FlexView";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
 import Text from "../components/Text";
@@ -82,8 +83,7 @@ const TradeInfo = ({ state }: { state: SwapState }) => {
     ) {
         return <WrapInfo state={state} />;
     }
-    const amount = state.trade?.outputAmount?.toSignificant(8);
-    if (state.fromSymbol === "" || state.toSymbol === "" || isEmptyValue(state.fromAmount) || !amount) {
+    if (state.fromSymbol === "" || state.toSymbol === "" || isEmptyValue(state.fromAmount)) {
         return <Column noTopMargin={true} />;
     }
     return <SwapInfo state={state} />;
@@ -116,11 +116,11 @@ const SwapInfo = ({ state }: { state: SwapState }) => {
         <Column noTopMargin={true}>
             <ArrowDown />
             <Text style={{ fontSize: 30, textAlign: "center", marginBottom: Spacing.normal }}>
-                {amount} {state.toSymbol}
+                {amount || "…"} {state.toSymbol}
             </Text>
-            <Row label={"Price"} text={price ? price + " " + state.toSymbol + "  = 1 " + state.fromSymbol : "..."} />
-            <Row label={"Price Impact"} text={impact ? impact + "%" : "..."} />
-            <Row label={"Fee (0.30%)"} text={fee ? fee + " " + state.fromSymbol : "..."} />
+            <Row label={"Price"} text={price ? price + " " + state.toSymbol + "  = 1 " + state.fromSymbol : "…"} />
+            <Row label={"Price Impact"} text={impact ? impact + "%" : "…"} />
+            <Row label={"Fee (0.30%)"} text={fee ? fee + " " + state.fromSymbol : "…"} />
         </Column>
     );
 };
@@ -149,7 +149,7 @@ const Controls = ({ state }: { state: SwapState }) => {
             ) : state.unsupported ? (
                 <UnsupportedButton state={state} />
             ) : state.loading || !state.trade ? (
-                <ActivityIndicator size={"large"} />
+                <FetchingButton />
             ) : (
                 <>
                     <ApproveButton

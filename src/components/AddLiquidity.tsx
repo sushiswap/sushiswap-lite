@@ -1,5 +1,4 @@
 import React, { useCallback, useContext, useState } from "react";
-import { ActivityIndicator } from "react-native";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
@@ -13,6 +12,7 @@ import ApproveButton from "./ApproveButton";
 import Button from "./Button";
 import Column from "./Column";
 import ErrorMessage from "./ErrorMessage";
+import FetchingButton from "./FetchingButton";
 import FlexView from "./FlexView";
 import InsufficientBalanceButton from "./InsufficientBalanceButton";
 import Text from "./Text";
@@ -76,7 +76,7 @@ const ToTokenInput = ({ state }: { state: AddLiquidityState }) => {
             state.setToAmount(newAmount);
             if (state.pair && state.toToken) {
                 const toPrice = state.pair.priceOf(convertToken(state.toToken));
-                state.setToAmount(toPrice.quote(convertAmount(state.toToken, newAmount)).toExact());
+                state.setFromAmount(toPrice.quote(convertAmount(state.toToken, newAmount)).toExact());
             }
         },
         [state.pair, state.toToken]
@@ -113,10 +113,10 @@ const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
             </Column>
         );
     }
-    if (!state.fromToken || !state.toToken || !state.pair) {
+    if (!state.fromToken || !state.toToken) {
         return <Column noTopMargin={true} />;
     }
-    const price = state.pair.priceOf(convertToken(state.fromToken)).toSignificant(8);
+    const price = state.pair ? state.pair.priceOf(convertToken(state.fromToken)).toSignificant(8) : "…";
     return (
         <Column noTopMargin={true}>
             <PriceRow price={price} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
@@ -159,7 +159,7 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
             ) : insufficientToToken ? (
                 <InsufficientBalanceButton symbol={state.toSymbol} />
             ) : state.loading || !state.pair ? (
-                <ActivityIndicator size={"large"} />
+                <FetchingButton />
             ) : (state.fromSymbol === "ETH" && state.toSymbol === "WETH") ||
               (state.fromSymbol === "WETH" && state.toSymbol === "ETH") ? (
                 <UnsupportedButton state={state} />

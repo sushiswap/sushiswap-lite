@@ -27,11 +27,13 @@ const useSwapState: () => SwapState = () => {
     const [swapping, setSwapping] = useState(false);
 
     useEffect(() => {
-        if (state.fromToken && state.toToken && state.fromAmount && provider && signer) {
-            const amount = parseBalance(state.fromAmount, state.fromToken.decimals);
-            if (!amount.isZero()) {
-                const updateTrade = async () => {
-                    if (state.fromToken && state.toToken) {
+        if (state.fromSymbol && state.toSymbol && state.fromAmount) {
+            const updateTrade = async () => {
+                if (state.fromToken && state.toToken && state.fromAmount && provider) {
+                    const amount = parseBalance(state.fromAmount, state.fromToken.decimals);
+                    if (!amount.isZero()) {
+                        setLoading(true);
+                        setTrade(undefined);
                         setUnsupported(false);
                         try {
                             setTrade(await getTrade(state.fromToken, state.toToken, amount));
@@ -41,17 +43,18 @@ const useSwapState: () => SwapState = () => {
                             setLoading(false);
                         }
                     }
-                };
-                updateTrade();
+                }
+            };
 
-                const name = "updateTrade(" + state.fromToken.symbol + "," + state.toToken.symbol + ")";
-                addOnBlockListener(name, updateTrade);
-                return () => {
-                    removeOnBlockListener(name);
-                };
-            }
+            updateTrade();
+            const name = "updateTrade(" + state.fromSymbol + "," + state.toSymbol + "," + state.fromAmount + ")";
+
+            addOnBlockListener(name, updateTrade);
+            return () => {
+                removeOnBlockListener(name);
+            };
         }
-    }, [state.fromToken, state.toToken, state.fromAmount, provider, signer]);
+    }, [state.fromSymbol, state.toSymbol, state.fromAmount]);
 
     const onSwap = useCallback(async () => {
         if (state.fromToken && state.toToken && state.fromAmount && signer && trade) {

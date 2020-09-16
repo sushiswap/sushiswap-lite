@@ -85,16 +85,18 @@ export const EthersContextProvider = ({ children }) => {
     );
     const addOnBlockListener = useCallback(
         (name, listener) => {
-            setOnBlockListeners({ ...onBlockListeners, [name]: listener });
+            setOnBlockListeners(old => ({ ...old, [name]: listener }));
         },
-        [onBlockListeners]
+        [setOnBlockListeners]
     );
     const removeOnBlockListener = useCallback(
         name => {
-            delete onBlockListeners[name];
-            setOnBlockListeners(onBlockListeners);
+            setOnBlockListeners(old => {
+                delete old[name];
+                return old;
+            });
         },
-        [onBlockListeners]
+        [setOnBlockListeners]
     );
     useEffect(() => {
         if (provider && signer && chainId === 1) {

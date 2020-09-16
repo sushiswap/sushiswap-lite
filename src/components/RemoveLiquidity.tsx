@@ -16,6 +16,7 @@ import Button from "./Button";
 import CloseIcon from "./CloseIcon";
 import Column from "./Column";
 import ErrorMessage from "./ErrorMessage";
+import FetchingButton from "./FetchingButton";
 import FlexView from "./FlexView";
 import InsufficientBalanceButton from "./InsufficientBalanceButton";
 import SelectIcon from "./SelectIcon";
@@ -166,8 +167,8 @@ const Controls = ({ state }: { state: RemoveLiquidityState }) => {
         <Column>
             {parseBalance(state.amount, state.selectedLPToken.decimals).gt(state.selectedLPToken.balance) ? (
                 <InsufficientBalanceButton symbol={state.selectedLPToken.symbol} />
-            ) : state.loading ? (
-                <ActivityIndicator size={"large"} />
+            ) : state.loading || !state.pair ? (
+                <FetchingButton />
             ) : (
                 <>
                     <ApproveButton

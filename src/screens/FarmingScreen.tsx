@@ -145,28 +145,20 @@ const AddLiquidityNotice = ({ token }: { token?: LPToken }) => {
     if (!token || !token.balance.isZero()) {
         return <Column noTopMargin={true} />;
     }
-    const { navigate } = useNavigation();
-    const onPress = useCallback(() => {
-        navigate("Liquidity");
-    }, [navigate]);
     return (
         <Column noTopMargin={true}>
-            <Notice
-                text={
-                    "You need some " +
-                    token.tokenA.symbol +
-                    "-" +
-                    token.tokenB.symbol +
-                    " LP token to start farming.\n" +
-                    "Add liquidity to get the LP token."
-                }
-            />
-            <Button
-                type={"outline"}
-                title={"Add Liquidity"}
-                containerStyle={{ marginTop: Spacing.small }}
-                onPress={onPress}
-            />
+            <View style={{ marginTop: Spacing.normal }}>
+                <Notice
+                    text={
+                        "You need some " +
+                        token.tokenA.symbol +
+                        "-" +
+                        token.tokenB.symbol +
+                        " LP token to start farming.\n" +
+                        "Add liquidity to get the LP token."
+                    }
+                />
+            </View>
         </Column>
     );
 };
@@ -182,7 +174,9 @@ const Controls = ({ state }: { state: FarmingState }) => {
     const disabled = approveRequired || isEmptyValue(state.amount);
     return (
         <Column>
-            {parseBalance(state.amount, state.selectedLPToken.decimals).gt(state.selectedLPToken.balance) ? (
+            {state.selectedLPToken.balance.isZero() ? (
+                <AddLiquidityButton />
+            ) : parseBalance(state.amount, state.selectedLPToken.decimals).gt(state.selectedLPToken.balance) ? (
                 <InsufficientBalanceButton symbol={state.selectedLPToken.symbol} />
             ) : state.loading ? (
                 <FetchingButton />
@@ -193,7 +187,7 @@ const Controls = ({ state }: { state: FarmingState }) => {
                         spender={MASTER_CHEF}
                         onSuccess={() => state.setSelectedLPTokenAllowed(true)}
                         onError={setError}
-                        hidden={!approveRequired}
+                        hidden={isEmptyValue(state.amount) || !approveRequired}
                     />
                     <DepositButton state={state} onError={setError} disabled={disabled} />
                 </>
@@ -201,6 +195,14 @@ const Controls = ({ state }: { state: FarmingState }) => {
             {error.message && error.code !== 4001 && <ErrorMessage error={error} />}
         </Column>
     );
+};
+
+const AddLiquidityButton = () => {
+    const { navigate } = useNavigation();
+    const onPress = useCallback(() => {
+        navigate("Liquidity");
+    }, [navigate]);
+    return <Button title={"Add Liquidity"} containerStyle={{ marginTop: Spacing.small }} onPress={onPress} />;
 };
 
 const DepositButton = ({

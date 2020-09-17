@@ -8,8 +8,17 @@ import Text from "./Text";
 const Notice = ({ text }) => {
     const { darkMode } = useContext(GlobalContext);
     const { primary, secondary } = useColors();
+    const color = darkMode ? secondary : primary;
     return (
-        <Text note={true} style={{ color: darkMode ? secondary : primary, margin: Spacing.small }}>
+        <Text
+            note={true}
+            style={{
+                color,
+                borderColor: color,
+                borderWidth: 1,
+                borderRadius: 4,
+                padding: Spacing.small
+            }}>
             {text}
         </Text>
     );

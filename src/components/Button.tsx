@@ -12,12 +12,13 @@ export interface ButtonProps extends NativeButtonProps {
 
 // tslint:disable-next-line:max-func-body-length
 const Button: FC<ButtonProps> = props => {
-    const { primary, shadow, borderDark } = useColors();
+    const { primary, shadow, borderDark, textMedium } = useColors();
     const type = props.type || "solid";
     const size = props.size || "normal";
     const height = props.size === "small" ? 40 : size === "normal" ? 48 : 56;
     const fontSize = props.size === "small" ? 14 : size === "normal" ? 16 : 18;
     const fontFamily = props.fontWeight || "regular";
+    const color = props.color || type === "solid" ? primary : textMedium;
     return (
         <NativeButton
             {...props}
@@ -31,7 +32,7 @@ const Button: FC<ButtonProps> = props => {
                 },
                 props.buttonStyle
             ]}
-            titleStyle={[{ fontSize, fontFamily }, props.titleStyle]}
+            titleStyle={[{ fontSize, fontFamily, color }, props.titleStyle]}
             containerStyle={[
                 !props.type || props.type === "solid"
                     ? {

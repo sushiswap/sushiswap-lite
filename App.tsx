@@ -16,9 +16,9 @@ import linking from "./src/constants/linking";
 import { ContextProvider } from "./src/context";
 import { GlobalContext } from "./src/context/GlobalContext";
 import useColors from "./src/hooks/useColors";
+import FarmingScreen from "./src/screens/FarmingScreen";
 import LiquidityScreen from "./src/screens/LiquidityScreen";
 import SwapScreen from "./src/screens/SwapScreen";
-import YieldScreen from "./src/screens/YieldScreen";
 
 const Stack = createStackNavigator();
 
@@ -67,7 +67,7 @@ const Navigation = () => {
                 }}>
                 <Stack.Screen name="Home" component={SwapScreen} />
                 <Stack.Screen name="Liquidity" component={LiquidityScreen} />
-                <Stack.Screen name="Yield" component={YieldScreen} />
+                <Stack.Screen name="Farming" component={FarmingScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );

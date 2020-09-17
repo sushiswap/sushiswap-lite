@@ -6,7 +6,6 @@ import useSDK from "./useSDK";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";
 
 export interface LiquidityState extends TokenPairState {
-    loading: boolean;
     pair?: Pair;
 }
 

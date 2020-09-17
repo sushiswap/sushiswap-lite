@@ -4,7 +4,7 @@ const linking = {
         screens: {
             Home: "",
             Liquidity: "liquidity",
-            Yield: "yield"
+            Farming: "farming"
         }
     }
 };

@@ -5,11 +5,9 @@ import {
     ETHER,
     FACTORY_ADDRESS,
     Fetcher,
-    Pair,
     Percent,
     Route,
     Router,
-    Token as SDKToken,
     TokenAmount,
     Trade,
     WETH
@@ -20,15 +18,16 @@ import { EthersContext } from "../context/EthersContext";
 import { GlobalContext } from "../context/GlobalContext";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
-import { convertToken } from "../utils";
+import { convertToken, getContract } from "../utils";
 
 // export const UNISWAP_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
 export const SUSHISWAP_ROUTER = "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f";
 export const ROUTER = SUSHISWAP_ROUTER;
+export const MASTER_CHEF = "0xc2edad668740f1aa35e4d8f227fb8e17dca888cd";
 
 // tslint:disable-next-line:max-func-body-length
 const useSDK = () => {
-    const { provider, signer, chainId } = useContext(EthersContext);
+    const { provider, signer, getToken } = useContext(EthersContext);
     const { tokens } = useContext(GlobalContext);
     const allowedSlippage = new Percent("50", "10000"); // 0.05%
     const ttl = 60 * 20;
@@ -63,7 +62,7 @@ const useSDK = () => {
 
     const getMyLPTokens = async () => {
         if (provider && signer && tokens) {
-            const factory = getFactory(signer);
+            const factory = getContract("IUniswapV2Factory", FACTORY_ADDRESS, signer);
             const length = await factory.allPairsLength();
             const pairs = await Promise.all(
                 Array.from({ length }).map((_, i) => {
@@ -72,23 +71,45 @@ const useSDK = () => {
             );
             const balances = await provider.send("alchemy_getTokenBalances", [await signer.getAddress(), pairs]);
             const result = await Promise.all(
-                pairs.map(async (pair, i) => {
+                pairs.map(async (address, i) => {
                     const balance = ethers.BigNumber.from(balances.tokenBalances[i].tokenBalance);
                     if (balance.isZero()) {
                         return null;
                     }
-                    const tokensForPair = getTokensForPair(pair, chainId, tokens);
-                    if (!tokensForPair) {
-                        return null;
-                    }
-                    const { abi } = require("@uniswap/v2-core/build/IERC20.json");
-                    const erc20 = ethers.ContractFactory.getContract(pair, abi, signer);
+                    const pair = getContract("IUniswapV2Pair", address, signer);
+                    const erc20 = getContract("ERC20", address, signer);
                     const decimals = Number(await erc20.decimals());
                     const totalSupply = await erc20.totalSupply();
-                    return { address: pair, decimals, balance, ...tokensForPair, totalSupply } as LPToken;
+                    const tokenA = await findOrGetToken(await pair.token0(), tokens, getToken);
+                    const tokenB = await findOrGetToken(await pair.token1(), tokens, getToken);
+                    return { address, decimals, balance, totalSupply, tokenA, tokenB } as LPToken;
                 })
             );
             return result.filter(token => !!token) as LPToken[];
+        }
+    };
+
+    const getPools = async () => {
+        if (provider && signer) {
+            const response = await fetch("/pools.json");
+            const pools = await response.json();
+            const balances = await provider.send("alchemy_getTokenBalances", [
+                await signer.getAddress(),
+                pools.map(pool => pool.address)
+            ]);
+            return (await Promise.all(
+                pools.map(async (pool, i) => {
+                    const poolToken = getContract("ERC20", pool.address, signer);
+                    const totalDeposited = await poolToken.balanceOf(MASTER_CHEF);
+                    return {
+                        ...pool,
+                        id: i,
+                        symbol: pool.tokenA.symbol + "-" + pool.tokenB.symbol + " LP",
+                        balance: ethers.BigNumber.from(balances.tokenBalances[i].tokenBalance || 0),
+                        totalDeposited
+                    };
+                })
+            )) as LPToken[];
         }
     };
 
@@ -119,7 +140,7 @@ const useSDK = () => {
                         recipient: await signer.getAddress(),
                         ttl
                     });
-                    const router = getRouter(signer);
+                    const router = getContract("IUniswapV2Router02", ROUTER, signer);
                     const gasLimit = await router.estimateGas[params.methodName](...params.args, {
                         value: params.value
                     });
@@ -140,7 +161,7 @@ const useSDK = () => {
     const wrapETH = useCallback(
         async (amount: ethers.BigNumber) => {
             if (signer) {
-                const weth = getWETH(signer);
+                const weth = getContract("IWETH", WETH[1].address, signer);
                 const gasLimit = await weth.estimateGas.deposit({
                     value: amount
                 });
@@ -156,7 +177,7 @@ const useSDK = () => {
     const unwrapETH = useCallback(
         async (amount: ethers.BigNumber) => {
             if (signer) {
-                const weth = getWETH(signer);
+                const weth = getContract("IWETH", WETH[1].address, signer);
                 const gasLimit = await weth.estimateGas.withdraw(amount);
                 return await weth.withdraw(amount, {
                     gasLimit
@@ -180,7 +201,7 @@ const useSDK = () => {
     const addLiquidity = useCallback(
         async (fromToken: Token, toToken: Token, fromAmount: ethers.BigNumber, toAmount: ethers.BigNumber) => {
             if (signer) {
-                const router = getRouter(signer);
+                const router = getContract("IUniswapV2Router02", ROUTER, signer);
                 const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + ttl).toString(16)}`;
                 const args = [
                     fromToken.address,
@@ -204,7 +225,7 @@ const useSDK = () => {
     const removeLiquidityETH = useCallback(
         async (token: Token, liquidity: ethers.BigNumber, amount: ethers.BigNumber, amountETH: ethers.BigNumber) => {
             if (signer) {
-                const router = getRouter(signer);
+                const router = getContract("IUniswapV2Router02", ROUTER, signer);
                 const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + ttl).toString(16)}`;
                 const args = [
                     token.address,
@@ -232,7 +253,7 @@ const useSDK = () => {
             toAmount: ethers.BigNumber
         ) => {
             if (signer) {
-                const router = getRouter(signer);
+                const router = getContract("IUniswapV2Router02", ROUTER, signer);
                 const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + ttl).toString(16)}`;
                 const args = [
                     fromToken.address,
@@ -255,7 +276,7 @@ const useSDK = () => {
     const addLiquidityETH = useCallback(
         async (token: Token, amount: ethers.BigNumber, amountETH: ethers.BigNumber) => {
             if (signer) {
-                const router = getRouter(signer);
+                const router = getContract("IUniswapV2Router02", ROUTER, signer);
                 const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + ttl).toString(16)}`;
                 const args = [
                     token.address,
@@ -277,6 +298,34 @@ const useSDK = () => {
         [signer]
     );
 
+    const getExpectedSushiRewardPerBlock = useCallback(
+        async (token: LPToken) => {
+            if (signer) {
+                const masterChef = getContract("MasterChef", MASTER_CHEF, signer);
+                const totalAllocPoint = await masterChef.totalAllocPoint();
+                const sushiPerBlock = await masterChef.sushiPerBlock();
+                const { allocPoint } = await masterChef.poolInfo(token.id);
+                return ethers.BigNumber.from(sushiPerBlock)
+                    .mul(allocPoint)
+                    .div(totalAllocPoint);
+            }
+        },
+        [signer]
+    );
+
+    const deposit = useCallback(
+        async (lpTokenId: number, amount: ethers.BigNumber) => {
+            if (signer) {
+                const masterChef = getContract("MasterChef", MASTER_CHEF, signer);
+                const gasLimit = await masterChef.estimateGas.deposit(lpTokenId, amount);
+                return await masterChef.deposit(lpTokenId, amount, {
+                    gasLimit: gasLimit.mul(120).div(100)
+                });
+            }
+        },
+        [signer]
+    );
+
     const calculateFee = (fromAmount: ethers.BigNumber) => {
         return fromAmount.mul(3).div(1000);
     };
@@ -285,6 +334,7 @@ const useSDK = () => {
         allowedSlippage,
         getTokens,
         getMyLPTokens,
+        getPools,
         getTrade,
         swap,
         wrapETH,
@@ -294,39 +344,19 @@ const useSDK = () => {
         addLiquidityETH,
         removeLiquidity,
         removeLiquidityETH,
+        getExpectedSushiRewardPerBlock,
+        deposit,
         calculateFee
     };
 };
 
-const getRouter = (signer: ethers.Signer) => {
-    const { abi } = require("@uniswap/v2-periphery/build/IUniswapV2Router02.json");
-    return ethers.ContractFactory.getContract(ROUTER, abi, signer);
-};
-
-const getFactory = (signer: ethers.Signer) => {
-    const { abi } = require("@uniswap/v2-core/build/IUniswapV2Factory.json");
-    return ethers.ContractFactory.getContract(FACTORY_ADDRESS, abi, signer);
-};
-
-const getWETH = (signer: ethers.Signer) => {
-    const { abi } = require("@uniswap/v2-periphery/build/IWETH.json");
-    return ethers.ContractFactory.getContract(WETH["1"].address, abi, signer);
-};
-
-const getTokensForPair = (pair: string, chainId: number, tokens: Token[]) => {
-    for (let j = 0; j < tokens.length; j++) {
-        for (let k = j + 1; k < tokens.length; k++) {
-            const tokenA = new SDKToken(chainId, tokens[j].address, tokens[j].decimals);
-            const tokenB = new SDKToken(chainId, tokens[k].address, tokens[k].decimals);
-            const create2Address = Pair.getAddress(tokenA, tokenB);
-            if (create2Address.toLowerCase() === pair.toLowerCase()) {
-                const toToken = (address: string) => {
-                    return tokens.find(token => token.address === address);
-                };
-                return { tokenA: toToken(tokenA.address), tokenB: toToken(tokenB.address) };
-            }
-        }
-    }
+const findOrGetToken = async (
+    address: string,
+    tokens: Token[],
+    getToken: (address: string) => Promise<Token | undefined>
+) => {
+    const token = tokens.find(t => t.address.toLowerCase() === address.toLowerCase());
+    return token || (await getToken(address));
 };
 
 const minAmount = (amount: ethers.BigNumber, percent: Percent) => {

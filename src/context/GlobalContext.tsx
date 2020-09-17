@@ -27,7 +27,7 @@ export const GlobalContextProvider = ({ children }) => {
     const { getTokens } = useSDK();
     const colorScheme = useColorScheme();
     const [darkMode, setDarkMode] = useState(colorScheme === "dark");
-    const [tokens, setTokens] = useState([ETH]);
+    const [tokens, setTokens] = useState<Token[]>([]);
     const [loadingTokens, setLoadingTokens] = useState(true);
     const [tradeHistory, setTradeHistory] = useState([] as Trade[]);
     const updateTokens = async () => {

@@ -8,7 +8,6 @@ import useSDK from "./useSDK";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";
 
 export interface SwapState extends TokenPairState {
-    loading: boolean;
     trade?: Trade;
     unsupported: boolean;
     onSwap: () => Promise<void>;

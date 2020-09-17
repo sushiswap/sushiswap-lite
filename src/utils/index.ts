@@ -33,3 +33,8 @@ export const convertAmount = (token: Token, amount: string) => {
 export const parseCurrencyAmount = (value: CurrencyAmount, decimals = 18) => {
     return ethers.BigNumber.from(parseBalance(value.toExact(), decimals));
 };
+
+export const getContract = (name: string, address: string, signer: ethers.Signer) => {
+    const { abi } = require("@levx/sushiswap-core/build/contracts/" + name + ".json");
+    return ethers.ContractFactory.getContract(address, abi, signer);
+};

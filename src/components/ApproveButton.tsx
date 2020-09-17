@@ -3,12 +3,12 @@ import { View } from "react-native";
 
 import { Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
-import { ROUTER } from "../hooks/useSDK";
 import Token from "../types/Token";
 import Button from "./Button";
 
 export interface ApproveButtonProps {
     token: Token;
+    spender: string;
     onSuccess: () => void;
     onError: (e) => void;
     hidden?: boolean;
@@ -22,7 +22,7 @@ const ApproveButton: FC<ApproveButtonProps> = props => {
             props.onError({});
             setLoading(true);
             try {
-                const tx = await approveToken(props.token.address, ROUTER);
+                const tx = await approveToken(props.token.address, props.spender);
                 await tx.wait();
                 props.onSuccess();
             } catch (e) {
@@ -41,7 +41,7 @@ const ApproveButton: FC<ApproveButtonProps> = props => {
             title={"Approve " + (props.token?.symbol || "")}
             onPress={onPress}
             loading={loading}
-            style={{ marginBottom: Spacing.small }}
+            containerStyle={{ marginBottom: Spacing.small }}
         />
     );
 };

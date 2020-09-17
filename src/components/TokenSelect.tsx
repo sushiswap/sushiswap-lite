@@ -73,7 +73,12 @@ const TokenList = (props: { filterTokens: (token: Token) => boolean; onSelectTok
     ) : data.length === 0 ? (
         <EmptyList />
     ) : (
-        <FlatList data={data} renderItem={renderItem} ItemSeparatorComponent={Border} />
+        <FlatList
+            keyExtractor={item => JSON.stringify(item)}
+            data={data}
+            renderItem={renderItem}
+            ItemSeparatorComponent={Border}
+        />
     );
 };
 

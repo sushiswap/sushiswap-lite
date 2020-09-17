@@ -1,11 +1,9 @@
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
-import { Spacing } from "../constants/dimension";
-import { GlobalContext } from "../context/GlobalContext";
 import { AddLiquidityState } from "../hooks/useAddLiquidityState";
-import useColors from "../hooks/useColors";
+import { ROUTER } from "../hooks/useSDK";
 import MetamaskError from "../types/MetamaskError";
 import { convertAmount, convertToken, formatBalance, isEmptyValue, parseBalance } from "../utils";
 import ApproveButton from "./ApproveButton";
@@ -13,8 +11,9 @@ import Button from "./Button";
 import Column from "./Column";
 import ErrorMessage from "./ErrorMessage";
 import FetchingButton from "./FetchingButton";
-import FlexView from "./FlexView";
 import InsufficientBalanceButton from "./InsufficientBalanceButton";
+import Meta from "./Meta";
+import Notice from "./Notice";
 import Text from "./Text";
 import TokenInput from "./TokenInput";
 import TokenSelect from "./TokenSelect";
@@ -28,14 +27,14 @@ const AddLiquidity = ({ state }: { state: AddLiquidityState }) => (
             </Text>
         </Column>
         <TokenSelect
-            title={"1. Select the 1st token of the liquidity pool"}
+            title={"1. Select the 1st token you want to ADD:"}
             hidden={false}
             symbol={state.fromSymbol}
             onChangeSymbol={state.setFromSymbol}
             filterTokens={token => token.balance && !token.balance.isZero()}
         />
         <TokenSelect
-            title={"2. Select the 2nd token of the liquidity pool"}
+            title={"2. Select the 2nd token you want to ADD:"}
             hidden={state.fromSymbol === ""}
             symbol={state.toSymbol}
             onChangeSymbol={state.setToSymbol}
@@ -92,8 +91,6 @@ const ToTokenInput = ({ state }: { state: AddLiquidityState }) => {
 };
 
 const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
-    const { darkMode } = useContext(GlobalContext);
-    const { primary, secondary } = useColors();
     if (!isEmptyValue(state.fromAmount) && !state.loading && !state.pair) {
         const initialPrice = formatBalance(
             parseBalance(state.toAmount, state.toToken?.decimals)
@@ -103,12 +100,14 @@ const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
         );
         return (
             <Column noTopMargin={true}>
-                <Text note={true} style={{ color: darkMode ? secondary : primary, margin: Spacing.small }}>
-                    {"You are the first liquidity provider.\n" +
-                        "The ratio of tokens you add will set the price of this pool."}
-                </Text>
+                <Notice
+                    text={
+                        "You are the first liquidity provider.\n" +
+                        "The ratio of tokens you add will set the price of this pool."
+                    }
+                />
                 {!!state.fromAmount && !!state.toAmount && (
-                    <PriceRow price={initialPrice} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
+                    <Price price={initialPrice} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
                 )}
             </Column>
         );
@@ -119,25 +118,14 @@ const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
     const price = state.pair ? state.pair.priceOf(convertToken(state.fromToken)).toSignificant(8) : "…";
     return (
         <Column noTopMargin={true}>
-            <PriceRow price={price} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
+            <Price price={price} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
         </Column>
     );
 };
 
-const PriceRow = ({ price, fromSymbol, toSymbol }) => (
-    <Row label={"Price"} text={price + " " + toSymbol + " = 1 " + fromSymbol} />
+const Price = ({ price, fromSymbol, toSymbol }) => (
+    <Meta label={"Price"} text={price + " " + toSymbol + " = 1 " + fromSymbol} />
 );
-
-const Row = ({ label, text }) => {
-    return (
-        <FlexView style={{ justifyContent: "space-between", marginTop: Spacing.tiny, marginHorizontal: Spacing.small }}>
-            <Text fontWeight={"bold"} style={{ fontSize: 14 }}>
-                {label}
-            </Text>
-            <Text style={{ fontSize: 14 }}>{text}</Text>
-        </FlexView>
-    );
-};
 
 // tslint:disable-next-line:max-func-body-length
 const Controls = ({ state }: { state: AddLiquidityState }) => {
@@ -167,12 +155,14 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
                 <>
                     <ApproveButton
                         token={state.fromToken}
+                        spender={ROUTER}
                         onSuccess={() => state.setFromTokenAllowed(true)}
                         onError={setError}
                         hidden={!fromApproveRequired}
                     />
                     <ApproveButton
                         token={state.toToken}
+                        spender={ROUTER}
                         onSuccess={() => state.setToTokenAllowed(true)}
                         onError={setError}
                         hidden={!toApproveRequired}

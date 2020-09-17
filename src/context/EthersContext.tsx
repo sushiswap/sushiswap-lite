@@ -3,6 +3,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { EventType, Listener } from "@ethersproject/abstract-provider";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
+import Token from "../types/Token";
+import { getContract } from "../utils";
 
 export type OnBlockListener = (block: number) => Promise<void>;
 
@@ -13,6 +15,9 @@ export const EthersContext = React.createContext({
     address: null as string | null,
     addOnBlockListener: (name: string, listener: OnBlockListener) => {},
     removeOnBlockListener: (name: string) => {},
+    getToken: async (token: string) => {
+        return {} as Token | undefined;
+    },
     approveToken: async (token: string, spender: string, amount?: ethers.BigNumber) => {
         return {} as ethers.providers.TransactionResponse;
     },
@@ -28,6 +33,7 @@ export const EthersContextProvider = ({ children }) => {
     const [chainId, setChainId] = useState<number>(1);
     const [address, setAddress] = useState<string | null>(ethers.constants.AddressZero);
     const [onBlockListeners, setOnBlockListeners] = useState<{ [name: string]: OnBlockListener }>({});
+
     useAsyncEffect(async () => {
         if (window.ethereum) {
             const web3 = new ethers.providers.Web3Provider(window.ethereum);
@@ -36,6 +42,7 @@ export const EthersContextProvider = ({ children }) => {
             setSigner(await web3.getSigner());
         }
     }, [window.ethereum]);
+
     useEffect(() => {
         if (window.ethereum) {
             const onAccountsChanged = () => {
@@ -57,18 +64,37 @@ export const EthersContextProvider = ({ children }) => {
             };
         }
     }, [window.ethereum, signer]);
+
+    const getToken = useCallback(
+        async (token: string) => {
+            if (provider && signer) {
+                const meta = await provider.send("alchemy_getTokenMetadata", [token]);
+                return {
+                    address: token,
+                    symbol: meta.symbol,
+                    decimals: meta.decimals,
+                    logoURI: meta.logo,
+                    balance: ethers.constants.Zero
+                } as Token;
+            }
+        },
+        [provider, signer]
+    );
+
     const approveToken = useCallback(
         async (token: string, spender: string, amount?: ethers.BigNumber) => {
-            amount = amount || ethers.constants.MaxUint256;
-            const { abi } = require("@uniswap/v2-core/build/IERC20.json");
-            const erc20 = ethers.ContractFactory.getContract(token, abi, signer);
-            const gasLimit = await erc20.estimateGas.approve(spender, amount);
-            return await erc20.approve(spender, amount, {
-                gasLimit
-            });
+            if (signer) {
+                amount = amount || ethers.constants.MaxUint256;
+                const erc20 = getContract("ERC20", token, signer);
+                const gasLimit = await erc20.estimateGas.approve(spender, amount);
+                return await erc20.approve(spender, amount, {
+                    gasLimit
+                });
+            }
         },
         [signer]
     );
+
     const getTokenAllowance = useCallback(
         async (token: string, spender: string) => {
             if (provider && signer) {
@@ -83,12 +109,14 @@ export const EthersContextProvider = ({ children }) => {
         },
         [provider, signer]
     );
+
     const addOnBlockListener = useCallback(
         (name, listener) => {
             setOnBlockListeners(old => ({ ...old, [name]: listener }));
         },
         [setOnBlockListeners]
     );
+
     const removeOnBlockListener = useCallback(
         name => {
             setOnBlockListeners(old => {
@@ -98,6 +126,7 @@ export const EthersContextProvider = ({ children }) => {
         },
         [setOnBlockListeners]
     );
+
     useEffect(() => {
         if (provider && signer && chainId === 1) {
             const onBlock = async (block: number) => {
@@ -111,6 +140,7 @@ export const EthersContextProvider = ({ children }) => {
             };
         }
     }, [provider, signer, chainId, onBlockListeners]);
+
     return (
         <EthersContext.Provider
             value={{
@@ -118,6 +148,7 @@ export const EthersContextProvider = ({ children }) => {
                 signer,
                 chainId,
                 address,
+                getToken,
                 approveToken,
                 getTokenAllowance,
                 addOnBlockListener,

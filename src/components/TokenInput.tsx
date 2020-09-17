@@ -1,8 +1,10 @@
-import React, { FC, useCallback, useEffect, useState } from "react";
+import React, { FC, useCallback, useContext } from "react";
 import { View } from "react-native";
 
 import { ethers } from "ethers";
 import { Spacing } from "../constants/dimension";
+import { GlobalContext } from "../context/GlobalContext";
+import useColors from "../hooks/useColors";
 import Token from "../types/Token";
 import { formatBalance, parseBalance } from "../utils";
 import Button from "./Button";
@@ -16,7 +18,6 @@ export interface TokenInputProps {
     hidden: boolean;
     amount: string;
     onAmountChanged: (amount: string) => void;
-    onBlur?: () => void;
 }
 
 // tslint:disable-next-line:max-func-body-length
@@ -44,23 +45,16 @@ const TokenInput: FC<TokenInputProps> = props => {
         <Column noTopMargin={!props.title}>
             {props.title && <Subtitle text={props.title} />}
             <View style={{ marginHorizontal: Spacing.small }}>
-                <Input
-                    label={label}
-                    value={props.amount}
-                    onChangeText={onChangeText}
-                    placeholder={"0.0"}
-                    onBlur={props.onBlur}
-                />
-                {props.token?.balance?.gt(0) && (
-                    <MaxButton token={props.token} updateAmount={props.onAmountChanged} onBlur={props.onBlur} />
-                )}
+                <Input label={label} value={props.amount} onChangeText={onChangeText} placeholder={"0.0"} />
+                {props.token?.balance?.gt(0) && <MaxButton token={props.token} updateAmount={props.onAmountChanged} />}
             </View>
         </Column>
     );
 };
 
-const MaxButton = (props: { token: Token; updateAmount; onBlur }) => {
-    const [pressed, setPressed] = useState(false);
+const MaxButton = (props: { token: Token; updateAmount }) => {
+    const { darkMode } = useContext(GlobalContext);
+    const { primary, secondary } = useColors();
     const onPressMax = useCallback(() => {
         if (props.token) {
             let balance = props.token.balance;
@@ -70,19 +64,13 @@ const MaxButton = (props: { token: Token; updateAmount; onBlur }) => {
                 balance = balance.gt(fee) ? balance.sub(fee) : ethers.constants.Zero;
             }
             props.updateAmount(formatBalance(balance, props.token.decimals));
-            setPressed(true);
         }
     }, [props.token, props.updateAmount]);
-    useEffect(() => {
-        if (pressed) {
-            props.onBlur?.();
-            setPressed(false);
-        }
-    }, [pressed]);
     return (
         <View style={{ position: "absolute", right: 0, bottom: 12 }}>
             <Button
                 type={"clear"}
+                color={darkMode ? secondary : primary}
                 title={"MAX"}
                 fontWeight={"bold"}
                 onPress={onPressMax}

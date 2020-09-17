@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import { ActivityIndicator, FlatList, Image, TouchableHighlight, View } from "react-native";
+import React, { FC, useCallback, useState } from "react";
+import { Image, TouchableHighlight, View } from "react-native";
 import { Icon } from "react-native-elements";
 import { Hoverable } from "react-native-web-hover";
 
@@ -7,11 +7,10 @@ import useAsyncEffect from "use-async-effect";
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 import { RemoveLiquidityState } from "../hooks/useRemoveLiquidityState";
-import LPToken from "../types/LPToken";
+import { ROUTER } from "../hooks/useSDK";
 import MetamaskError from "../types/MetamaskError";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
 import ApproveButton from "./ApproveButton";
-import Border from "./Border";
 import Button from "./Button";
 import CloseIcon from "./CloseIcon";
 import Column from "./Column";
@@ -19,8 +18,8 @@ import ErrorMessage from "./ErrorMessage";
 import FetchingButton from "./FetchingButton";
 import FlexView from "./FlexView";
 import InsufficientBalanceButton from "./InsufficientBalanceButton";
+import LPTokenSelect, { LPTokenItemProps } from "./LPTokenSelect";
 import SelectIcon from "./SelectIcon";
-import Subtitle from "./Subtitle";
 import Text from "./Text";
 import TokenInput from "./TokenInput";
 
@@ -31,9 +30,14 @@ const RemoveLiquidity = ({ state }: { state: RemoveLiquidityState }) => (
                 🎉 Remove Liquidity
             </Text>
         </Column>
-        <TokenSelect state={state} />
+        <LPTokenSelect
+            state={state}
+            title={"1. Select the pool to REMOVE liquidity from:"}
+            emptyText={"You don't have any liquidity."}
+            Item={TokenItem}
+        />
         <TokenInput
-            title={"2. How many tokens do you want to remove?"}
+            title={"2. How many tokens do you want to REMOVE?"}
             token={state.selectedLPToken}
             hidden={!state.selectedLPToken}
             amount={state.amount}
@@ -44,49 +48,9 @@ const RemoveLiquidity = ({ state }: { state: RemoveLiquidityState }) => (
     </>
 );
 
-const TokenSelect = ({ state }: { state: RemoveLiquidityState }) => {
-    const onUnselectToken = useCallback(() => {
-        state.setSelectedLPToken(undefined);
-    }, [state.setSelectedLPToken]);
-    return (
-        <Column>
-            <Subtitle text={"1. Select the pool to remove liquidity from"} />
-            {state.selectedLPToken ? (
-                <LPTokenItem token={state.selectedLPToken} selected={true} onSelectToken={onUnselectToken} />
-            ) : (
-                <LPTokenList state={state} />
-            )}
-        </Column>
-    );
-};
-
-const LPTokenList = ({ state }: { state: RemoveLiquidityState }) => {
-    const renderItem = useCallback(({ item }) => {
-        return (
-            <LPTokenItem key={item.address} token={item} selected={false} onSelectToken={state.setSelectedLPToken} />
-        );
-    }, []);
-    return state.loading || !state.lpTokens ? (
-        <ActivityIndicator size={"large"} style={{ marginTop: Spacing.large }} />
-    ) : state.lpTokens.length === 0 ? (
-        <EmptyList />
-    ) : (
-        <FlatList data={state.lpTokens} renderItem={renderItem} ItemSeparatorComponent={Border} />
-    );
-};
-
-const EmptyList = () => {
-    return (
-        <View style={{ margin: Spacing.normal }}>
-            <Text light={true} style={{ textAlign: "center", width: "100%" }}>
-                {"You don't have any liquidity."}
-            </Text>
-        </View>
-    );
-};
-
-const LPTokenItem = (props: { token: LPToken; selected: boolean; onSelectToken: (token: LPToken) => void }) => {
+const TokenItem: FC<LPTokenItemProps> = props => {
     const { background, backgroundHovered, textMedium } = useColors();
+    const balance = formatBalance(props.token.balance, props.token.decimals, 18);
     const onPress = useCallback(() => {
         props.onSelectToken(props.token);
     }, [props.onSelectToken, props.token]);
@@ -100,9 +64,14 @@ const LPTokenItem = (props: { token: LPToken; selected: boolean; onSelectToken: 
                                 <LogoSymbol token={props.token.tokenA} />
                                 <LogoSymbol token={props.token.tokenB} />
                             </View>
-                            <Text light={true} style={{ flex: 1, textAlign: "right", fontSize: 22, color: textMedium }}>
-                                {formatBalance(props.token.balance, props.token.decimals, 18)}
-                            </Text>
+                            <View style={{ flex: 1 }}>
+                                <Text note={true} style={{ textAlign: "right" }}>
+                                    My Balance
+                                </Text>
+                                <Text light={true} style={{ textAlign: "right", fontSize: 22, color: textMedium }}>
+                                    {balance}
+                                </Text>
+                            </View>
                             {props.selected ? <CloseIcon /> : <SelectIcon />}
                         </FlexView>
                     </View>
@@ -173,6 +142,7 @@ const Controls = ({ state }: { state: RemoveLiquidityState }) => {
                 <>
                     <ApproveButton
                         token={state.selectedLPToken}
+                        spender={ROUTER}
                         onSuccess={() => state.setSelectedLPTokenAllowed(true)}
                         onError={setError}
                         hidden={!approveRequired}

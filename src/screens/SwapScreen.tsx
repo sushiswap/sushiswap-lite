@@ -10,8 +10,8 @@ import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
 import FetchingButton from "../components/FetchingButton";
-import FlexView from "../components/FlexView";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
+import Meta from "../components/Meta";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
 import TokenSelect from "../components/TokenSelect";
@@ -19,7 +19,7 @@ import UnsupportedButton from "../components/UnsupportedButton";
 import { Spacing } from "../constants/dimension";
 import { ETH } from "../constants/tokens";
 import useColors from "../hooks/useColors";
-import useSDK from "../hooks/useSDK";
+import useSDK, { ROUTER } from "../hooks/useSDK";
 import useSwapState, { SwapState } from "../hooks/useSwapState";
 import MetamaskError from "../types/MetamaskError";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
@@ -49,14 +49,14 @@ const Swap = () => {
     return (
         <>
             <TokenSelect
-                title={"1. Which token do you want to SELL?"}
+                title={"1. Select the token you want to SELL:"}
                 hidden={false}
                 symbol={state.fromSymbol}
                 onChangeSymbol={state.setFromSymbol}
                 filterTokens={token => token.balance && !token.balance.isZero()}
             />
             <TokenSelect
-                title={"2. Which token do you want to BUY?"}
+                title={"2. Select the token you want to BUY:"}
                 hidden={state.fromSymbol === ""}
                 symbol={state.toSymbol}
                 onChangeSymbol={state.setToSymbol}
@@ -118,9 +118,9 @@ const SwapInfo = ({ state }: { state: SwapState }) => {
             <Text style={{ fontSize: 30, textAlign: "center", marginBottom: Spacing.normal }}>
                 {amount || "…"} {state.toSymbol}
             </Text>
-            <Row label={"Price"} text={price ? price + " " + state.toSymbol + "  = 1 " + state.fromSymbol : "…"} />
-            <Row label={"Price Impact"} text={impact ? impact + "%" : "…"} />
-            <Row label={"Fee (0.30%)"} text={fee ? fee + " " + state.fromSymbol : "…"} />
+            <Meta label={"Price"} text={price ? price + " " + state.toSymbol + "  = 1 " + state.fromSymbol : "…"} />
+            <Meta label={"Price Impact"} text={impact ? impact + "%" : "…"} />
+            <Meta label={"Fee (0.30%)"} text={fee ? fee + " " + state.fromSymbol : "…"} />
         </Column>
     );
 };
@@ -154,6 +154,7 @@ const Controls = ({ state }: { state: SwapState }) => {
                 <>
                     <ApproveButton
                         token={state.fromToken}
+                        spender={ROUTER}
                         onSuccess={() => state.setFromTokenAllowed(true)}
                         onError={setError}
                         hidden={!approveRequired}
@@ -196,17 +197,6 @@ const UnwrapButton = ({ state, onError }: { state: SwapState; onError: (e) => vo
         state.onUnwrap().catch(onError);
     }, []);
     return <Button size={"large"} title={"Unwrap"} loading={state.unwrapping} onPress={onPress} />;
-};
-
-const Row = ({ label, text }) => {
-    return (
-        <FlexView style={{ justifyContent: "space-between", marginTop: Spacing.tiny, marginHorizontal: Spacing.small }}>
-            <Text fontWeight={"bold"} style={{ fontSize: 14 }}>
-                {label}
-            </Text>
-            <Text style={{ fontSize: 14 }}>{text}</Text>
-        </FlexView>
-    );
 };
 
 export default SwapScreen;

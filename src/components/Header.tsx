@@ -68,7 +68,7 @@ const Menu = () => {
             }}>
             <MenuItem title={"SWAP"} routeName={"Home"} />
             <MenuItem title={"LIQUIDITY"} routeName={"Liquidity"} />
-            <MenuItem title={"YIELD"} routeName={"Yield"} />
+            <MenuItem title={"FARMING"} routeName={"Farming"} />
             <DarkModeSwitch />
         </FlexView>
     );

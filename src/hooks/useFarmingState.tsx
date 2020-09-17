@@ -39,9 +39,6 @@ const useFarmingState: () => FarmingState = () => {
 
     useAsyncEffect(async () => {
         if (provider && signer && state.selectedLPToken) {
-            state.setFromSymbol(state.selectedLPToken.tokenA.symbol);
-            state.setToSymbol(state.selectedLPToken.tokenB.symbol);
-
             setLoading(true);
             state.setSelectedLPTokenAllowed(false);
             try {

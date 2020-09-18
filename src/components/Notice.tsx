@@ -5,10 +5,10 @@ import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
 import Text from "./Text";
 
-const Notice = ({ text }) => {
+const Notice = (props: { text: string; color?: string }) => {
     const { darkMode } = useContext(GlobalContext);
     const { primary, secondary } = useColors();
-    const color = darkMode ? secondary : primary;
+    const color = props.color || (darkMode ? secondary : primary);
     return (
         <Text
             note={true}
@@ -19,7 +19,7 @@ const Notice = ({ text }) => {
                 borderRadius: 4,
                 padding: Spacing.small
             }}>
-            {text}
+            {props.text}
         </Text>
     );
 };

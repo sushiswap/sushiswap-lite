@@ -8,6 +8,7 @@ import useSDK from "./useSDK";
 
 export interface LPTokensState extends LiquidityState {
     lpTokens: LPToken[];
+    updateLPTokens: () => Promise<void>;
     selectedLPToken?: LPToken;
     setSelectedLPToken: (token?: LPToken) => void;
     selectedLPTokenAllowed: boolean;
@@ -28,6 +29,18 @@ const useLPTokensState: (loadPools: boolean) => LPTokensState = loadPools => {
     const [selectedLPTokenAllowed, setSelectedLPTokenAllowed] = useState(false);
     const [amount, setAmount] = useState("");
 
+    const updateLPTokens = async () => {
+        try {
+            const method = loadPools ? getPools : getMyLPTokens;
+            const data = await method();
+            if (data) {
+                setLPTokens(data);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (!selectedLPToken) {
             setAmount("");
@@ -35,20 +48,7 @@ const useLPTokensState: (loadPools: boolean) => LPTokensState = loadPools => {
     }, [selectedLPToken]);
 
     useEffect(() => {
-        if (provider && signer && tokens.length > 0) {
-            const updateLPTokens = async () => {
-                try {
-                    const method = loadPools ? getPools : getMyLPTokens;
-                    const data = await method();
-                    if (data) {
-                        setLPTokens(data);
-                    }
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            setLoading(true);
+        if (provider && signer && (loadPools || tokens.length > 0)) {
             updateLPTokens();
 
             const name = "updateLPTokens()";
@@ -63,6 +63,7 @@ const useLPTokensState: (loadPools: boolean) => LPTokensState = loadPools => {
         ...state,
         loading: state.loading || loading,
         lpTokens,
+        updateLPTokens,
         selectedLPToken,
         setSelectedLPToken,
         selectedLPTokenAllowed,

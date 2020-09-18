@@ -93,8 +93,9 @@ const useSDK = () => {
         if (provider && signer) {
             const response = await fetch("/pools.json");
             const pools = await response.json();
+            const address = await signer.getAddress();
             const balances = await provider.send("alchemy_getTokenBalances", [
-                await signer.getAddress(),
+                address,
                 pools.map(pool => pool.address)
             ]);
             return (await Promise.all(
@@ -326,6 +327,19 @@ const useSDK = () => {
         [signer]
     );
 
+    const withdraw = useCallback(
+        async (lpTokenId: number, amount: ethers.BigNumber) => {
+            if (signer) {
+                const masterChef = getContract("MasterChef", MASTER_CHEF, signer);
+                const gasLimit = await masterChef.estimateGas.withdraw(lpTokenId, amount);
+                return await masterChef.withdraw(lpTokenId, amount, {
+                    gasLimit: gasLimit.mul(120).div(100)
+                });
+            }
+        },
+        [signer]
+    );
+
     const calculateFee = (fromAmount: ethers.BigNumber) => {
         return fromAmount.mul(3).div(1000);
     };
@@ -346,6 +360,7 @@ const useSDK = () => {
         removeLiquidityETH,
         getExpectedSushiRewardPerBlock,
         deposit,
+        withdraw,
         calculateFee
     };
 };

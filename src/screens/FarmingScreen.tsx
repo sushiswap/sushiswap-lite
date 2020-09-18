@@ -7,6 +7,7 @@ import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import ApproveButton from "../components/ApproveButton";
 import Button from "../components/Button";
+import ButtonGroup from "../components/ButtonGroup";
 import CloseIcon from "../components/CloseIcon";
 import Column from "../components/Column";
 import Container from "../components/Container";
@@ -19,11 +20,12 @@ import LPTokenSelect, { LPTokenItemProps } from "../components/LPTokenSelect";
 import Meta from "../components/Meta";
 import Notice from "../components/Notice";
 import SelectIcon from "../components/SelectIcon";
+import Subtitle from "../components/Subtitle";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
-import useFarmingState, { FarmingState } from "../hooks/useFarmingState";
+import useFarmingState, { Action, FarmingState } from "../hooks/useFarmingState";
 import { MASTER_CHEF } from "../hooks/useSDK";
 import LPToken from "../types/LPToken";
 import MetamaskError from "../types/MetamaskError";
@@ -36,7 +38,7 @@ const FarmingScreen = () => {
             <Container>
                 <Content>
                     <View style={{ alignItems: "center", marginBottom: Spacing.large }}>
-                        <StartFarming />
+                        <Farming />
                     </View>
                 </Content>
             </Container>
@@ -44,31 +46,24 @@ const FarmingScreen = () => {
     );
 };
 
-const StartFarming = () => {
+const Farming = () => {
     const state = useFarmingState();
     return (
         <>
             <Column>
                 <Text h4={true} style={{ textAlign: "center" }}>
-                    🌾 Start Farming
+                    🌾 Farming
                 </Text>
             </Column>
             <LPTokenSelect
                 state={state}
-                title={"1. Select the pool you want to FARM from:"}
-                emptyText={"Temporarily unable to load LP tokens."}
+                title={"1. Select a pool for yield farming:"}
+                emptyText={"Temporarily unable to load pools."}
                 Item={TokenItem}
             />
-            <TokenInput
-                title={"2. How many tokens would you DEPOSIT?"}
-                token={state.selectedLPToken}
-                hidden={!state.selectedLPToken || state.selectedLPToken.balance.isZero()}
-                amount={state.amount}
-                onAmountChanged={state.setAmount}
-            />
-            <DepositInfo state={state} />
-            <AddLiquidityNotice token={state.selectedLPToken} />
-            <Controls state={state} />
+            <ActionSelect state={state} />
+            <Deposit state={state} />
+            <Withdraw state={state} />
         </>
     );
 };
@@ -119,11 +114,82 @@ const LogoSymbol = ({ token }) => {
     );
 };
 
-const DepositInfo = ({ state }: { state: FarmingState }) => {
-    if (!state.selectedLPToken || state.selectedLPToken.balance.isZero()) {
+const ActionSelect = ({ state }: { state: FarmingState }) => {
+    if (!state.selectedLPToken) {
         return <Column noTopMargin={true} />;
     }
-    const balance = formatBalance(state.selectedLPToken.balance, state.selectedLPToken.decimals);
+    const actions = ["deposit", "withdraw"];
+    const index = state.action ? actions.indexOf(state.action) : null;
+    const onPress = useCallback((i: number) => {
+        state.setAction(actions[i] as Action);
+    }, []);
+    const radius = Spacing.tiny;
+    return (
+        <Column>
+            <Subtitle text={"2. What do you want to do with this pool?"} />
+            <ButtonGroup
+                selectedIndex={index}
+                onPress={onPress}
+                buttons={["☘️ Deposit", "🚜 Withdraw"]}
+                buttonStyle={{
+                    borderTopLeftRadius: index === 0 ? radius : 0,
+                    borderBottomLeftRadius: index === 0 ? radius : 0,
+                    borderTopRightRadius: index === 2 ? radius : 0,
+                    borderBottomRightRadius: index === 2 ? radius : 0
+                }}
+                containerStyle={{ marginHorizontal: Spacing.small }}
+            />
+        </Column>
+    );
+};
+
+const Deposit = ({ state }: { state: FarmingState }) => {
+    if (!state.selectedLPToken || state.action !== "deposit") {
+        return <Column noTopMargin={true} />;
+    }
+    return (
+        <>
+            <AddLiquidityNotice state={state} />
+            <TokenInput
+                title={"3. How many tokens would you DEPOSIT?"}
+                token={state.selectedLPToken}
+                hidden={state.selectedLPToken.balance.isZero()}
+                amount={state.amount}
+                onAmountChanged={state.setAmount}
+            />
+            <DepositInfo state={state} />
+            <DepositControls state={state} />
+        </>
+    );
+};
+
+const AddLiquidityNotice = ({ state }: { state: FarmingState }) => {
+    if (!state.selectedLPToken!.balance.isZero()) {
+        return <Column noTopMargin={true} />;
+    }
+    return (
+        <Column noTopMargin={true}>
+            <View style={{ marginTop: Spacing.large, marginHorizontal: Spacing.small }}>
+                <Notice
+                    color={"red"}
+                    text={
+                        "You need some " +
+                        state.selectedLPToken!.symbol +
+                        " token to start farming.\n" +
+                        "Add liquidity to get the LP token."
+                    }
+                />
+            </View>
+            <AddLiquidityButton />
+        </Column>
+    );
+};
+
+const DepositInfo = ({ state }: { state: FarmingState }) => {
+    if (state.selectedLPToken!.balance.isZero()) {
+        return <Column noTopMargin={true} />;
+    }
+    const balance = formatBalance(state.selectedLPToken!.balance, state.selectedLPToken!.decimals);
     const sushiReward =
         state.expectedSushiRewardPerBlock && state.amount
             ? formatBalance(
@@ -141,49 +207,24 @@ const DepositInfo = ({ state }: { state: FarmingState }) => {
     );
 };
 
-const AddLiquidityNotice = ({ token }: { token?: LPToken }) => {
-    if (!token || !token.balance.isZero()) {
-        return <Column noTopMargin={true} />;
-    }
-    return (
-        <Column noTopMargin={true}>
-            <View style={{ marginTop: Spacing.normal }}>
-                <Notice
-                    text={
-                        "You need some " +
-                        token.tokenA.symbol +
-                        "-" +
-                        token.tokenB.symbol +
-                        " LP token to start farming.\n" +
-                        "Add liquidity to get the LP token."
-                    }
-                />
-            </View>
-        </Column>
-    );
-};
-
-// tslint:disable-next-line:max-func-body-length
-const Controls = ({ state }: { state: FarmingState }) => {
+const DepositControls = ({ state }: { state: FarmingState }) => {
     const [error, setError] = useState<MetamaskError>({});
     useAsyncEffect(() => setError({}), [state.selectedLPToken]);
-    if (!state.selectedLPToken) {
+    if (state.selectedLPToken!.balance.isZero()) {
         return <Column noTopMargin={true} />;
     }
     const approveRequired = !state.selectedLPTokenAllowed;
     const disabled = approveRequired || isEmptyValue(state.amount);
     return (
         <Column>
-            {state.selectedLPToken.balance.isZero() ? (
-                <AddLiquidityButton />
-            ) : parseBalance(state.amount, state.selectedLPToken.decimals).gt(state.selectedLPToken.balance) ? (
-                <InsufficientBalanceButton symbol={state.selectedLPToken.symbol} />
+            {parseBalance(state.amount, state.selectedLPToken!.decimals).gt(state.selectedLPToken!.balance) ? (
+                <InsufficientBalanceButton symbol={state.selectedLPToken!.symbol} />
             ) : state.loading ? (
                 <FetchingButton />
             ) : (
                 <>
                     <ApproveButton
-                        token={state.selectedLPToken}
+                        token={state.selectedLPToken!}
                         spender={MASTER_CHEF}
                         onSuccess={() => state.setSelectedLPTokenAllowed(true)}
                         onError={setError}
@@ -202,7 +243,14 @@ const AddLiquidityButton = () => {
     const onPress = useCallback(() => {
         navigate("Liquidity");
     }, [navigate]);
-    return <Button title={"Add Liquidity"} containerStyle={{ marginTop: Spacing.small }} onPress={onPress} />;
+    return (
+        <Button
+            color={"red"}
+            title={"Add Liquidity"}
+            containerStyle={{ marginTop: Spacing.normal }}
+            onPress={onPress}
+        />
+    );
 };
 
 const DepositButton = ({
@@ -218,7 +266,104 @@ const DepositButton = ({
         onError({});
         state.onDeposit().catch(onError);
     }, [state.onDeposit, onError]);
-    return <Button size={"large"} title={"Remove"} disabled={disabled} loading={state.depositing} onPress={onPress} />;
+    return <Button size={"large"} title={"Deposit"} disabled={disabled} loading={state.depositing} onPress={onPress} />;
+};
+
+const Withdraw = ({ state }: { state: FarmingState }) => {
+    if (!state.selectedLPToken || state.action !== "withdraw") {
+        return <Column noTopMargin={true} />;
+    }
+    const token: LPToken = {
+        ...state.selectedLPToken,
+        balance: state.amountDeposited || ethers.constants.Zero
+    };
+    return (
+        <Column>
+            <NoLPTokenNotice state={state} />
+            <TokenInput
+                title={"3. How many tokens would you WITHDRAW?"}
+                token={token}
+                hidden={state.amountDeposited?.isZero() || false}
+                amount={state.amount}
+                onAmountChanged={state.setAmount}
+            />
+            <WithdrawInfo state={state} />
+            <WithdrawControls state={state} />
+        </Column>
+    );
+};
+
+const NoLPTokenNotice = ({ state }: { state: FarmingState }) => {
+    if (state.loading || !state.amountDeposited?.isZero()) {
+        return <Column noTopMargin={true} />;
+    }
+    return (
+        <Column noTopMargin={true}>
+            <View style={{ marginTop: Spacing.normal, marginHorizontal: Spacing.small }}>
+                <Notice text={"You don't have any " + state.selectedLPToken!.symbol + " token. Deposit it first."} />
+            </View>
+        </Column>
+    );
+};
+
+const WithdrawInfo = ({ state }: { state: FarmingState }) => {
+    if (state.loading || !state.amountDeposited || state.amountDeposited.isZero()) {
+        return <Column noTopMargin={true} />;
+    }
+    const deposit = formatBalance(state.amountDeposited, state.selectedLPToken!.decimals);
+    const pendingSushi = formatBalance(state.pendingSushi || ethers.constants.Zero, state.selectedLPToken!.decimals);
+    return (
+        <Column noTopMargin={true}>
+            <Meta label={"My Deposit"} text={deposit} />
+            <Meta label={"Pending Sushi Reward"} text={pendingSushi} />
+            <View style={{ marginTop: Spacing.normal, marginHorizontal: Spacing.small }}>
+                <Notice text={"All pending sushi reward will be transferred to you if you withdraw."} />
+            </View>
+        </Column>
+    );
+};
+
+const WithdrawControls = ({ state }: { state: FarmingState }) => {
+    const [error, setError] = useState<MetamaskError>({});
+    useAsyncEffect(() => setError({}), [state.selectedLPToken]);
+    if (state.loading) {
+        return (
+            <Column>
+                <FetchingButton />
+            </Column>
+        );
+    }
+    if (!state.amountDeposited || state.amountDeposited.isZero()) {
+        return <Column noTopMargin={true} />;
+    }
+    return (
+        <Column>
+            {parseBalance(state.amount, state.selectedLPToken!.decimals).gt(state.amountDeposited) ? (
+                <InsufficientBalanceButton symbol={state.selectedLPToken!.symbol} />
+            ) : (
+                <WithdrawButton state={state} onError={setError} disabled={isEmptyValue(state.amount)} />
+            )}
+            {error.message && error.code !== 4001 && <ErrorMessage error={error} />}
+        </Column>
+    );
+};
+
+const WithdrawButton = ({
+    state,
+    onError,
+    disabled
+}: {
+    state: FarmingState;
+    onError: (e) => void;
+    disabled: boolean;
+}) => {
+    const onPress = useCallback(() => {
+        onError({});
+        state.onWithdraw().catch(onError);
+    }, [state.onWithdraw, onError]);
+    return (
+        <Button size={"large"} title={"Withdraw"} disabled={disabled} loading={state.withdrawing} onPress={onPress} />
+    );
 };
 
 export default FarmingScreen;

@@ -134,8 +134,8 @@ const ActionSelect = ({ state }: { state: FarmingState }) => {
                 buttonStyle={{
                     borderTopLeftRadius: index === 0 ? radius : 0,
                     borderBottomLeftRadius: index === 0 ? radius : 0,
-                    borderTopRightRadius: index === 2 ? radius : 0,
-                    borderBottomRightRadius: index === 2 ? radius : 0
+                    borderTopRightRadius: index === 1 ? radius : 0,
+                    borderBottomRightRadius: index === 1 ? radius : 0
                 }}
                 containerStyle={{ marginHorizontal: Spacing.small }}
             />
@@ -175,8 +175,7 @@ const AddLiquidityNotice = ({ state }: { state: FarmingState }) => {
                     text={
                         "You need some " +
                         state.selectedLPToken!.symbol +
-                        " token to start farming.\n" +
-                        "Add liquidity to get the LP token."
+                        " token to start farming. Add liquidity to get the LP token."
                     }
                 />
             </View>
@@ -283,7 +282,7 @@ const Withdraw = ({ state }: { state: FarmingState }) => {
             <TokenInput
                 title={"3. How many tokens would you WITHDRAW?"}
                 token={token}
-                hidden={state.amountDeposited?.isZero() || false}
+                hidden={state.loading || state.amountDeposited?.isZero() || false}
                 amount={state.amount}
                 onAmountChanged={state.setAmount}
             />
@@ -299,8 +298,10 @@ const NoLPTokenNotice = ({ state }: { state: FarmingState }) => {
     }
     return (
         <Column noTopMargin={true}>
-            <View style={{ marginTop: Spacing.normal, marginHorizontal: Spacing.small }}>
-                <Notice text={"You don't have any " + state.selectedLPToken!.symbol + " token. Deposit it first."} />
+            <View style={{ marginHorizontal: Spacing.small }}>
+                <Notice
+                    text={"You don't have any " + state.selectedLPToken!.symbol + " token deposited. Deposit it first."}
+                />
             </View>
         </Column>
     );

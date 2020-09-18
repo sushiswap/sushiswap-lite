@@ -110,7 +110,13 @@ const Stats = () => {
         <Link to={"https://sushiswap.vision"} target={"_blank"} style={{ marginLeft: Spacing.small, marginBottom: 4 }}>
             <FlexView style={{ alignItems: "flex-start" }}>
                 <Text style={{ fontFamily: "regular", fontSize: 20, color: textDark, padding: 4 }}>{"STATS"}</Text>
-                <Icon name={"arrow-top-right"} type={"material-community"} size={18} style={{ marginTop: 6 }} />
+                <Icon
+                    name={"arrow-top-right"}
+                    type={"material-community"}
+                    size={18}
+                    color={textDark}
+                    style={{ marginTop: 6 }}
+                />
             </FlexView>
         </Link>
     );

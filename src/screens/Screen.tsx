@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { View } from "react-native";
 
 import ConnectToWallet from "../components/ConnectToWallet";
+import Footer from "../components/Footer";
 import Status from "../components/Status";
 import Text from "../components/Text";
 import { EthersContext } from "../context/EthersContext";
@@ -24,6 +25,7 @@ const Screen = props => {
         <View style={{ flex: 1 }}>
             <View {...props} />
             <Status />
+            <Footer />
         </View>
     );
 };

@@ -1,5 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Image, View } from "react-native";
+import { Icon } from "react-native-elements";
 
 import Switch from "expo-dark-mode-switch";
 
@@ -69,6 +70,7 @@ const Menu = () => {
             <MenuItem title={"SWAP"} routeName={"Home"} />
             <MenuItem title={"LIQUIDITY"} routeName={"Liquidity"} />
             <MenuItem title={"FARMING"} routeName={"Farming"} />
+            <Stats />
             <DarkModeSwitch />
         </FlexView>
     );
@@ -98,6 +100,18 @@ const MenuItem = ({ title, routeName }) => {
                     />
                 )}
             </View>
+        </Link>
+    );
+};
+
+const Stats = () => {
+    const { textDark } = useColors();
+    return (
+        <Link to={"https://sushiswap.vision"} target={"_blank"} style={{ marginLeft: Spacing.small, marginBottom: 4 }}>
+            <FlexView style={{ alignItems: "flex-start" }}>
+                <Text style={{ fontFamily: "regular", fontSize: 20, color: textDark, padding: 4 }}>{"STATS"}</Text>
+                <Icon name={"arrow-top-right"} type={"material-community"} size={18} style={{ marginTop: 6 }} />
+            </FlexView>
         </Link>
     );
 };

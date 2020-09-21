@@ -15,13 +15,13 @@ const Footer = () => (
             width: "100%",
             margin: Spacing.content
         }}>
-        <Text note={true}>
-            © 2020 Built by <Link to={"https://levx.io"} text={"Team LevX"} />
+        <Text note={true} style={{ marginLeft: 12 }}>
+            Built by <Link to={"https://levx.io"} text={"Team LevX"} />
         </Text>
-        <FlexView style={{ marginLeft: Spacing.small }}>
+        <FlexView>
             <Link to={"https://github.com/lev-x"} text={"GitHub"} />
             <Link to={"https://twitter.com/LevxApp"} text={"Twitter"} />
-            <Link to={"mailto:team@levx.io"} text={"Email"} />
+            <Link to={"https://discord.gg/Mcdm7v"} text={"Discord"} />
         </FlexView>
     </View>
 );

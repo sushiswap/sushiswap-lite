@@ -44,7 +44,7 @@ export const Title = () => {
     const { darkMode } = useContext(GlobalContext);
     const { primary, white } = useColors();
     return (
-        <View style={{ alignSelf: "flex-end", alignItems: "center" }}>
+        <View style={{ alignSelf: "center", alignItems: "center" }}>
             <Link to={"/"}>
                 <Text style={{ fontFamily: "title", fontSize: 40, color: darkMode ? white : primary }}>SushiSwap</Text>
             </Link>

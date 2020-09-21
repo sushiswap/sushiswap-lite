@@ -63,13 +63,13 @@ const Filter = ({ filter, onFilterChanged }) => {
     const handler = (f: string) => () => onFilterChanged(f);
     return (
         <FlexView style={{ width: "100%", justifyContent: "flex-end" }}>
-            <CheckBox checked={filter === "balance"} onPress={handler("balance")} title={"My Balance"} />
+            <CheckBox checked={filter === "balance"} onPress={handler("balance")} title={"with balance"} />
             <CheckBox
                 checked={filter === "amountDeposited"}
                 onPress={handler("amountDeposited")}
-                title={"My Deposit"}
+                title={"with deposit"}
             />
-            <CheckBox checked={!filter} onPress={handler("")} title={"All"} />
+            <CheckBox checked={!filter} onPress={handler("")} title={"all"} />
         </FlexView>
     );
 };

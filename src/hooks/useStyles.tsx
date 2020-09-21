@@ -9,7 +9,7 @@ const useStyles = () => {
         borderRadius: Spacing.tiny,
         elevation: Spacing.small,
         shadowColor,
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.5,
         shadowRadius: 4,
         overflow: "visible"

@@ -50,12 +50,16 @@ const TokenSelect: FC<TokenSelectProps> = props => {
     );
 };
 
+// tslint:disable-next-line:max-func-body-length
 const TokenList = (props: { filterTokens: (token: Token) => boolean; onSelectToken: (token: Token) => void }) => {
     const { loadingTokens } = useContext(GlobalContext);
     const { tokens } = useContext(GlobalContext);
-    const renderItem = useCallback(({ item }) => {
-        return <TokenItem key={item.address} token={item} selected={false} onSelectToken={props.onSelectToken} />;
-    }, []);
+    const renderItem = useCallback(
+        ({ item }) => {
+            return <TokenItem key={item.address} token={item} selected={false} onSelectToken={props.onSelectToken} />;
+        },
+        [props.onSelectToken]
+    );
     const data = useMemo(
         () =>
             tokens

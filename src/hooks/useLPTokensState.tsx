@@ -7,8 +7,9 @@ import useLiquidityState, { LiquidityState } from "./useLiquidityState";
 import useSDK from "./useSDK";
 
 export interface LPTokensState extends LiquidityState {
+    lastTimeRefreshed: number;
+    updateLastTimeRefreshed: () => void;
     lpTokens: LPToken[];
-    updateLPTokens: () => Promise<void>;
     selectedLPToken?: LPToken;
     setSelectedLPToken: (token?: LPToken) => void;
     selectedLPTokenAllowed: boolean;
@@ -23,6 +24,7 @@ const useLPTokensState: (loadPools: boolean) => LPTokensState = loadPools => {
     const { provider, signer, address, addOnBlockListener, removeOnBlockListener } = useContext(EthersContext);
     const { tokens } = useContext(GlobalContext);
     const { getMyLPTokens, getPools } = useSDK();
+    const [lastTimeRefreshed, setLastTimeRefreshed] = useState(0);
     const [loading, setLoading] = useState(true);
     const [lpTokens, setLPTokens] = useState<LPToken[]>([]);
     const [selectedLPToken, setSelectedLPToken] = useState<LPToken>();
@@ -49,6 +51,7 @@ const useLPTokensState: (loadPools: boolean) => LPTokensState = loadPools => {
 
     useEffect(() => {
         if (provider && signer && (loadPools || tokens.length > 0)) {
+            setLoading(true);
             updateLPTokens();
 
             const name = "updateLPTokens()";
@@ -57,13 +60,16 @@ const useLPTokensState: (loadPools: boolean) => LPTokensState = loadPools => {
                 removeOnBlockListener(name);
             };
         }
-    }, [provider, signer, tokens.length, address]);
+    }, [provider, signer, tokens.length, address, lastTimeRefreshed]);
 
     return {
         ...state,
         loading: state.loading || loading,
+        lastTimeRefreshed,
+        updateLastTimeRefreshed: () => {
+            setLastTimeRefreshed(Date.now());
+        },
         lpTokens,
-        updateLPTokens,
         selectedLPToken,
         setSelectedLPToken,
         selectedLPTokenAllowed,

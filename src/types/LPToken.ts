@@ -7,4 +7,6 @@ export default interface LPToken extends Token {
     tokenB: Token;
     totalSupply?: ethers.BigNumber;
     totalDeposited?: ethers.BigNumber;
+    amountDeposited?: ethers.BigNumber;
+    pendingSushi?: ethers.BigNumber;
 }

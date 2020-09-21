@@ -2,8 +2,9 @@ import { useCallback, useContext, useEffect, useState } from "react";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
+import { LPTokenSelectFilter } from "../components/LPTokenSelect";
 import { EthersContext } from "../context/EthersContext";
-import { getContract, parseBalance } from "../utils";
+import { parseBalance } from "../utils";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
 import useSDK, { MASTER_CHEF } from "./useSDK";
 
@@ -11,8 +12,8 @@ export interface FarmingState extends LPTokensState {
     action?: Action;
     setAction: (action?: Action) => void;
     expectedSushiRewardPerBlock?: ethers.BigNumber;
-    amountDeposited?: ethers.BigNumber;
-    pendingSushi?: ethers.BigNumber;
+    filteredBy: LPTokenSelectFilter;
+    setFilteredBy: (filter: LPTokenSelectFilter) => void;
     onDeposit: () => Promise<void>;
     depositing: boolean;
     onWithdraw: () => Promise<void>;
@@ -26,15 +27,15 @@ const useFarmingState: () => FarmingState = () => {
     const state = useLPTokensState(true);
     const { provider, signer, getTokenAllowance } = useContext(EthersContext);
     const { getExpectedSushiRewardPerBlock, deposit, withdraw } = useSDK();
+    const [filteredBy, setFilteredBy] = useState("" as LPTokenSelectFilter);
     const [action, setAction] = useState<Action>();
     const [loading, setLoading] = useState(false);
     const [expectedSushiRewardPerBlock, setExpectedSushiRewardPerBlock] = useState<ethers.BigNumber>();
-    const [amountDeposited, setAmountDeposited] = useState<ethers.BigNumber>();
-    const [pendingSushi, setPendingSushi] = useState<ethers.BigNumber>();
     const [depositing, setDepositing] = useState(false);
     const [withdrawing, setWithdrawing] = useState(false);
 
     useEffect(() => {
+        setFilteredBy("");
         setAction(undefined);
         setLoading(false);
         setDepositing(false);
@@ -47,14 +48,6 @@ const useFarmingState: () => FarmingState = () => {
             setLoading(true);
             try {
                 setExpectedSushiRewardPerBlock(await getExpectedSushiRewardPerBlock(state.selectedLPToken));
-
-                const address = await signer.getAddress();
-                const masterChef = getContract("MasterChef", MASTER_CHEF, signer);
-                const id = state.selectedLPToken.id!;
-                const { amount } = await masterChef.userInfo(id, address);
-                const pending = await masterChef.pendingSushi(id, address);
-                setAmountDeposited(amount);
-                setPendingSushi(pending);
             } finally {
                 setLoading(false);
             }
@@ -77,6 +70,10 @@ const useFarmingState: () => FarmingState = () => {
         }
     }, [provider, signer, state.selectedLPToken]);
 
+    useEffect(() => {
+        state.setAmount("");
+    }, [action]);
+
     const onDeposit = useCallback(async () => {
         if (state.selectedLPToken?.id && state.amount && signer) {
             setDepositing(true);
@@ -84,8 +81,8 @@ const useFarmingState: () => FarmingState = () => {
                 const amount = parseBalance(state.amount, state.selectedLPToken.decimals);
                 const tx = await deposit(state.selectedLPToken.id, amount);
                 await tx.wait();
-                await state.updateLPTokens();
                 state.setSelectedLPToken(undefined);
+                await state.updateLastTimeRefreshed();
             } finally {
                 setDepositing(false);
             }
@@ -99,8 +96,8 @@ const useFarmingState: () => FarmingState = () => {
                 const amount = parseBalance(state.amount, state.selectedLPToken.decimals);
                 const tx = await withdraw(state.selectedLPToken.id, amount);
                 await tx.wait();
-                await state.updateLPTokens();
                 state.setSelectedLPToken(undefined);
+                await state.updateLastTimeRefreshed();
             } finally {
                 setWithdrawing(false);
             }
@@ -110,11 +107,11 @@ const useFarmingState: () => FarmingState = () => {
     return {
         ...state,
         loading: state.loading || loading,
+        filteredBy,
+        setFilteredBy,
         action,
         setAction,
         expectedSushiRewardPerBlock,
-        amountDeposited,
-        pendingSushi,
         onDeposit,
         depositing,
         onWithdraw,

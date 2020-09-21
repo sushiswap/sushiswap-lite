@@ -32,6 +32,8 @@ import MetamaskError from "../types/MetamaskError";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
 import Screen from "./Screen";
 
+const Actions = ["deposit", "withdraw"];
+
 const FarmingScreen = () => {
     return (
         <Screen>
@@ -48,6 +50,12 @@ const FarmingScreen = () => {
 
 const Farming = () => {
     const state = useFarmingState();
+    const emptyText =
+        state.filteredBy === "amountDeposited"
+            ? "You don't have any pool with deposit."
+            : state.filteredBy === "balance"
+            ? "You don't have any pool with balance."
+            : "Temporarily unable to load pools.";
     return (
         <>
             <Column>
@@ -58,7 +66,10 @@ const Farming = () => {
             <LPTokenSelect
                 state={state}
                 title={"1. Select a pool for yield farming:"}
-                emptyText={"Temporarily unable to load pools."}
+                emptyText={emptyText}
+                showFilter={!state.selectedLPToken}
+                filter={state.filteredBy}
+                onFilterChanged={state.setFilteredBy}
                 Item={TokenItem}
             />
             <ActionSelect state={state} />
@@ -68,12 +79,20 @@ const Farming = () => {
     );
 };
 
+// tslint:disable-next-line:max-func-body-length
 const TokenItem: FC<LPTokenItemProps> = props => {
     const { background, backgroundHovered, textMedium } = useColors();
-    const amount = formatBalance(props.token.totalDeposited || "0", props.token.decimals, 4);
+    const amount =
+        (props.filter === "balance"
+            ? props.token.balance
+            : props.filter === "amountDeposited"
+            ? props.token.amountDeposited
+            : props.token.totalDeposited) || "0";
     const onPress = useCallback(() => {
         props.onSelectToken(props.token);
     }, [props.onSelectToken, props.token]);
+    const field =
+        props.filter === "amountDeposited" ? "My Deposit" : props.filter === "balance" ? "My Balance" : "Total Deposit";
     return (
         <Hoverable>
             {({ hovered }) => (
@@ -85,9 +104,9 @@ const TokenItem: FC<LPTokenItemProps> = props => {
                                 <LogoSymbol token={props.token.tokenB} />
                             </View>
                             <View style={{ flex: 1 }}>
-                                <Text style={{ textAlign: "right", fontSize: 15 }}>Total Deposited</Text>
+                                <Text style={{ textAlign: "right", fontSize: 15 }}>{field}</Text>
                                 <Text light={true} style={{ textAlign: "right", fontSize: 22, color: textMedium }}>
-                                    {amount}
+                                    {formatBalance(amount, props.token.decimals, 8)}
                                 </Text>
                             </View>
                             {props.selected ? <CloseIcon /> : <SelectIcon />}
@@ -118,24 +137,28 @@ const ActionSelect = ({ state }: { state: FarmingState }) => {
     if (!state.selectedLPToken) {
         return <Column noTopMargin={true} />;
     }
-    const actions = ["deposit", "withdraw"];
-    const index = state.action ? actions.indexOf(state.action) : null;
+    const index = state.action ? Actions.indexOf(state.action) : null;
     const onPress = useCallback((i: number) => {
-        state.setAction(actions[i] as Action);
+        state.setAction(Actions[i] as Action);
     }, []);
-    const radius = Spacing.tiny;
+    const balance = formatBalance(state.selectedLPToken!.balance, state.selectedLPToken!.decimals);
+    const deposit = formatBalance(state.selectedLPToken.amountDeposited || "0", state.selectedLPToken!.decimals);
     return (
         <Column>
-            <Subtitle text={"2. What do you want to do with this pool?"} />
+            <Subtitle text={"2. Do you want to DEPOSIT or WITHDRAW?"} />
+            <View style={{ marginHorizontal: Spacing.small, marginBottom: Spacing.normal }}>
+                <Meta label={"My Balance"} text={balance} />
+                <Meta label={"My Deposit"} text={deposit} />
+            </View>
             <ButtonGroup
                 selectedIndex={index}
                 onPress={onPress}
-                buttons={["☘️ Deposit", "🚜 Withdraw"]}
+                buttons={["DEPOSIT", "WITHDRAW"]}
                 buttonStyle={{
-                    borderTopLeftRadius: index === 0 ? radius : 0,
-                    borderBottomLeftRadius: index === 0 ? radius : 0,
-                    borderTopRightRadius: index === 1 ? radius : 0,
-                    borderBottomRightRadius: index === 1 ? radius : 0
+                    borderTopLeftRadius: index === 0 ? Spacing.tiny : 0,
+                    borderBottomLeftRadius: index === 0 ? Spacing.tiny : 0,
+                    borderTopRightRadius: index === 1 ? Spacing.tiny : 0,
+                    borderBottomRightRadius: index === 1 ? Spacing.tiny : 0
                 }}
                 containerStyle={{ marginHorizontal: Spacing.small }}
             />
@@ -148,10 +171,10 @@ const Deposit = ({ state }: { state: FarmingState }) => {
         return <Column noTopMargin={true} />;
     }
     return (
-        <>
+        <Column>
             <AddLiquidityNotice state={state} />
             <TokenInput
-                title={"3. How many tokens would you DEPOSIT?"}
+                title={"3. Amount of tokens to DEPOSIT:"}
                 token={state.selectedLPToken}
                 hidden={state.selectedLPToken.balance.isZero()}
                 amount={state.amount}
@@ -159,19 +182,20 @@ const Deposit = ({ state }: { state: FarmingState }) => {
             />
             <DepositInfo state={state} />
             <DepositControls state={state} />
-        </>
+        </Column>
     );
 };
 
 const AddLiquidityNotice = ({ state }: { state: FarmingState }) => {
+    const { green } = useColors();
     if (!state.selectedLPToken!.balance.isZero()) {
         return <Column noTopMargin={true} />;
     }
     return (
-        <Column noTopMargin={true}>
-            <View style={{ marginTop: Spacing.large, marginHorizontal: Spacing.small }}>
+        <>
+            <View style={{ marginHorizontal: Spacing.small }}>
                 <Notice
-                    color={"red"}
+                    color={green}
                     text={
                         "You need some " +
                         state.selectedLPToken!.symbol +
@@ -180,7 +204,7 @@ const AddLiquidityNotice = ({ state }: { state: FarmingState }) => {
                 />
             </View>
             <AddLiquidityButton />
-        </Column>
+        </>
     );
 };
 
@@ -238,13 +262,14 @@ const DepositControls = ({ state }: { state: FarmingState }) => {
 };
 
 const AddLiquidityButton = () => {
+    const { green } = useColors();
     const { navigate } = useNavigation();
     const onPress = useCallback(() => {
         navigate("Liquidity");
     }, [navigate]);
     return (
         <Button
-            color={"red"}
+            color={green}
             title={"Add Liquidity"}
             containerStyle={{ marginTop: Spacing.normal }}
             onPress={onPress}
@@ -274,15 +299,15 @@ const Withdraw = ({ state }: { state: FarmingState }) => {
     }
     const token: LPToken = {
         ...state.selectedLPToken,
-        balance: state.amountDeposited || ethers.constants.Zero
+        balance: state.selectedLPToken.amountDeposited || ethers.constants.Zero
     };
     return (
         <Column>
             <NoLPTokenNotice state={state} />
             <TokenInput
-                title={"3. How many tokens would you WITHDRAW?"}
+                title={"3. Amount of tokens to WITHDRAW:"}
                 token={token}
-                hidden={state.loading || state.amountDeposited?.isZero() || false}
+                hidden={state.loading || state.selectedLPToken.amountDeposited?.isZero() || false}
                 amount={state.amount}
                 onAmountChanged={state.setAmount}
             />
@@ -293,7 +318,7 @@ const Withdraw = ({ state }: { state: FarmingState }) => {
 };
 
 const NoLPTokenNotice = ({ state }: { state: FarmingState }) => {
-    if (state.loading || !state.amountDeposited?.isZero()) {
+    if (state.loading || !state.selectedLPToken || !state.selectedLPToken.amountDeposited?.isZero()) {
         return <Column noTopMargin={true} />;
     }
     return (
@@ -308,11 +333,20 @@ const NoLPTokenNotice = ({ state }: { state: FarmingState }) => {
 };
 
 const WithdrawInfo = ({ state }: { state: FarmingState }) => {
-    if (state.loading || !state.amountDeposited || state.amountDeposited.isZero()) {
+    if (
+        state.loading ||
+        !state.selectedLPToken ||
+        !state.selectedLPToken.amountDeposited ||
+        state.selectedLPToken.amountDeposited?.isZero() ||
+        !state.selectedLPToken.pendingSushi
+    ) {
         return <Column noTopMargin={true} />;
     }
-    const deposit = formatBalance(state.amountDeposited, state.selectedLPToken!.decimals);
-    const pendingSushi = formatBalance(state.pendingSushi || ethers.constants.Zero, state.selectedLPToken!.decimals);
+    const deposit = formatBalance(state.selectedLPToken.amountDeposited, state.selectedLPToken!.decimals);
+    const pendingSushi = formatBalance(
+        state.selectedLPToken.pendingSushi || ethers.constants.Zero,
+        state.selectedLPToken!.decimals
+    );
     return (
         <Column noTopMargin={true}>
             <Meta label={"My Deposit"} text={deposit} />
@@ -334,12 +368,16 @@ const WithdrawControls = ({ state }: { state: FarmingState }) => {
             </Column>
         );
     }
-    if (!state.amountDeposited || state.amountDeposited.isZero()) {
+    if (
+        !state.selectedLPToken ||
+        !state.selectedLPToken.amountDeposited ||
+        state.selectedLPToken.amountDeposited.isZero()
+    ) {
         return <Column noTopMargin={true} />;
     }
     return (
         <Column>
-            {parseBalance(state.amount, state.selectedLPToken!.decimals).gt(state.amountDeposited) ? (
+            {parseBalance(state.amount, state.selectedLPToken!.decimals).gt(state.selectedLPToken.amountDeposited) ? (
                 <InsufficientBalanceButton symbol={state.selectedLPToken!.symbol} />
             ) : (
                 <WithdrawButton state={state} onError={setError} disabled={isEmptyValue(state.amount)} />

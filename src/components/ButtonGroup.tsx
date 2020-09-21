@@ -11,6 +11,12 @@ const ButtonGroup: FC<ButtonGroupProps> = props => {
     return (
         <NativeButtonGroup
             {...props}
+            textStyle={[
+                {
+                    fontFamily: "regular"
+                },
+                props.textStyle
+            ]}
             selectedButtonStyle={[
                 {
                     backgroundColor: borderDark

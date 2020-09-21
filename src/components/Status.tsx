@@ -4,11 +4,13 @@ import { View } from "react-native";
 import { Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
+import useStyles from "../hooks/useStyles";
 import FlexView from "./FlexView";
 import Text from "./Text";
 
 const Status = () => {
-    const { shadow, textMedium, textLight, green } = useColors();
+    const { textMedium, textLight, green } = useColors();
+    const { shadow } = useStyles();
     const { chainId } = useContext(EthersContext);
     const connected = chainId === 1;
     const title = connected ? "Connected" : "Not connected";
@@ -25,10 +27,7 @@ const Status = () => {
                 justifyContent: "center",
                 paddingHorizontal: Spacing.small,
                 borderRadius: 16,
-                shadowColor: shadow,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.5,
-                shadowRadius: 8
+                ...shadow
             }}>
             <View style={{ backgroundColor: color, width: 6, height: 6, borderRadius: 3, marginRight: 12 }} />
             <Text style={{ fontSize: 16, color: textMedium, marginRight: 2 }}>{title}</Text>

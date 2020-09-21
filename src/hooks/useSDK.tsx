@@ -102,12 +102,17 @@ const useSDK = () => {
                 pools.map(async (pool, i) => {
                     const poolToken = getContract("ERC20", pool.address, signer);
                     const totalDeposited = await poolToken.balanceOf(MASTER_CHEF);
+                    const masterChef = getContract("MasterChef", MASTER_CHEF, signer);
+                    const { amount: amountDeposited } = await masterChef.userInfo(i, address);
+                    const pendingSushi = await masterChef.pendingSushi(i, address);
                     return {
                         ...pool,
                         id: i,
                         symbol: pool.tokenA.symbol + "-" + pool.tokenB.symbol + " LP",
                         balance: ethers.BigNumber.from(balances.tokenBalances[i].tokenBalance || 0),
-                        totalDeposited
+                        totalDeposited,
+                        amountDeposited,
+                        pendingSushi
                     };
                 })
             )) as LPToken[];

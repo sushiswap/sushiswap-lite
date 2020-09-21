@@ -2,11 +2,9 @@ import { useCallback, useContext } from "react";
 
 import {
     CurrencyAmount,
-    ETHER,
     FACTORY_ADDRESS,
     Fetcher,
     Percent,
-    Route,
     Router,
     TokenAmount,
     Trade,
@@ -19,6 +17,7 @@ import { GlobalContext } from "../context/GlobalContext";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
 import { convertToken, getContract } from "../utils";
+import useAllCommonPairs from "./useAllCommonPairs";
 
 // export const UNISWAP_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
 export const SUSHISWAP_ROUTER = "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f";
@@ -29,6 +28,7 @@ export const MASTER_CHEF = "0xc2edad668740f1aa35e4d8f227fb8e17dca888cd";
 const useSDK = () => {
     const { provider, signer, getToken } = useContext(EthersContext);
     const { tokens } = useContext(GlobalContext);
+    const { loadAllCommonPairs } = useAllCommonPairs();
     const allowedSlippage = new Percent("50", "10000"); // 0.05%
     const ttl = 60 * 20;
 
@@ -120,12 +120,11 @@ const useSDK = () => {
                 const isETH = fromToken.symbol === "ETH";
                 const from = convertToken(fromToken);
                 const to = convertToken(toToken);
-                const pair = await Fetcher.fetchPairData(from, to, provider);
-                const route = new Route([pair], isETH ? ETHER : from, to);
+                const pairs = await loadAllCommonPairs(from, to, provider);
                 const amount = isETH
                     ? CurrencyAmount.ether(fromAmount.toString())
                     : new TokenAmount(from, fromAmount.toString());
-                return Trade.exactIn(route, amount);
+                return Trade.bestTradeExactIn(pairs, amount, to, { maxHops: 3, maxNumResults: 1 })[0];
             }
         },
         [provider]

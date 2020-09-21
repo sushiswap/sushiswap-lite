@@ -16,7 +16,7 @@ const Footer = () => (
         }}>
         <Text note={true}>
             © 2020 Built by{" "}
-            <Link to={"https://levx.app"} target={"_blank"}>
+            <Link to={"https://levx.io"} target={"_blank"}>
                 <Text note={true} style={{ textDecorationLine: "underline" }}>
                     LevX
                 </Text>

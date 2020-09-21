@@ -1,11 +1,14 @@
 {
   "main": "node_modules/expo/AppEntry.js",
+  "homepage": "http://lev-x.github.io/",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "deploy": "gh-pages -d web-build --remote=gh-pages",
+    "predeploy": "expo build:web"
   },
   "dependencies": {
     "@expo-google-fonts/open-sans": "^0.1.0",
@@ -42,6 +45,7 @@
     "@babel/core": "^7.8.6",
     "@types/react": "~16.9.41",
     "@types/react-native": "~0.62.13",
+    "gh-pages": "^3.1.0",
     "prettier": "^1.16.4",
     "tslint": "^6.1.0",
     "tslint-config-prettier": "^1.18.0",

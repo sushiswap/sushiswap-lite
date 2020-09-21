@@ -1,5 +1,5 @@
 const linking = {
-    prefixes: ["https://sushiswap.levx.app"],
+    prefixes: ["https://sushiswap.levx.io"],
     config: {
         screens: {
             Home: "",

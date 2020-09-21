@@ -63,7 +63,7 @@ const Navigation = () => {
             <Stack.Navigator
                 screenOptions={{
                     header: Header,
-                    title: "SushiSwap by LevX"
+                    title: "SushiSwap | LevX"
                 }}>
                 <Stack.Screen name="Home" component={SwapScreen} />
                 <Stack.Screen name="Liquidity" component={LiquidityScreen} />

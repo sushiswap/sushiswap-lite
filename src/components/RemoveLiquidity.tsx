@@ -34,7 +34,6 @@ const RemoveLiquidity = ({ state }: { state: RemoveLiquidityState }) => (
             state={state}
             title={"1. Select the pool to REMOVE liquidity from:"}
             emptyText={"You don't have any liquidity."}
-            filteredBy={null}
             Item={TokenItem}
         />
         <TokenInput

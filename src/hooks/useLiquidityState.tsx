@@ -21,7 +21,6 @@ const useLiquidityState: () => LiquidityState = () => {
         if (state.fromSymbol && state.toSymbol) {
             const updatePair = async () => {
                 if (state.fromToken && state.toToken && provider) {
-                    setLoading(true);
                     setPair(undefined);
                     try {
                         setPair(await getPair(state.fromToken, state.toToken));
@@ -32,6 +31,7 @@ const useLiquidityState: () => LiquidityState = () => {
                 }
             };
 
+            setLoading(true);
             updatePair();
             const name = "updatePair(" + state.fromSymbol + "," + state.toSymbol + ")";
 

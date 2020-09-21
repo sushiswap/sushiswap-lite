@@ -31,7 +31,6 @@ const useSwapState: () => SwapState = () => {
                 if (state.fromToken && state.toToken && state.fromAmount && provider) {
                     const amount = parseBalance(state.fromAmount, state.fromToken.decimals);
                     if (!amount.isZero()) {
-                        setLoading(true);
                         setTrade(undefined);
                         setUnsupported(false);
                         try {
@@ -45,6 +44,7 @@ const useSwapState: () => SwapState = () => {
                 }
             };
 
+            setLoading(true);
             updateTrade();
             const name = "updateTrade(" + state.fromSymbol + "," + state.toSymbol + "," + state.fromAmount + ")";
 

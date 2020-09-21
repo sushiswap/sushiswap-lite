@@ -8,7 +8,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     },
     "tokenB": {
       "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
@@ -16,7 +16,7 @@
       "name": "TetherUSD",
       "symbol": "USDT",
       "decimals": 6,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/USDT.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/USDT.png"
     }
   },
   {
@@ -28,7 +28,7 @@
       "name": "USDCoin",
       "symbol": "USDC",
       "decimals": 6,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/USDC.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/USDC.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -36,7 +36,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -48,7 +48,7 @@
       "name": "DaiStablecoin",
       "symbol": "DAI",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/DAI.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/DAI.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -56,7 +56,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -68,7 +68,7 @@
       "name": "SynthsUSD",
       "symbol": "sUSD",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/sUSD.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/sUSD.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -76,7 +76,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -88,7 +88,7 @@
       "name": "Compound",
       "symbol": "COMP",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/COMP.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/COMP.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -96,7 +96,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -108,7 +108,7 @@
       "name": "EthLend",
       "symbol": "LEND",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/LEND.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/LEND.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -116,7 +116,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -128,7 +128,7 @@
       "name": "SynthetixNetworkToken",
       "symbol": "SNX",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/SNX.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/SNX.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -136,7 +136,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -148,7 +148,7 @@
       "name": "UMAVotingTokenv1",
       "symbol": "UMA",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/UMA.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/UMA.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -156,7 +156,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -168,7 +168,7 @@
       "name": "ChainLink",
       "symbol": "LINK",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/LINK.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/LINK.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -176,7 +176,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -188,7 +188,7 @@
       "name": "BandProtocol",
       "symbol": "BAND",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/BAND.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/BAND.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -196,7 +196,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -208,7 +208,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     },
     "tokenB": {
       "address": "0xD46bA6D942050d489DBd938a2C909A5d5039A161",
@@ -216,7 +216,7 @@
       "name": "Ampleforth",
       "symbol": "AMPL",
       "decimals": 9,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/AMPL.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/AMPL.png"
     }
   },
   {
@@ -228,7 +228,7 @@
       "name": "yearn.finance",
       "symbol": "YFI",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/YFI.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/YFI.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -236,7 +236,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -248,7 +248,7 @@
       "name": "SushiSwap",
       "symbol": "SUSHI",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/SUSHI.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/SUSHI.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -256,7 +256,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -268,7 +268,7 @@
       "name": "Republic",
       "symbol": "REN",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/REN.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/REN.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -276,7 +276,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -288,7 +288,7 @@
       "name": "SynthsUSD",
       "symbol": "sUSD",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/sUSD.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/sUSD.png"
     },
     "tokenB": {
       "address": "0x68A118Ef45063051Eac49c7e647CE5Ace48a68a5",
@@ -296,7 +296,7 @@
       "name": "BASED",
       "symbol": "BASED",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/BASED.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/BASED.png"
     }
   },
   {
@@ -308,7 +308,7 @@
       "name": "Serum",
       "symbol": "SRM",
       "decimals": 6,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/SRM.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/SRM.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -316,7 +316,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -334,7 +334,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     }
   },
   {
@@ -346,7 +346,7 @@
       "name": "WrappedEther",
       "symbol": "WETH",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/WETH.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
     },
     "tokenB": {
       "address": "0xD533a949740bb3306d119CC777fa900bA034cd52",
@@ -354,7 +354,7 @@
       "name": "CurveDAOToken",
       "symbol": "CRV",
       "decimals": 18,
-      "logoURI": "https://sushiswap.levx.app/images/tokens/CRV.png"
+      "logoURI": "https://sushiswap.levx.io/images/tokens/CRV.png"
     }
   }
 ]

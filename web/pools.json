@@ -356,5 +356,25 @@
       "decimals": 18,
       "logoURI": "https://sushiswap.levx.io/images/tokens/CRV.png"
     }
+  },
+  {
+    "address": "0xDafd66636E2561b0284EDdE37e42d192F2844D40",
+    "decimals": 18,
+    "tokenA": {
+      "address": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+      "chainId": 1,
+      "name": "Uniswap",
+      "symbol": "UNI",
+      "decimals": 18,
+      "logoURI": "https://sushiswap.levx.io/images/tokens/UNI.png"
+    },
+    "tokenB": {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "chainId": 1,
+      "name": "WrappedEther",
+      "symbol": "WETH",
+      "decimals": 18,
+      "logoURI": "https://sushiswap.levx.io/images/tokens/WETH.png"
+    }
   }
 ]

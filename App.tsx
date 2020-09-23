@@ -42,7 +42,7 @@ const Main = () => {
 const Navigation = () => {
     return (
         <Router>
-            <View>
+            <View style={{ flex: 1 }}>
                 <Header />
                 <Switch>
                     <Route path={"/liquidity"}>

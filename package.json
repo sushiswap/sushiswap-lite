@@ -8,7 +8,7 @@
     "web": "expo start --web",
     "eject": "expo eject",
     "deploy": "gh-pages -d web-build --remote=gh-pages",
-    "predeploy": "expo build:web"
+    "predeploy": "bash ./scripts/build:web.sh"
   },
   "dependencies": {
     "@expo-google-fonts/open-sans": "^0.1.0",

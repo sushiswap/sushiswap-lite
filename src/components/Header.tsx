@@ -1,12 +1,11 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext } from "react";
 import { Image, View } from "react-native";
 import { Icon } from "react-native-elements";
+import { Link, useRouteMatch } from "react-router-dom";
 
 import Switch from "expo-dark-mode-switch";
 
-import { Link, useRoute } from "@react-navigation/native";
 import { HEADER_HEIGHT, Spacing } from "../constants/dimension";
-import linking from "../constants/linking";
 import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
 import FlexView from "./FlexView";
@@ -20,6 +19,7 @@ const Header = () => {
             style={{
                 position: "fixed",
                 top: 0,
+                zIndex: 100,
                 width: "100%",
                 height: HEADER_HEIGHT,
                 paddingBottom: 16,
@@ -45,7 +45,7 @@ export const Title = () => {
     const { primary, white } = useColors();
     return (
         <View style={{ alignSelf: "center", alignItems: "center" }}>
-            <Link to={"/"}>
+            <Link to={"/"} style={{ textDecoration: "none" }}>
                 <Text style={{ fontFamily: "title", fontSize: 40, color: darkMode ? white : primary }}>SushiSwap</Text>
             </Link>
             <Image
@@ -67,27 +67,23 @@ const Menu = () => {
                 height: "100%",
                 alignItems: "flex-end"
             }}>
-            <MenuItem title={"SWAP"} routeName={"Home"} />
-            <MenuItem title={"LIQUIDITY"} routeName={"Liquidity"} />
-            <MenuItem title={"FARMING"} routeName={"Farming"} />
+            <MenuItem title={"SWAP"} path={"/"} />
+            <MenuItem title={"LIQUIDITY"} path={"/liquidity"} />
+            <MenuItem title={"FARMING"} path={"/farming"} />
             <Stats />
             <DarkModeSwitch />
         </FlexView>
     );
 };
 
-const MenuItem = ({ title, routeName }) => {
+const MenuItem = ({ title, path }) => {
     const { textDark } = useColors();
-    const [current, setCurrent] = useState(false);
-    const route = useRoute();
-    useEffect(() => {
-        setCurrent(route.name === routeName);
-    }, [route]);
+    const match = useRouteMatch(path);
     return (
-        <Link to={"/" + linking.config.screens[routeName]} style={{ marginLeft: Spacing.small, marginBottom: 4 }}>
+        <Link to={path} style={{ marginLeft: Spacing.small, marginBottom: 4, textDecoration: "none" }}>
             <View>
                 <Text style={{ fontFamily: "regular", fontSize: 20, color: textDark, padding: 4 }}>{title}</Text>
-                {current && (
+                {match?.isExact && (
                     <View
                         style={{
                             position: "absolute",
@@ -106,19 +102,22 @@ const MenuItem = ({ title, routeName }) => {
 
 const Stats = () => {
     const { textDark } = useColors();
+    const onPress = useCallback(() => {
+        window.open("https://sushiswap.vision", "_blank");
+    }, []);
     return (
-        <Link to={"https://sushiswap.vision"} target={"_blank"} style={{ marginLeft: Spacing.small, marginBottom: 4 }}>
-            <FlexView style={{ alignItems: "flex-start" }}>
-                <Text style={{ fontFamily: "regular", fontSize: 20, color: textDark, padding: 4 }}>{"STATS"}</Text>
-                <Icon
-                    name={"arrow-top-right"}
-                    type={"material-community"}
-                    size={18}
-                    color={textDark}
-                    style={{ marginTop: 6 }}
-                />
-            </FlexView>
-        </Link>
+        <FlexView style={{ alignItems: "flex-start", marginLeft: Spacing.small, marginBottom: 4 }}>
+            <Text style={{ fontFamily: "regular", fontSize: 20, color: textDark, padding: 4 }} onPress={onPress}>
+                {"STATS"}
+            </Text>
+            <Icon
+                name={"arrow-top-right"}
+                type={"material-community"}
+                size={18}
+                color={textDark}
+                style={{ marginTop: 6 }}
+            />
+        </FlexView>
     );
 };
 

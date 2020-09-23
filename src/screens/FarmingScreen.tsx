@@ -1,8 +1,8 @@
 import React, { FC, useCallback, useState } from "react";
 import { Image, TouchableHighlight, View } from "react-native";
 import { Hoverable } from "react-native-web-hover";
+import { Link } from "react-router-dom";
 
-import { useNavigation } from "@react-navigation/native";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import ApproveButton from "../components/ApproveButton";
@@ -263,17 +263,10 @@ const DepositControls = ({ state }: { state: FarmingState }) => {
 
 const AddLiquidityButton = () => {
     const { green } = useColors();
-    const { navigate } = useNavigation();
-    const onPress = useCallback(() => {
-        navigate("Liquidity");
-    }, [navigate]);
     return (
-        <Button
-            color={green}
-            title={"Add Liquidity"}
-            containerStyle={{ marginTop: Spacing.normal }}
-            onPress={onPress}
-        />
+        <Link to={"/liquidity"} style={{ textDecoration: "none" }}>
+            <Button color={green} title={"Add Liquidity"} containerStyle={{ marginTop: Spacing.normal }} />
+        </Link>
     );
 };
 

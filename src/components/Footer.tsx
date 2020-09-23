@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { View } from "react-native";
 
-import { Link as NativeLink } from "@react-navigation/native";
 import { Spacing } from "../constants/dimension";
 import FlexView from "./FlexView";
 import Text from "./Text";
@@ -26,12 +25,15 @@ const Footer = () => (
     </View>
 );
 
-const Link = ({ to, text }) => (
-    <NativeLink to={to} target={"_blank"}>
-        <Text note={true} style={{ textDecorationLine: "underline", marginRight: 8 }}>
+const Link = ({ to, text }) => {
+    const onPress = useCallback(() => {
+        window.open(to, "_blank");
+    }, []);
+    return (
+        <Text note={true} style={{ textDecorationLine: "underline", marginRight: 8 }} onPress={onPress}>
             {text}
         </Text>
-    </NativeLink>
-);
+    );
+};
 
 export default Footer;

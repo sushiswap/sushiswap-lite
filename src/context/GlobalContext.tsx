@@ -1,6 +1,8 @@
 import React, { useContext, useState } from "react";
 import { useColorScheme } from "react-native-appearance";
 
+import { DeviceType, getDeviceTypeAsync } from "expo-device";
+
 import { Trade } from "@levx/sushiswap-sdk";
 import AsyncStorage from "@react-native-community/async-storage";
 import useAsyncEffect from "use-async-effect";
@@ -12,6 +14,7 @@ import { EthersContext } from "./EthersContext";
 export const GlobalContext = React.createContext({
     load: async () => {},
     clear: async () => {},
+    deviceType: undefined as DeviceType | undefined,
     darkMode: false as boolean,
     setDarkMode: async darkMode => {},
     tokens: [ETH] as Token[],
@@ -26,6 +29,7 @@ export const GlobalContextProvider = ({ children }) => {
     const { provider, signer, address, addOnBlockListener, removeOnBlockListener } = useContext(EthersContext);
     const { getTokens } = useSDK();
     const colorScheme = useColorScheme();
+    const [deviceType, setDeviceType] = useState<DeviceType>();
     const [darkMode, setDarkMode] = useState(colorScheme === "dark");
     const [tokens, setTokens] = useState<Token[]>([]);
     const [loadingTokens, setLoadingTokens] = useState(true);
@@ -40,6 +44,9 @@ export const GlobalContextProvider = ({ children }) => {
             setLoadingTokens(false);
         }
     };
+    useAsyncEffect(async () => {
+        setDeviceType(await getDeviceTypeAsync());
+    }, []);
     // useEffect(() => {
     //     updateTokens();
     //     addOnBlockListener("updateTokens()", updateTokens);
@@ -66,6 +73,7 @@ export const GlobalContextProvider = ({ children }) => {
                     await AsyncStorage.removeItem("dark_mode");
                     await AsyncStorage.removeItem("trade_history");
                 },
+                deviceType,
                 darkMode,
                 setDarkMode: async (mode: boolean) => {
                     await AsyncStorage.setItem("dark_mode", String(mode));

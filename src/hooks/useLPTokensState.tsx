@@ -1,10 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 
 import { EthersContext } from "../context/EthersContext";
-import { GlobalContext } from "../context/GlobalContext";
 import LPToken from "../types/LPToken";
+import { fetchMyLPTokens, fetchPools } from "../utils/fetch-utils";
 import useLiquidityState, { LiquidityState } from "./useLiquidityState";
-import useSDK from "./useSDK";
 
 export interface LPTokensState extends LiquidityState {
     lastTimeRefreshed: number;
@@ -21,9 +20,7 @@ export interface LPTokensState extends LiquidityState {
 // tslint:disable-next-line:max-func-body-length
 const useLPTokensState: (loadPools: boolean) => LPTokensState = loadPools => {
     const state = useLiquidityState();
-    const { provider, signer, address, addOnBlockListener, removeOnBlockListener } = useContext(EthersContext);
-    const { tokens } = useContext(GlobalContext);
-    const { getMyLPTokens, getPools } = useSDK();
+    const { provider, signer, address, addOnBlockListener, removeOnBlockListener, tokens } = useContext(EthersContext);
     const [lastTimeRefreshed, setLastTimeRefreshed] = useState(0);
     const [loading, setLoading] = useState(true);
     const [lpTokens, setLPTokens] = useState<LPToken[]>([]);
@@ -33,8 +30,7 @@ const useLPTokensState: (loadPools: boolean) => LPTokensState = loadPools => {
 
     const updateLPTokens = async () => {
         try {
-            const method = loadPools ? getPools : getMyLPTokens;
-            const data = await method();
+            const data = await (loadPools ? fetchPools(provider, signer) : fetchMyLPTokens(tokens, provider, signer));
             if (data) {
                 setLPTokens(data);
             }

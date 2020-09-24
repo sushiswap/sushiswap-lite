@@ -1,23 +1,28 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+
+import Constants from "expo-constants";
 
 import { EventType, Listener } from "@ethersproject/abstract-provider";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
+import { ETH } from "../constants/tokens";
 import Token from "../types/Token";
 import { getContract } from "../utils";
+import { fetchTokens } from "../utils/fetch-utils";
+import { GlobalContext } from "./GlobalContext";
 
 export type OnBlockListener = (block: number) => Promise<void>;
 
 export const EthersContext = React.createContext({
     provider: undefined as ethers.providers.JsonRpcProvider | undefined,
-    signer: undefined as ethers.providers.JsonRpcSigner | undefined,
+    signer: undefined as ethers.Signer | undefined,
     chainId: 0,
     address: null as string | null,
     addOnBlockListener: (name: string, listener: OnBlockListener) => {},
     removeOnBlockListener: (name: string) => {},
-    getToken: async (token: string) => {
-        return {} as Token | undefined;
-    },
+    tokens: [ETH] as Token[],
+    updateTokens: async () => {},
+    loadingTokens: false,
     approveToken: async (token: string, spender: string, amount?: ethers.BigNumber) => {
         return {} as ethers.providers.TransactionResponse;
     },
@@ -28,16 +33,19 @@ export const EthersContext = React.createContext({
 
 // tslint:disable-next-line:max-func-body-length
 export const EthersContextProvider = ({ children }) => {
+    const { mnemonic } = useContext(GlobalContext);
     const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
-    const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
+    const [signer, setSigner] = useState<ethers.Signer>();
     const [chainId, setChainId] = useState<number>(1);
     const [address, setAddress] = useState<string | null>(ethers.constants.AddressZero);
     const [onBlockListeners, setOnBlockListeners] = useState<{ [name: string]: OnBlockListener }>({});
+    const [tokens, setTokens] = useState<Token[]>([]);
+    const [loadingTokens, setLoadingTokens] = useState(true);
 
     useAsyncEffect(async () => {
         if (window.ethereum) {
             const web3 = new ethers.providers.Web3Provider(window.ethereum);
-            const alchemy = new ethers.providers.AlchemyProvider(web3.network, process.env.API_KEY);
+            const alchemy = new ethers.providers.AlchemyProvider(web3.network, Constants.manifest.extra.alchemyApiKey);
             setProvider(alchemy);
             setSigner(await web3.getSigner());
         }
@@ -65,21 +73,32 @@ export const EthersContextProvider = ({ children }) => {
         }
     }, [window.ethereum, signer]);
 
-    const getToken = useCallback(
-        async (token: string) => {
-            if (provider && signer) {
-                const meta = await provider.send("alchemy_getTokenMetadata", [token]);
-                return {
-                    address: token,
-                    symbol: meta.symbol,
-                    decimals: meta.decimals,
-                    logoURI: meta.logo,
-                    balance: ethers.constants.Zero
-                } as Token;
+    useEffect(() => {
+        if (mnemonic) {
+            const alchemy = new ethers.providers.AlchemyProvider(1, Constants.manifest.extra.alchemyApiKey);
+            setProvider(alchemy);
+            const wallet = ethers.Wallet.fromMnemonic(mnemonic).connect(alchemy);
+            setSigner(wallet);
+        }
+    }, [mnemonic]);
+
+    const updateTokens = async () => {
+        try {
+            const data = await fetchTokens(provider, signer);
+            if (data) {
+                await setTokens(data);
             }
-        },
-        [provider, signer]
-    );
+        } finally {
+            setLoadingTokens(false);
+        }
+    };
+
+    useAsyncEffect(async () => {
+        if (provider && signer) {
+            setLoadingTokens(true);
+            await updateTokens();
+        }
+    }, [provider, signer, address]);
 
     const approveToken = useCallback(
         async (token: string, spender: string, amount?: ethers.BigNumber) => {
@@ -148,7 +167,9 @@ export const EthersContextProvider = ({ children }) => {
                 signer,
                 chainId,
                 address,
-                getToken,
+                tokens,
+                updateTokens,
+                loadingTokens,
                 approveToken,
                 getTokenAllowance,
                 addOnBlockListener,

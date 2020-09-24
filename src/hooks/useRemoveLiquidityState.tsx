@@ -2,11 +2,11 @@ import { useCallback, useContext, useState } from "react";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
+import { ROUTER } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
-import { GlobalContext } from "../context/GlobalContext";
 import { convertToken, formatBalance, parseBalance, parseCurrencyAmount } from "../utils";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
-import useSDK, { ROUTER } from "./useSDK";
+import useSDK from "./useSDK";
 
 export interface RemoveLiquidityState extends LPTokensState {
     onRemove: () => Promise<void>;
@@ -16,8 +16,7 @@ export interface RemoveLiquidityState extends LPTokensState {
 // tslint:disable-next-line:max-func-body-length
 const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
     const state = useLPTokensState(false);
-    const { provider, signer, getTokenAllowance } = useContext(EthersContext);
-    const { updateTokens } = useContext(GlobalContext);
+    const { provider, signer, updateTokens, getTokenAllowance } = useContext(EthersContext);
     const { removeLiquidity, removeLiquidityETH } = useSDK();
     const [loading, setLoading] = useState(false);
     const [removing, setRemoving] = useState(false);

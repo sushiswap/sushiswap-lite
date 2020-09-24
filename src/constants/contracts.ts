@@ -1,0 +1,4 @@
+// export const UNISWAP_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
+export const SUSHISWAP_ROUTER = "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f";
+export const ROUTER = SUSHISWAP_ROUTER;
+export const MASTER_CHEF = "0xc2edad668740f1aa35e4d8f227fb8e17dca888cd";

@@ -1,5 +1,4 @@
 import React, { useCallback, useState } from "react";
-import { View } from "react-native";
 import { Icon } from "react-native-elements";
 
 import useAsyncEffect from "use-async-effect";
@@ -16,10 +15,11 @@ import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
 import TokenSelect from "../components/TokenSelect";
 import UnsupportedButton from "../components/UnsupportedButton";
+import { ROUTER } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import { ETH } from "../constants/tokens";
 import useColors from "../hooks/useColors";
-import useSDK, { ROUTER } from "../hooks/useSDK";
+import useSDK from "../hooks/useSDK";
 import useSwapState, { SwapState } from "../hooks/useSwapState";
 import MetamaskError from "../types/MetamaskError";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
@@ -30,14 +30,12 @@ const SwapScreen = () => {
         <Screen>
             <Container>
                 <Content>
-                    <View style={{ alignItems: "center", marginBottom: Spacing.large }}>
-                        <Column>
-                            <Text h4={true} style={{ textAlign: "center" }}>
-                                🍣 Swap Tokens
-                            </Text>
-                        </Column>
-                        <Swap />
-                    </View>
+                    <Column style={{ alignItems: "center" }}>
+                        <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
+                            🍣 Swap Tokens
+                        </Text>
+                    </Column>
+                    <Swap />
                 </Content>
             </Container>
         </Screen>

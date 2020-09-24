@@ -1,11 +1,11 @@
 import React, { useCallback } from "react";
 import { View } from "react-native";
 
-import { Spacing } from "../constants/dimension";
-import FlexView from "./FlexView";
-import Text from "./Text";
+import { Spacing } from "../../constants/dimension";
+import FlexView from "../FlexView";
+import Text from "../Text";
 
-const Footer = () => (
+const WebFooter = () => (
     <View
         // @ts-ignore
         style={{
@@ -36,4 +36,4 @@ const Link = ({ to, text }) => {
     );
 };
 
-export default Footer;
+export default WebFooter;

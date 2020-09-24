@@ -2,7 +2,6 @@ import { useCallback, useContext, useEffect, useState } from "react";
 
 import { Trade } from "@levx/sushiswap-sdk";
 import { EthersContext } from "../context/EthersContext";
-import { GlobalContext } from "../context/GlobalContext";
 import { parseBalance } from "../utils";
 import useSDK from "./useSDK";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";
@@ -17,8 +16,7 @@ export interface SwapState extends TokenPairState {
 // tslint:disable-next-line:max-func-body-length
 const useSwapState: () => SwapState = () => {
     const state = useTokenPairState();
-    const { addToTradeHistory, updateTokens } = useContext(GlobalContext);
-    const { provider, signer, addOnBlockListener, removeOnBlockListener } = useContext(EthersContext);
+    const { provider, signer, addOnBlockListener, removeOnBlockListener, updateTokens } = useContext(EthersContext);
     const { getTrade, swap } = useSDK();
     const [loading, setLoading] = useState(true);
     const [trade, setTrade] = useState<Trade>();
@@ -62,7 +60,6 @@ const useSwapState: () => SwapState = () => {
                 const result = await swap(trade);
                 if (result) {
                     await result.tx.wait();
-                    await addToTradeHistory(result.trade);
                     await updateTokens();
                     state.setFromSymbol("");
                 }

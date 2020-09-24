@@ -1,20 +1,19 @@
-import React, { useContext } from "react";
-import { View } from "react-native";
-import { HashRouter as Router, Route, Switch } from "react-router-dom";
+/* tslint:disable:ordered-imports */
+import "./globals";
+import React from "react";
 
 import { OpenSans_300Light, OpenSans_400Regular, OpenSans_700Bold } from "@expo-google-fonts/open-sans";
 import { UnicaOne_400Regular } from "@expo-google-fonts/unica-one";
 import { AppLoading } from "expo";
 import { useFonts } from "expo-font";
 
-import "dotenv/config";
-import useAsyncEffect from "use-async-effect";
-import Header from "./src/components/Header";
 import { ContextProvider } from "./src/context";
-import { GlobalContext } from "./src/context/GlobalContext";
-import FarmingScreen from "./src/screens/FarmingScreen";
-import LiquidityScreen from "./src/screens/LiquidityScreen";
-import SwapScreen from "./src/screens/SwapScreen";
+import { Screens } from "./src/screens";
+import { YellowBox } from "react-native";
+
+if (__DEV__) {
+    YellowBox.ignoreWarnings(["Setting a timer", "VirtualizedLists should never be nested"]);
+}
 
 const App = () => {
     const [fontsLoaded] = useFonts({
@@ -28,35 +27,8 @@ const App = () => {
     }
     return (
         <ContextProvider>
-            <Main />
+            <Screens />
         </ContextProvider>
-    );
-};
-
-const Main = () => {
-    const { load } = useContext(GlobalContext);
-    useAsyncEffect(load, []);
-    return <Navigation />;
-};
-
-const Navigation = () => {
-    return (
-        <Router>
-            <View style={{ flex: 1 }}>
-                <Header />
-                <Switch>
-                    <Route path={"/liquidity"}>
-                        <LiquidityScreen />
-                    </Route>
-                    <Route path={"/farming"}>
-                        <FarmingScreen />
-                    </Route>
-                    <Route path={"/"}>
-                        <SwapScreen />
-                    </Route>
-                </Switch>
-            </View>
-        </Router>
     );
 };
 

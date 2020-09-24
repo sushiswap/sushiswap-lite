@@ -1,123 +1,21 @@
 import { useCallback, useContext } from "react";
 
-import {
-    CurrencyAmount,
-    FACTORY_ADDRESS,
-    Fetcher,
-    Percent,
-    Router,
-    TokenAmount,
-    Trade,
-    WETH
-} from "@levx/sushiswap-sdk";
+import { CurrencyAmount, Fetcher, Percent, Router, TokenAmount, Trade, WETH } from "@levx/sushiswap-sdk";
 import { ethers } from "ethers";
+import { MASTER_CHEF, ROUTER } from "../constants/contracts";
 import { ETH } from "../constants/tokens";
 import { EthersContext } from "../context/EthersContext";
-import { GlobalContext } from "../context/GlobalContext";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
 import { convertToken, getContract } from "../utils";
 import useAllCommonPairs from "./useAllCommonPairs";
 
-// export const UNISWAP_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
-export const SUSHISWAP_ROUTER = "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f";
-export const ROUTER = SUSHISWAP_ROUTER;
-export const MASTER_CHEF = "0xc2edad668740f1aa35e4d8f227fb8e17dca888cd";
-
 // tslint:disable-next-line:max-func-body-length
 const useSDK = () => {
-    const { provider, signer, getToken } = useContext(EthersContext);
-    const { tokens } = useContext(GlobalContext);
+    const { provider, signer } = useContext(EthersContext);
     const { loadAllCommonPairs } = useAllCommonPairs();
     const allowedSlippage = new Percent("50", "10000"); // 0.05%
     const ttl = 60 * 20;
-
-    const getTokens = async () => {
-        if (provider && signer) {
-            const response = await fetch("/tokens.json");
-            const json = await response.json();
-
-            const account = await signer.getAddress();
-            const balances = await provider.send("alchemy_getTokenBalances", [
-                account,
-                json.tokens.map(token => token.address)
-            ]);
-            return [
-                {
-                    ...ETH,
-                    balance: await provider.getBalance(account)
-                },
-                ...json.tokens.map((token, i) => ({
-                    ...token,
-                    balance: ethers.BigNumber.from(balances.tokenBalances[i].tokenBalance || 0)
-                }))
-            ].sort((t1, t2) => {
-                return t2.balance
-                    .sub(t1.balance)
-                    .div(ethers.BigNumber.from(10).pow(10))
-                    .toNumber();
-            });
-        }
-    };
-
-    const getMyLPTokens = async () => {
-        if (provider && signer && tokens) {
-            const factory = getContract("IUniswapV2Factory", FACTORY_ADDRESS, signer);
-            const length = await factory.allPairsLength();
-            const pairs = await Promise.all(
-                Array.from({ length }).map((_, i) => {
-                    return factory.allPairs(i);
-                })
-            );
-            const balances = await provider.send("alchemy_getTokenBalances", [await signer.getAddress(), pairs]);
-            const result = await Promise.all(
-                pairs.map(async (address, i) => {
-                    const balance = ethers.BigNumber.from(balances.tokenBalances[i].tokenBalance);
-                    if (balance.isZero()) {
-                        return null;
-                    }
-                    const pair = getContract("IUniswapV2Pair", address, signer);
-                    const erc20 = getContract("ERC20", address, signer);
-                    const decimals = Number(await erc20.decimals());
-                    const totalSupply = await erc20.totalSupply();
-                    const tokenA = await findOrGetToken(await pair.token0(), tokens, getToken);
-                    const tokenB = await findOrGetToken(await pair.token1(), tokens, getToken);
-                    return { address, decimals, balance, totalSupply, tokenA, tokenB } as LPToken;
-                })
-            );
-            return result.filter(token => !!token) as LPToken[];
-        }
-    };
-
-    const getPools = async () => {
-        if (provider && signer) {
-            const response = await fetch("/pools.json");
-            const pools = await response.json();
-            const address = await signer.getAddress();
-            const balances = await provider.send("alchemy_getTokenBalances", [
-                address,
-                pools.map(pool => pool.address)
-            ]);
-            return (await Promise.all(
-                pools.map(async (pool, i) => {
-                    const poolToken = getContract("ERC20", pool.address, signer);
-                    const totalDeposited = await poolToken.balanceOf(MASTER_CHEF);
-                    const masterChef = getContract("MasterChef", MASTER_CHEF, signer);
-                    const { amount: amountDeposited } = await masterChef.userInfo(i, address);
-                    const pendingSushi = await masterChef.pendingSushi(i, address);
-                    return {
-                        ...pool,
-                        id: i,
-                        symbol: pool.tokenA.symbol + "-" + pool.tokenB.symbol + " LP",
-                        balance: ethers.BigNumber.from(balances.tokenBalances[i].tokenBalance || 0),
-                        totalDeposited,
-                        amountDeposited,
-                        pendingSushi
-                    };
-                })
-            )) as LPToken[];
-        }
-    };
 
     const getTrade = useCallback(
         async (fromToken: Token, toToken: Token, fromAmount: ethers.BigNumber) => {
@@ -350,9 +248,6 @@ const useSDK = () => {
 
     return {
         allowedSlippage,
-        getTokens,
-        getMyLPTokens,
-        getPools,
         getTrade,
         swap,
         wrapETH,
@@ -367,15 +262,6 @@ const useSDK = () => {
         withdraw,
         calculateFee
     };
-};
-
-const findOrGetToken = async (
-    address: string,
-    tokens: Token[],
-    getToken: (address: string) => Promise<Token | undefined>
-) => {
-    const token = tokens.find(t => t.address.toLowerCase() === address.toLowerCase());
-    return token || (await getToken(address));
 };
 
 const minAmount = (amount: ethers.BigNumber, percent: Percent) => {

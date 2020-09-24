@@ -1,5 +1,5 @@
 import React from "react";
-import { View, ViewProps } from "react-native";
+import { Platform, View, ViewProps } from "react-native";
 
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
@@ -16,15 +16,16 @@ const Content: React.FunctionComponent<ContentProps> = props => {
         large: 1.5
     }[props.contentPadding || "normal"];
     return (
-        <View style={{ alignItems: "center", flex: 1, backgroundColor: background }}>
-            <View style={{ width: 1280, flex: 1 }}>
+        <View style={{ alignItems: "center", flex: 1, width: "100%", backgroundColor: background }}>
+            <View style={{ width: Platform.OS === "web" ? 1280 : "100%", flex: 1 }}>
                 <View
                     {...props}
                     style={[
                         {
                             paddingHorizontal: Spacing.content * multiplier,
-                            paddingVertical: Spacing.normal * multiplier,
-                            backgroundColor: background
+                            paddingVertical: Platform.OS === "web" ? Spacing.normal * multiplier : 0,
+                            backgroundColor: background,
+                            alignItems: "center"
                         },
                         props.style
                     ]}

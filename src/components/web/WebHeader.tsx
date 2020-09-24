@@ -5,13 +5,13 @@ import { Link, useRouteMatch } from "react-router-dom";
 
 import Switch from "expo-dark-mode-switch";
 
-import { HEADER_HEIGHT, Spacing } from "../constants/dimension";
-import { GlobalContext } from "../context/GlobalContext";
-import useColors from "../hooks/useColors";
-import FlexView from "./FlexView";
-import Text from "./Text";
+import { HEADER_HEIGHT, Spacing } from "../../constants/dimension";
+import { GlobalContext } from "../../context/GlobalContext";
+import useColors from "../../hooks/useColors";
+import FlexView from "../FlexView";
+import Text from "../Text";
 
-const Header = () => {
+const WebHeader = () => {
     const { background } = useColors();
     return (
         <View
@@ -51,8 +51,8 @@ export const Title = () => {
             <Image
                 source={
                     darkMode
-                        ? require("../../assets/levx-typography-dark.png")
-                        : require("../../assets/levx-typography.png")
+                        ? require("../../../assets/levx-typography-dark.png")
+                        : require("../../../assets/levx-typography.png")
                 }
                 style={{ width: 76, height: 13 }}
             />
@@ -146,4 +146,4 @@ const DarkModeSwitch = () => {
     );
 };
 
-export default Header;
+export default WebHeader;

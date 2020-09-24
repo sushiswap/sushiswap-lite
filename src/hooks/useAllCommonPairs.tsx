@@ -2,7 +2,6 @@ import { useCallback } from "react";
 
 import { ChainId, Currency, ETHER, Fetcher, Pair, Token, WETH } from "@levx/sushiswap-sdk";
 import { ethers } from "ethers";
-import { flatMap } from "tslint/lib/utils";
 
 const DAI = new Token(ChainId.MAINNET, "0x6B175474E89094C44Da98b954EedeAC495271d0F", 18, "DAI", "Dai Stablecoin");
 const USDC = new Token(ChainId.MAINNET, "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", 6, "USDC", "USD//C");
@@ -27,9 +26,9 @@ const useAllCommonPairs = () => {
         async (currencyA?: Currency, currencyB?: Currency, provider?: ethers.providers.BaseProvider) => {
             const bases: Token[] = BASES_TO_CHECK_TRADES_AGAINST;
             const [tokenA, tokenB] = [wrappedCurrency(currencyA), wrappedCurrency(currencyB)];
-            const basePairs: [Token, Token][] = flatMap(bases, (base): [Token, Token][] =>
-                bases.map(otherBase => [base, otherBase])
-            ).filter(([t0, t1]) => t0.address !== t1.address);
+            const basePairs: [Token, Token][] = bases
+                .flatMap((base): [Token, Token][] => bases.map(otherBase => [base, otherBase]))
+                .filter(([t0, t1]) => t0.address !== t1.address);
 
             const allPairCombinations =
                 tokenA && tokenB

@@ -1,6 +1,21 @@
+import ERC20 from "@levx/sushiswap-core/build/contracts/ERC20.json";
+import IUniswapV2Factory from "@levx/sushiswap-core/build/contracts/IUniswapV2Factory.json";
+import IUniswapV2Pair from "@levx/sushiswap-core/build/contracts/IUniswapV2Pair.json";
+import IUniswapV2Router02 from "@levx/sushiswap-core/build/contracts/IUniswapV2Router02.json";
+import IWETH from "@levx/sushiswap-core/build/contracts/IWETH.json";
+import MasterChef from "@levx/sushiswap-core/build/contracts/MasterChef.json";
 import { ChainId, CurrencyAmount, Token as SDKToken, TokenAmount, WETH } from "@levx/sushiswap-sdk";
 import { ethers } from "ethers";
 import Token from "../types/Token";
+
+const CONTRACTS = {
+    ERC20,
+    IUniswapV2Factory,
+    IUniswapV2Pair,
+    IUniswapV2Router02,
+    IWETH,
+    MasterChef
+};
 
 export const formatBalance = (value: ethers.BigNumberish, decimals = 18, maxFraction = 0) => {
     const formatted = ethers.utils.formatUnits(value, decimals);
@@ -20,7 +35,7 @@ export const parseBalance = (value: string, decimals = 18) => {
 export const isEmptyValue = (text: string) =>
     ethers.BigNumber.isBigNumber(text)
         ? ethers.BigNumber.from(text).isZero()
-        : text === "" || text.replaceAll("0", "").replaceAll(".", "") === "";
+        : text === "" || text.replace(/0/g, "").replace(/\./, "") === "";
 
 export const convertToken = (token: Token) => {
     return token.symbol === "ETH" ? WETH["1"] : new SDKToken(ChainId.MAINNET, token.address, token.decimals);
@@ -35,6 +50,6 @@ export const parseCurrencyAmount = (value: CurrencyAmount, decimals = 18) => {
 };
 
 export const getContract = (name: string, address: string, signer: ethers.Signer) => {
-    const { abi } = require("@levx/sushiswap-core/build/contracts/" + name + ".json");
-    return ethers.ContractFactory.getContract(address, abi, signer);
+    const contract = CONTRACTS[name];
+    return ethers.ContractFactory.getContract(address, contract.abi, signer);
 };

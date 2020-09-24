@@ -2,8 +2,9 @@ import React, { useCallback, useState } from "react";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
+import { ROUTER } from "../constants/contracts";
+import { Spacing } from "../constants/dimension";
 import { AddLiquidityState } from "../hooks/useAddLiquidityState";
-import { ROUTER } from "../hooks/useSDK";
 import MetamaskError from "../types/MetamaskError";
 import { convertAmount, convertToken, formatBalance, isEmptyValue, parseBalance } from "../utils";
 import ApproveButton from "./ApproveButton";
@@ -22,7 +23,7 @@ import UnsupportedButton from "./UnsupportedButton";
 const AddLiquidity = ({ state }: { state: AddLiquidityState }) => (
     <>
         <Column>
-            <Text h4={true} style={{ textAlign: "center" }}>
+            <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
                 🔥 Add Liquidity
             </Text>
         </Column>

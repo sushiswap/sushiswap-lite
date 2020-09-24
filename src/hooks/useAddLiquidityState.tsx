@@ -1,7 +1,6 @@
 import { useCallback, useContext, useState } from "react";
 
 import { EthersContext } from "../context/EthersContext";
-import { GlobalContext } from "../context/GlobalContext";
 import { parseBalance } from "../utils";
 import useLiquidityState, { LiquidityState } from "./useLiquidityState";
 import useSDK from "./useSDK";
@@ -14,8 +13,7 @@ export interface AddLiquidityState extends LiquidityState {
 // tslint:disable-next-line:max-func-body-length
 const useAddLiquidityState: () => AddLiquidityState = () => {
     const state = useLiquidityState();
-    const { signer } = useContext(EthersContext);
-    const { updateTokens } = useContext(GlobalContext);
+    const { signer, updateTokens } = useContext(EthersContext);
     const [adding, setAdding] = useState(false);
     const { addLiquidity, addLiquidityETH } = useSDK();
 

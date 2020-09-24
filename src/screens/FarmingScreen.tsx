@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useState } from "react";
 import { Image, TouchableHighlight, View } from "react-native";
 import { Hoverable } from "react-native-web-hover";
-import { Link } from "react-router-dom";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
@@ -23,10 +22,11 @@ import SelectIcon from "../components/SelectIcon";
 import Subtitle from "../components/Subtitle";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
+import { MASTER_CHEF } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 import useFarmingState, { Action, FarmingState } from "../hooks/useFarmingState";
-import { MASTER_CHEF } from "../hooks/useSDK";
+import useLinker from "../hooks/useLinker";
 import LPToken from "../types/LPToken";
 import MetamaskError from "../types/MetamaskError";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
@@ -59,7 +59,7 @@ const Farming = () => {
     return (
         <>
             <Column>
-                <Text h4={true} style={{ textAlign: "center" }}>
+                <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
                     🌾 Farming
                 </Text>
             </Column>
@@ -263,10 +263,14 @@ const DepositControls = ({ state }: { state: FarmingState }) => {
 
 const AddLiquidityButton = () => {
     const { green } = useColors();
+    const onPress = useLinker("/liquidity", "Liquidity");
     return (
-        <Link to={"/liquidity"} style={{ textDecoration: "none" }}>
-            <Button color={green} title={"Add Liquidity"} containerStyle={{ marginTop: Spacing.normal }} />
-        </Link>
+        <Button
+            color={green}
+            title={"Add Liquidity"}
+            containerStyle={{ marginTop: Spacing.normal }}
+            onPress={onPress}
+        />
     );
 };
 

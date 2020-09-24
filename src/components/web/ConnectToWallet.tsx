@@ -3,9 +3,9 @@ import { Image, View } from "react-native";
 
 import * as Linking from "expo-linking";
 
-import { Spacing } from "../constants/dimension";
-import { GlobalContext } from "../context/GlobalContext";
-import Button from "./Button";
+import { Spacing } from "../../constants/dimension";
+import { GlobalContext } from "../../context/GlobalContext";
+import Button from "../Button";
 
 const ConnectWallet = () => {
     const { darkMode } = useContext(GlobalContext);
@@ -20,7 +20,9 @@ const ConnectWallet = () => {
     return (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
             <Image
-                source={darkMode ? require("../../assets/metamask-dark.png") : require("../../assets/metamask.png")}
+                source={
+                    darkMode ? require("../../../assets/metamask-dark.png") : require("../../../assets/metamask.png")
+                }
                 style={{ width: 223, height: 183, marginBottom: Spacing.huge }}
             />
             <Button type={"outline"} size={"large"} onPress={onPress} title={title} containerStyle={{ width: 440 }} />

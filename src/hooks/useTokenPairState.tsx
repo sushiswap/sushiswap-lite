@@ -2,11 +2,11 @@ import { useCallback, useContext, useEffect, useState } from "react";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
+import { ROUTER } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
-import { GlobalContext } from "../context/GlobalContext";
 import Token from "../types/Token";
 import { parseBalance } from "../utils";
-import useSDK, { ROUTER } from "./useSDK";
+import useSDK from "./useSDK";
 
 export interface TokenPairState {
     fromSymbol: string;
@@ -32,8 +32,7 @@ export interface TokenPairState {
 
 // tslint:disable-next-line:max-func-body-length
 const useTokenPairState: () => TokenPairState = () => {
-    const { tokens, updateTokens } = useContext(GlobalContext);
-    const { provider, signer, address, getTokenAllowance } = useContext(EthersContext);
+    const { provider, signer, address, tokens, updateTokens, getTokenAllowance } = useContext(EthersContext);
     const { wrapETH, unwrapETH } = useSDK();
     const [fromSymbol, setFromSymbol] = useState("");
     const [toSymbol, setToSymbol] = useState("");

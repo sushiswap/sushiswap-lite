@@ -5,25 +5,25 @@ import { GlobalContextConsumer, GlobalContextProvider } from "./GlobalContext";
 
 export const ContextProvider = ({ children }) => {
     return (
-        <EthersContextProvider>
-            <GlobalContextProvider>{children}</GlobalContextProvider>
-        </EthersContextProvider>
+        <GlobalContextProvider>
+            <EthersContextProvider>{children}</EthersContextProvider>
+        </GlobalContextProvider>
     );
 };
 
 export const ContextConsumer = ({ children }) => {
     return (
-        <EthersContextConsumer>
-            {ethersContext => (
-                <GlobalContextConsumer>
-                    {globalContext =>
+        <GlobalContextConsumer>
+            {globalContext => (
+                <EthersContextConsumer>
+                    {ethersContext =>
                         children({
                             ...globalContext,
                             ...ethersContext
                         })
                     }
-                </GlobalContextConsumer>
+                </EthersContextConsumer>
             )}
-        </EthersContextConsumer>
+        </GlobalContextConsumer>
     );
 };

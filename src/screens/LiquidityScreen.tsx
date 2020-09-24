@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 
 import AddLiquidity from "../components/AddLiquidity";
 import Column from "../components/Column";
@@ -21,7 +21,7 @@ const LiquidityScreen = () => {
         <Screen>
             <Container>
                 <Content>
-                    <View style={{ alignItems: "center", marginBottom: Spacing.huge * 2 }}>
+                    <View style={{ width: "100%", alignItems: "center", marginBottom: Spacing.huge * 2 }}>
                         {!removeLiquidityState.selectedLPToken && <AddLiquidity state={addLiquidityState} />}
                         {!removeLiquidityState.selectedLPToken && <OR />}
                         <RemoveLiquidity state={removeLiquidityState} />
@@ -40,11 +40,18 @@ const OR = () => {
                 style={{
                     width: "100%",
                     paddingHorizontal: Spacing.small,
-                    paddingVertical: Spacing.huge,
+                    paddingVertical: Platform.OS === "web" ? Spacing.huge : Spacing.normal,
                     alignItems: "center"
                 }}>
                 <Line />
-                <Text h4={true} light={true} style={{ paddingHorizontal: Spacing.small, backgroundColor: background }}>
+                <Text
+                    light={true}
+                    style={{
+                        paddingHorizontal: Spacing.small,
+                        paddingBottom: Spacing.tiny,
+                        backgroundColor: background,
+                        fontSize: 26
+                    }}>
                     or
                 </Text>
                 <Line />

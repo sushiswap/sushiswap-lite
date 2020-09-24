@@ -1,4 +1,5 @@
 import React, { FC, useCallback } from "react";
+import { Platform } from "react-native";
 import { Input as NativeInput, InputProps as NativeInputProps } from "react-native-elements";
 
 import { Spacing } from "../constants/dimension";
@@ -52,8 +53,9 @@ const Input: FC<InputProps> = props => {
         <NativeInput
             {...props}
             inputStyle={[
+                { fontSize, fontFamily: "regular", paddingBottom: 4, color, marginTop: 0 },
                 // @ts-ignore
-                { fontSize, fontFamily: "regular", paddingBottom: 4, color, outline: "none", marginTop: 0 },
+                Platform.OS === "web" ? { outline: "none" } : {},
                 props.inputStyle
             ]}
             labelStyle={[{ color: textMedium }, props.labelStyle]}

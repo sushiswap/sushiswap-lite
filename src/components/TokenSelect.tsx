@@ -3,7 +3,7 @@ import { ActivityIndicator, FlatList, Image, TouchableHighlight, View } from "re
 import { Hoverable } from "react-native-web-hover";
 
 import { Spacing } from "../constants/dimension";
-import { GlobalContext } from "../context/GlobalContext";
+import { EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
 import Token from "../types/Token";
 import { formatBalance } from "../utils";
@@ -24,7 +24,7 @@ interface TokenSelectProps {
 }
 
 const TokenSelect: FC<TokenSelectProps> = props => {
-    const { tokens } = useContext(GlobalContext);
+    const { tokens } = useContext(EthersContext);
     const token = tokens.find(t => t.symbol === props.symbol);
     const onSelectToken = useCallback(
         t => {
@@ -52,8 +52,7 @@ const TokenSelect: FC<TokenSelectProps> = props => {
 
 // tslint:disable-next-line:max-func-body-length
 const TokenList = (props: { filterTokens: (token: Token) => boolean; onSelectToken: (token: Token) => void }) => {
-    const { loadingTokens } = useContext(GlobalContext);
-    const { tokens } = useContext(GlobalContext);
+    const { loadingTokens, tokens } = useContext(EthersContext);
     const renderItem = useCallback(
         ({ item }) => {
             return <TokenItem key={item.address} token={item} selected={false} onSelectToken={props.onSelectToken} />;

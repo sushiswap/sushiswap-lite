@@ -1,14 +1,14 @@
 import React, { useContext } from "react";
 import { View } from "react-native";
 
-import { Spacing } from "../constants/dimension";
-import { EthersContext } from "../context/EthersContext";
-import useColors from "../hooks/useColors";
-import useStyles from "../hooks/useStyles";
-import FlexView from "./FlexView";
-import Text from "./Text";
+import { Spacing } from "../../constants/dimension";
+import { EthersContext } from "../../context/EthersContext";
+import useColors from "../../hooks/useColors";
+import useStyles from "../../hooks/useStyles";
+import FlexView from "../FlexView";
+import Text from "../Text";
 
-const Status = () => {
+const WebStatus = () => {
     const { textMedium, textLight, green } = useColors();
     const { shadow } = useStyles();
     const { chainId } = useContext(EthersContext);
@@ -36,4 +36,4 @@ const Status = () => {
     );
 };
 
-export default Status;
+export default WebStatus;

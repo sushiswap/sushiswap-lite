@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useContext } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 
 import { ethers } from "ethers";
 import { Spacing } from "../constants/dimension";
@@ -67,7 +67,7 @@ const MaxButton = (props: { token: Token; updateAmount }) => {
         }
     }, [props.token, props.updateAmount]);
     return (
-        <View style={{ position: "absolute", right: 0, bottom: 12 }}>
+        <View style={{ position: "absolute", right: 0, bottom: Platform.OS === "web" ? 12 : 28 }}>
             <Button
                 type={"clear"}
                 color={darkMode ? secondary : primary}

@@ -1,9 +1,9 @@
-import { Dimensions } from "react-native";
+import { Dimensions, Platform } from "react-native";
 
 export const SCREEN_WIDTH = Math.round(Dimensions.get("window").width);
 export const SCREEN_HEIGHT = Math.round(Dimensions.get("window").height);
 export const IS_HIGH_RESOLUTION = SCREEN_HEIGHT > 667;
-export const HEADER_HEIGHT = 96;
+export const HEADER_HEIGHT = Platform.OS === "web" ? 96 : 64;
 
 export const Spacing = IS_HIGH_RESOLUTION
     ? {

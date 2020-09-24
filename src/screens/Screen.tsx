@@ -1,14 +1,13 @@
 import React, { useContext } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 
 import { AppLoading } from "expo";
 import { DeviceType } from "expo-device";
 
-import ConnectToWallet from "../components/ConnectToWallet";
-import Footer from "../components/Footer";
-import MobileNotSupported from "../components/MobileNotSupported";
-import Status from "../components/Status";
+import AppHeader from "../components/app/AppHeader";
 import Text from "../components/Text";
+import ConnectToWallet from "../components/web/ConnectToWallet";
+import MobileNotSupported from "../components/web/MobileNotSupported";
 import { EthersContext } from "../context/EthersContext";
 import { GlobalContext } from "../context/GlobalContext";
 
@@ -18,28 +17,31 @@ const Screen = props => {
     if (!deviceType) {
         return <AppLoading />;
     }
-    if (deviceType === DeviceType.PHONE) {
-        return <MobileNotSupported />;
-    }
-    if (!address) {
-        return <ConnectToWallet />;
-    }
-    if (chainId !== 1) {
+    if (Platform.OS === "web") {
+        if (deviceType === DeviceType.PHONE) {
+            return <MobileNotSupported />;
+        }
+        if (!address) {
+            return <ConnectToWallet />;
+        }
+        if (chainId !== 1) {
+            return (
+                <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+                    <Text light={true} style={{ textAlign: "center" }}>
+                        {"Please switch network to\n'Ethereum Mainnet'"}
+                    </Text>
+                </View>
+            );
+        }
+        return <View {...props} style={[{ flex: 1 }, props.style]} />;
+    } else {
         return (
-            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                <Text light={true} style={{ textAlign: "center" }}>
-                    {"Please switch network to\n'Ethereum Mainnet'"}
-                </Text>
+            <View style={{ width: "100%", height: "100%" }}>
+                <AppHeader />
+                <View {...props} style={[{ flex: 1 }, props.style]} />
             </View>
         );
     }
-    return (
-        <View style={{ flex: 1 }}>
-            <View {...props} />
-            <Status />
-            <Footer />
-        </View>
-    );
 };
 
 export default Screen;

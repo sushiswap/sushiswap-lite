@@ -4,10 +4,10 @@ import { Icon } from "react-native-elements";
 import { Hoverable } from "react-native-web-hover";
 
 import useAsyncEffect from "use-async-effect";
+import { ROUTER } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 import { RemoveLiquidityState } from "../hooks/useRemoveLiquidityState";
-import { ROUTER } from "../hooks/useSDK";
 import MetamaskError from "../types/MetamaskError";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
 import ApproveButton from "./ApproveButton";
@@ -26,7 +26,7 @@ import TokenInput from "./TokenInput";
 const RemoveLiquidity = ({ state }: { state: RemoveLiquidityState }) => (
     <>
         <Column>
-            <Text h4={true} style={{ textAlign: "center" }}>
+            <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
                 🎉 Remove Liquidity
             </Text>
         </Column>

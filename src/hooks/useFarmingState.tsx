@@ -3,10 +3,11 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import { LPTokenSelectFilter } from "../components/LPTokenSelect";
+import { MASTER_CHEF } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import { parseBalance } from "../utils";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
-import useSDK, { MASTER_CHEF } from "./useSDK";
+import useSDK from "./useSDK";
 
 export interface FarmingState extends LPTokensState {
     action?: Action;

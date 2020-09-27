@@ -5,11 +5,13 @@ import { HashRouter as Router, Route, Switch } from "react-router-dom";
 import { OpenSans_300Light, OpenSans_400Regular, OpenSans_700Bold } from "@expo-google-fonts/open-sans";
 import { UnicaOne_400Regular } from "@expo-google-fonts/unica-one";
 import { AppLoading } from "expo";
+import { DeviceType } from "expo-device";
 import { useFonts } from "expo-font";
 
 import "dotenv/config";
 import useAsyncEffect from "use-async-effect";
 import Header from "./src/components/Header";
+import MobileNotSupported from "./src/components/MobileNotSupported";
 import { ContextProvider } from "./src/context";
 import { GlobalContext } from "./src/context/GlobalContext";
 import FarmingScreen from "./src/screens/FarmingScreen";
@@ -28,35 +30,41 @@ const App = () => {
     }
     return (
         <ContextProvider>
-            <Main />
+            <Router>
+                <Main />
+            </Router>
         </ContextProvider>
     );
 };
 
 const Main = () => {
-    const { load } = useContext(GlobalContext);
+    const { load, deviceType } = useContext(GlobalContext);
     useAsyncEffect(load, []);
+    if (!deviceType) {
+        return <AppLoading />;
+    }
+    if (deviceType === DeviceType.PHONE) {
+        return <MobileNotSupported />;
+    }
     return <Navigation />;
 };
 
 const Navigation = () => {
     return (
-        <Router>
-            <View style={{ flex: 1 }}>
-                <Header />
-                <Switch>
-                    <Route path={"/liquidity"}>
-                        <LiquidityScreen />
-                    </Route>
-                    <Route path={"/farming"}>
-                        <FarmingScreen />
-                    </Route>
-                    <Route path={"/"}>
-                        <SwapScreen />
-                    </Route>
-                </Switch>
-            </View>
-        </Router>
+        <View style={{ flex: 1 }}>
+            <Header />
+            <Switch>
+                <Route path={"/liquidity"}>
+                    <LiquidityScreen />
+                </Route>
+                <Route path={"/farming"}>
+                    <FarmingScreen />
+                </Route>
+                <Route path={"/"}>
+                    <SwapScreen />
+                </Route>
+            </Switch>
+        </View>
     );
 };
 

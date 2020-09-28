@@ -1,6 +1,5 @@
 import React, { useCallback, useContext } from "react";
 import { Image, View } from "react-native";
-import { Icon } from "react-native-elements";
 import { Link, useRouteMatch } from "react-router-dom";
 
 import Switch from "expo-dark-mode-switch";
@@ -71,7 +70,7 @@ const Menu = () => {
             <MenuItem title={"LIQUIDITY"} path={"/liquidity"} />
             <MenuItem title={"FARMING"} path={"/farming"} />
             <MenuItem title={"STAKING"} path={"/staking"} />
-            <Stats />
+            <MenuItem title={"MIGRATE"} path={"/migrate"} />
             <DarkModeSwitch />
         </FlexView>
     );
@@ -98,27 +97,6 @@ const MenuItem = ({ title, path }) => {
                 )}
             </View>
         </Link>
-    );
-};
-
-const Stats = () => {
-    const { textDark } = useColors();
-    const onPress = useCallback(() => {
-        window.open("https://sushiswap.vision", "_blank");
-    }, []);
-    return (
-        <FlexView style={{ alignItems: "flex-start", marginLeft: Spacing.small, marginBottom: 4 }}>
-            <Text style={{ fontFamily: "regular", fontSize: 20, color: textDark, padding: 4 }} onPress={onPress}>
-                {"STATS"}
-            </Text>
-            <Icon
-                name={"arrow-top-right"}
-                type={"material-community"}
-                size={18}
-                color={textDark}
-                style={{ marginTop: 6 }}
-            />
-        </FlexView>
     );
 };
 

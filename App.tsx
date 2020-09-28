@@ -16,6 +16,7 @@ import { ContextProvider } from "./src/context";
 import { GlobalContext } from "./src/context/GlobalContext";
 import FarmingScreen from "./src/screens/FarmingScreen";
 import LiquidityScreen from "./src/screens/LiquidityScreen";
+import MigrateScreen from "./src/screens/MigrateScreen";
 import StakingScreen from "./src/screens/StakingScreen";
 import SwapScreen from "./src/screens/SwapScreen";
 
@@ -63,6 +64,9 @@ const Navigation = () => {
                 </Route>
                 <Route path={"/staking"}>
                     <StakingScreen />
+                </Route>
+                <Route path={"/migrate"}>
+                    <MigrateScreen />
                 </Route>
                 <Route path={"/"}>
                     <SwapScreen />

@@ -10,6 +10,7 @@ import {
     Trade,
     WETH
 } from "@levx/sushiswap-sdk";
+import { FACTORY_ADDRESS as UNISWAP_FACTORY } from "@uniswap/sdk";
 import { ethers } from "ethers";
 import { ETH } from "../constants/tokens";
 import { EthersContext } from "../context/EthersContext";
@@ -19,11 +20,14 @@ import Token from "../types/Token";
 import { convertToken, getContract } from "../utils";
 import useAllCommonPairs from "./useAllCommonPairs";
 
-// export const UNISWAP_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
+export const UNISWAP_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
 export const SUSHISWAP_ROUTER = "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f";
 export const ROUTER = SUSHISWAP_ROUTER;
 export const MASTER_CHEF = "0xc2edad668740f1aa35e4d8f227fb8e17dca888cd";
 export const SUSHI_BAR = "0x8798249c2e607446efb7ad49ec89dd1865ff4272";
+export const SUSHI_ROLL = "0x94CfE11E6b57f6f84bBa2c6DfB0fAeA47C4741D6";
+export const LP_TOKEN_SCANNER = "0xD132Ce8eA8865348Ac25E416d95ab1Ba84D216AF";
+export const MIGRATOR2 = "0x60A02cD1e3443E8ab7825DccF8d7080Eb78BCA6F";
 
 // tslint:disable-next-line:max-func-body-length
 const useSDK = () => {
@@ -58,6 +62,35 @@ const useSDK = () => {
                     .div(ethers.BigNumber.from(10).pow(10))
                     .toNumber();
             });
+        }
+    };
+
+    const getMyUniswapLPTokens = async () => {
+        if (provider && signer && tokens) {
+            const factory = getContract("IUniswapV2Factory", UNISWAP_FACTORY, signer);
+            const length = await factory.allPairsLength();
+            const abi = require("../constants/abi/LPTokenScanner.json");
+            const scanner = ethers.ContractFactory.getContract(LP_TOKEN_SCANNER, abi, signer);
+            const account = await signer.getAddress();
+            let pairs: any[] = [];
+            for (let i = 0; i < length; i += 5000) {
+                pairs = pairs.concat(
+                    await scanner.findPairs(account, UNISWAP_FACTORY, i, Math.min(i + 5000, length.toNumber()))
+                );
+            }
+            const balances = await provider.send("alchemy_getTokenBalances", [account, pairs.map(pair => pair.token)]);
+            const result = await Promise.all(
+                pairs.map(async (pair, i) => {
+                    const balance = ethers.BigNumber.from(balances.tokenBalances[i].tokenBalance);
+                    const erc20 = getContract("ERC20", pair.token, signer);
+                    const decimals = Number(await erc20.decimals());
+                    const totalSupply = await erc20.totalSupply();
+                    const tokenA = await findOrGetToken(pair.token0, tokens, getToken);
+                    const tokenB = await findOrGetToken(pair.token1, tokens, getToken);
+                    return { address: pair.token, decimals, balance, totalSupply, tokenA, tokenB } as LPToken;
+                })
+            );
+            return result.filter(token => !!token) as LPToken[];
         }
     };
 
@@ -371,6 +404,28 @@ const useSDK = () => {
         [signer]
     );
 
+    const migrate = useCallback(
+        async (lpToken: LPToken, amount: ethers.BigNumber) => {
+            if (signer) {
+                const migrator2 = getContract("Migrator2", MIGRATOR2, signer);
+                const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + ttl).toString(16)}`;
+                const args = [
+                    lpToken.tokenA.address,
+                    lpToken.tokenB.address,
+                    amount,
+                    ethers.constants.Zero,
+                    ethers.constants.Zero,
+                    deadline
+                ];
+                const gasLimit = await migrator2.estimateGas.migrate(...args);
+                return await migrator2.migrate(...args, {
+                    gasLimit: gasLimit.mul(200).div(100)
+                });
+            }
+        },
+        [signer]
+    );
+
     const calculateFee = (fromAmount: ethers.BigNumber) => {
         return fromAmount.mul(3).div(1000);
     };
@@ -378,6 +433,7 @@ const useSDK = () => {
     return {
         allowedSlippage,
         getTokens,
+        getMyUniswapLPTokens,
         getMyLPTokens,
         getPools,
         getTrade,
@@ -394,6 +450,7 @@ const useSDK = () => {
         withdraw,
         enterSushiBar,
         leaveSushiBar,
+        migrate,
         calculateFee
     };
 };
@@ -410,4 +467,5 @@ const findOrGetToken = async (
 const minAmount = (amount: ethers.BigNumber, percent: Percent) => {
     return amount.sub(amount.mul(percent.numerator.toString()).div(percent.denominator.toString()));
 };
+
 export default useSDK;

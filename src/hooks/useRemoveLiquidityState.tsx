@@ -15,7 +15,7 @@ export interface RemoveLiquidityState extends LPTokensState {
 
 // tslint:disable-next-line:max-func-body-length
 const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
-    const state = useLPTokensState(false);
+    const state = useLPTokensState("my-lp-tokens");
     const { provider, signer, getTokenAllowance } = useContext(EthersContext);
     const { updateTokens } = useContext(GlobalContext);
     const { removeLiquidity, removeLiquidityETH } = useSDK();

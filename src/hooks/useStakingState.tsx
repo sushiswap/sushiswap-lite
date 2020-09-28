@@ -10,7 +10,7 @@ import useSDK, { SUSHI_BAR } from "./useSDK";
 
 export type Action = "enter" | "leave";
 
-export interface SushiBarState {
+export interface StakingState {
     action?: Action;
     setAction: (action?: Action) => void;
     sushi?: Token;
@@ -32,7 +32,7 @@ export interface SushiBarState {
 }
 
 // tslint:disable-next-line:max-func-body-length
-const useSushiBarState: () => SushiBarState = () => {
+const useStakingState: () => StakingState = () => {
     const { tokens, updateTokens } = useContext(GlobalContext);
     const { provider, signer, address, getTokenAllowance } = useContext(EthersContext);
     const { enterSushiBar, leaveSushiBar } = useSDK();
@@ -133,4 +133,4 @@ const useSushiBarState: () => SushiBarState = () => {
     };
 };
 
-export default useSushiBarState;
+export default useStakingState;

@@ -22,14 +22,14 @@ import TokenInput from "../components/TokenInput";
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 import { SUSHI_BAR } from "../hooks/useSDK";
-import useSushiBarState, { Action, SushiBarState } from "../hooks/useSushiBarState";
+import useStakingState, { Action, StakingState } from "../hooks/useStakingState";
 import MetamaskError from "../types/MetamaskError";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const Actions = ["enter", "leave"];
 
-const SushiBarScreen = () => {
+const StakingScreen = () => {
     return (
         <Screen>
             <Container>
@@ -42,12 +42,12 @@ const SushiBarScreen = () => {
 };
 
 const Staking = () => {
-    const state = useSushiBarState();
+    const state = useStakingState();
     return (
         <View style={{ alignItems: "center", marginBottom: Spacing.huge * 2 }}>
             <Column>
                 <Text h4={true} style={{ textAlign: "center" }}>
-                    🧑‍🍳 Sushi Bar
+                    💰 Staking
                 </Text>
             </Column>
             <ActionSelect state={state} />
@@ -73,7 +73,7 @@ const Staking = () => {
     );
 };
 
-const ActionSelect = ({ state }: { state: SushiBarState }) => {
+const ActionSelect = ({ state }: { state: StakingState }) => {
     if (!state.sushi || !state.xSushi || !state.sushiStaked || !state.xSushiSupply) {
         return (
             <Column noTopMargin={true}>
@@ -166,7 +166,7 @@ const NoXSushiNotice = () => {
     );
 };
 
-const StakeInfo = ({ state }: { state: SushiBarState }) => {
+const StakeInfo = ({ state }: { state: StakingState }) => {
     if (!state.sushi || !state.xSushi || !state.sushiSupply || !state.xSushiSupply || isEmptyValue(state.amount)) {
         return <Column noTopMargin={true} />;
     }
@@ -181,7 +181,7 @@ const StakeInfo = ({ state }: { state: SushiBarState }) => {
     );
 };
 
-const Controls = ({ state }: { state: SushiBarState }) => {
+const Controls = ({ state }: { state: StakingState }) => {
     const [error, setError] = useState<MetamaskError>({});
     useAsyncEffect(() => setError({}), [state.action, state.amount]);
     const token = state.action === "leave" ? state.xSushi : state.sushi;
@@ -218,7 +218,7 @@ const StakeButton = ({
     onError,
     disabled
 }: {
-    state: SushiBarState;
+    state: StakingState;
     onError: (e) => void;
     disabled: boolean;
 }) => {
@@ -234,7 +234,7 @@ const StakeButton = ({
     return <Button size={"large"} title={"Stake"} loading={state.entering} onPress={onPress} disabled={disabled} />;
 };
 
-const UnstakeButton = ({ state, onError }: { state: SushiBarState; onError: (e) => void }) => {
+const UnstakeButton = ({ state, onError }: { state: StakingState; onError: (e) => void }) => {
     const onPress = useCallback(async () => {
         onError({});
         try {
@@ -247,4 +247,4 @@ const UnstakeButton = ({ state, onError }: { state: SushiBarState; onError: (e) 
     return <Button size={"large"} title={"Unstake"} loading={state.leaving} onPress={onPress} />;
 };
 
-export default SushiBarScreen;
+export default StakingScreen;

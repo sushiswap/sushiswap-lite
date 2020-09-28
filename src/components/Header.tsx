@@ -70,6 +70,7 @@ const Menu = () => {
             <MenuItem title={"SWAP"} path={"/"} />
             <MenuItem title={"LIQUIDITY"} path={"/liquidity"} />
             <MenuItem title={"FARMING"} path={"/farming"} />
+            <MenuItem title={"SUSHIBAR"} path={"/sushibar"} />
             <Stats />
             <DarkModeSwitch />
         </FlexView>

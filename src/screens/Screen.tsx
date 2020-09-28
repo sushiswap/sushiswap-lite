@@ -6,9 +6,11 @@ import Footer from "../components/Footer";
 import Status from "../components/Status";
 import Text from "../components/Text";
 import { EthersContext } from "../context/EthersContext";
+import useColors from "../hooks/useColors";
 
 const Screen = props => {
     const { address, chainId } = useContext(EthersContext);
+    const { background } = useColors();
     if (!address) {
         return <ConnectToWallet />;
     }
@@ -22,7 +24,7 @@ const Screen = props => {
         );
     }
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, backgroundColor: background }}>
             <View {...props} />
             <Status />
             <Footer />

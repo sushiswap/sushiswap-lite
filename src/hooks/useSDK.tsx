@@ -23,6 +23,7 @@ import useAllCommonPairs from "./useAllCommonPairs";
 export const SUSHISWAP_ROUTER = "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f";
 export const ROUTER = SUSHISWAP_ROUTER;
 export const MASTER_CHEF = "0xc2edad668740f1aa35e4d8f227fb8e17dca888cd";
+export const SUSHI_BAR = "0x8798249c2e607446efb7ad49ec89dd1865ff4272";
 
 // tslint:disable-next-line:max-func-body-length
 const useSDK = () => {
@@ -344,6 +345,32 @@ const useSDK = () => {
         [signer]
     );
 
+    const enterSushiBar = useCallback(
+        async (amount: ethers.BigNumber) => {
+            if (signer) {
+                const sushiBar = getContract("SushiBar", SUSHI_BAR, signer);
+                const gasLimit = await sushiBar.estimateGas.enter(amount);
+                return await sushiBar.enter(amount, {
+                    gasLimit: gasLimit.mul(120).div(100)
+                });
+            }
+        },
+        [signer]
+    );
+
+    const leaveSushiBar = useCallback(
+        async (amount: ethers.BigNumber) => {
+            if (signer) {
+                const sushiBar = getContract("SushiBar", SUSHI_BAR, signer);
+                const gasLimit = await sushiBar.estimateGas.leave(amount);
+                return await sushiBar.leave(amount, {
+                    gasLimit: gasLimit.mul(120).div(100)
+                });
+            }
+        },
+        [signer]
+    );
+
     const calculateFee = (fromAmount: ethers.BigNumber) => {
         return fromAmount.mul(3).div(1000);
     };
@@ -365,6 +392,8 @@ const useSDK = () => {
         getExpectedSushiRewardPerBlock,
         deposit,
         withdraw,
+        enterSushiBar,
+        leaveSushiBar,
         calculateFee
     };
 };

@@ -16,6 +16,7 @@ import { ContextProvider } from "./src/context";
 import { GlobalContext } from "./src/context/GlobalContext";
 import FarmingScreen from "./src/screens/FarmingScreen";
 import LiquidityScreen from "./src/screens/LiquidityScreen";
+import SushiBarScreen from "./src/screens/SushiBarScreen";
 import SwapScreen from "./src/screens/SwapScreen";
 
 const App = () => {
@@ -59,6 +60,9 @@ const Navigation = () => {
                 </Route>
                 <Route path={"/farming"}>
                     <FarmingScreen />
+                </Route>
+                <Route path={"/sushibar"}>
+                    <SushiBarScreen />
                 </Route>
                 <Route path={"/"}>
                     <SwapScreen />

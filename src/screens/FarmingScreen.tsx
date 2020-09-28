@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useState } from "react";
 import { Image, TouchableHighlight, View } from "react-native";
+import { Icon } from "react-native-elements";
 import { Hoverable } from "react-native-web-hover";
 import { Link } from "react-router-dom";
 
@@ -153,16 +154,38 @@ const ActionSelect = ({ state }: { state: FarmingState }) => {
             <ButtonGroup
                 selectedIndex={index}
                 onPress={onPress}
-                buttons={["DEPOSIT", "WITHDRAW"]}
-                buttonStyle={{
-                    borderTopLeftRadius: index === 0 ? Spacing.tiny : 0,
-                    borderBottomLeftRadius: index === 0 ? Spacing.tiny : 0,
-                    borderTopRightRadius: index === 1 ? Spacing.tiny : 0,
-                    borderBottomRightRadius: index === 1 ? Spacing.tiny : 0
-                }}
+                buttons={[{ element: DepositText }, { element: WithdrawText }]}
                 containerStyle={{ marginHorizontal: Spacing.small }}
             />
         </Column>
+    );
+};
+
+const DepositText = () => {
+    return (
+        <FlexView style={{ alignItems: "center" }}>
+            <Text style={{ color: "black" }}>Deposit</Text>
+            <Icon
+                type={"material-community"}
+                name={"chevron-right"}
+                color={"black"}
+                style={{ marginLeft: Spacing.tiny, marginTop: 2 }}
+            />
+        </FlexView>
+    );
+};
+
+const WithdrawText = () => {
+    return (
+        <FlexView style={{ alignItems: "center" }}>
+            <Text style={{ color: "black" }}>Withdraw</Text>
+            <Icon
+                type={"material-community"}
+                name={"chevron-right"}
+                color={"black"}
+                style={{ marginLeft: Spacing.tiny, marginTop: 2 }}
+            />
+        </FlexView>
     );
 };
 

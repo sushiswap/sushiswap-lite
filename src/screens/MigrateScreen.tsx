@@ -12,6 +12,7 @@ import FetchingButton from "../components/FetchingButton";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
 import LPTokenItem from "../components/LPTokenItem";
 import LPTokenSelect from "../components/LPTokenSelect";
+import Notice from "../components/Notice";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
 import { Spacing } from "../constants/dimension";
@@ -38,9 +39,15 @@ const Migrate = () => {
     return (
         <View style={{ alignItems: "center", marginBottom: Spacing.huge * 2 }}>
             <Column>
-                <Text h4={true} style={{ textAlign: "center" }}>
+                <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
                     🦄️ Migrate from Uniswap
                 </Text>
+                <Notice
+                    text={
+                        "This is an experimental feature that is using an unaudited contract: https://github.com/lev-x/sushiswap-core/blob/master/contracts/Migrator2.sol. Read the contract and use it with caution."
+                    }
+                    color={"red"}
+                />
                 <LPTokenSelect
                     state={state}
                     title={"1. Select a uniswap pool to MIGRATE from:"}

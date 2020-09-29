@@ -245,13 +245,13 @@
       "address": "0x57Ab1ec28D129707052df4dF418D58a2D46d5f51",
       "symbol": "sUSD",
       "decimals": 18,
-      "logoURI": null
+      "logoURI": "https://sushiswap.levx.io/images/tokens/sUSD.png"
     },
     "tokenB": {
       "address": "0x68A118Ef45063051Eac49c7e647CE5Ace48a68a5",
-      "symbol": "$BASED",
+      "symbol": "BASED",
       "decimals": 18,
-      "logoURI": null
+      "logoURI": "https://sushiswap.levx.io/images/tokens/BASED.png"
     }
   },
   {
@@ -262,7 +262,7 @@
       "address": "0x476c5E26a75bd202a9683ffD34359C0CC15be0fF",
       "symbol": "SRM",
       "decimals": 6,
-      "logoURI": null
+      "logoURI": "https://sushiswap.levx.io/images/tokens/SRM.png"
     },
     "tokenB": {
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",

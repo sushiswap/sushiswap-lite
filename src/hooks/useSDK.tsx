@@ -419,7 +419,7 @@ const useSDK = () => {
                 ];
                 const gasLimit = await migrator2.estimateGas.migrate(...args);
                 return await migrator2.migrate(...args, {
-                    gasLimit: gasLimit.mul(200).div(100)
+                    gasLimit: gasLimit.mul(120).div(100)
                 });
             }
         },

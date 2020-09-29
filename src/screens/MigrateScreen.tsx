@@ -46,7 +46,7 @@ const Migrate = () => {
                     text={
                         "This is an experimental feature that is using an unaudited contract: https://github.com/lev-x/sushiswap-core/blob/master/contracts/Migrator2.sol. Read the contract and use it with caution."
                     }
-                    color={"red"}
+                    color={"orange"}
                 />
                 <LPTokenSelect
                     state={state}
@@ -55,7 +55,7 @@ const Migrate = () => {
                     Item={LPTokenItem}
                 />
                 <TokenInput
-                    title={"2. How many tokens would you MIGRATE:"}
+                    title={"2. How many tokens would you MIGRATE?"}
                     token={state.selectedLPToken}
                     hidden={!state.selectedLPToken}
                     amount={state.amount}

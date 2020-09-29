@@ -121,14 +121,17 @@ const TokenItem: FC<LPTokenItemProps> = props => {
 
 const LogoSymbol = ({ token }) => {
     const { textMedium } = useColors();
+    const [isEmpty, setIsEmpty] = useState(false);
+    const source = !token.logoURI || isEmpty ? require("../../assets/empty-token.png") : { uri: token.logoURI };
     return (
         <FlexView style={{ alignItems: "center", marginBottom: Spacing.tiny }}>
             <Image
-                source={{ uri: token.logoURI }}
+                source={source}
+                onError={() => setIsEmpty(true)}
                 style={{ width: 24, height: 24, backgroundColor: "white", borderRadius: 12 }}
             />
             <Text light={true} style={{ fontSize: 22, color: textMedium, marginLeft: Spacing.small }}>
-                {token.symbol}
+                {token.symbol.replace(/\+/g, "+\n")}
             </Text>
         </FlexView>
     );

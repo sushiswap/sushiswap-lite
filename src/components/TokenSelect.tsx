@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useMemo } from "react";
+import React, { FC, useCallback, useContext, useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Image, TouchableHighlight, View } from "react-native";
 import { Hoverable } from "react-native-web-hover";
 
@@ -98,9 +98,11 @@ const EmptyList = () => {
 
 const TokenItem = (props: { token: Token; selected: boolean; onSelectToken: (token: Token) => void }) => {
     const { background, backgroundHovered, textMedium } = useColors();
+    const [isEmpty, setIsEmpty] = useState(false);
     const onPress = useCallback(() => {
         props.onSelectToken(props.token);
     }, [props.onSelectToken, props.token]);
+    const source = isEmpty ? require("../../assets/empty-token.png") : { uri: props.token.logoURI };
     return (
         <Hoverable>
             {({ hovered }) => (
@@ -108,7 +110,8 @@ const TokenItem = (props: { token: Token; selected: boolean; onSelectToken: (tok
                     <View style={{ backgroundColor: hovered ? backgroundHovered : background }}>
                         <FlexView style={{ alignItems: "center", margin: Spacing.small }}>
                             <Image
-                                source={{ uri: props.token.logoURI }}
+                                source={source}
+                                onError={() => setIsEmpty(true)}
                                 style={{ width: 24, height: 24, backgroundColor: "white", borderRadius: 12 }}
                             />
                             <Text light={true} style={{ marginLeft: Spacing.small, fontSize: 22, color: textMedium }}>

@@ -25,7 +25,7 @@ export type Action = "deposit" | "withdraw";
 
 // tslint:disable-next-line:max-func-body-length
 const useFarmingState: () => FarmingState = () => {
-    const state = useLPTokensState(true);
+    const state = useLPTokensState("pools");
     const { provider, signer, getTokenAllowance } = useContext(EthersContext);
     const { getExpectedSushiRewardPerBlock, deposit, withdraw } = useSDK();
     const [filteredBy, setFilteredBy] = useState("" as LPTokenSelectFilter);

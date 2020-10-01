@@ -242,6 +242,54 @@ const useSDK = () => {
         [signer]
     );
 
+    const enterSushiBar = useCallback(
+        async (amount: ethers.BigNumber) => {
+            if (signer) {
+                const sushiBar = getContract("SushiBar", SUSHI_BAR, signer);
+                const gasLimit = await sushiBar.estimateGas.enter(amount);
+                return await sushiBar.enter(amount, {
+                    gasLimit: gasLimit.mul(120).div(100)
+                });
+            }
+        },
+        [signer]
+    );
+
+    const leaveSushiBar = useCallback(
+        async (amount: ethers.BigNumber) => {
+            if (signer) {
+                const sushiBar = getContract("SushiBar", SUSHI_BAR, signer);
+                const gasLimit = await sushiBar.estimateGas.leave(amount);
+                return await sushiBar.leave(amount, {
+                    gasLimit: gasLimit.mul(120).div(100)
+                });
+            }
+        },
+        [signer]
+    );
+
+    const migrate = useCallback(
+        async (lpToken: LPToken, amount: ethers.BigNumber) => {
+            if (signer) {
+                const migrator2 = getContract("Migrator2", MIGRATOR2, signer);
+                const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + ttl).toString(16)}`;
+                const args = [
+                    lpToken.tokenA.address,
+                    lpToken.tokenB.address,
+                    amount,
+                    ethers.constants.Zero,
+                    ethers.constants.Zero,
+                    deadline
+                ];
+                const gasLimit = await migrator2.estimateGas.migrate(...args);
+                return await migrator2.migrate(...args, {
+                    gasLimit: gasLimit.mul(120).div(100)
+                });
+            }
+        },
+        [signer]
+    );
+
     const calculateFee = (fromAmount: ethers.BigNumber) => {
         return fromAmount.mul(3).div(1000);
     };
@@ -260,6 +308,9 @@ const useSDK = () => {
         getExpectedSushiRewardPerBlock,
         deposit,
         withdraw,
+        enterSushiBar,
+        leaveSushiBar,
+        migrate,
         calculateFee
     };
 };
@@ -267,4 +318,5 @@ const useSDK = () => {
 const minAmount = (amount: ethers.BigNumber, percent: Percent) => {
     return amount.sub(amount.mul(percent.numerator.toString()).div(percent.denominator.toString()));
 };
+
 export default useSDK;

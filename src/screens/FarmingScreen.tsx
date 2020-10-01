@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useState } from "react";
 import { Image, TouchableHighlight, View } from "react-native";
+import { Icon } from "react-native-elements";
 import { Hoverable } from "react-native-web-hover";
 
 import { ethers } from "ethers";
@@ -120,14 +121,17 @@ const TokenItem: FC<LPTokenItemProps> = props => {
 
 const LogoSymbol = ({ token }) => {
     const { textMedium } = useColors();
+    const [isEmpty, setIsEmpty] = useState(false);
+    const source = !token.logoURI || isEmpty ? require("../../assets/empty-token.png") : { uri: token.logoURI };
     return (
         <FlexView style={{ alignItems: "center", marginBottom: Spacing.tiny }}>
             <Image
-                source={{ uri: token.logoURI }}
+                source={source}
+                onError={() => setIsEmpty(true)}
                 style={{ width: 24, height: 24, backgroundColor: "white", borderRadius: 12 }}
             />
             <Text light={true} style={{ fontSize: 22, color: textMedium, marginLeft: Spacing.small }}>
-                {token.symbol}
+                {token.symbol.replace(/\+/g, "+\n")}
             </Text>
         </FlexView>
     );
@@ -153,16 +157,38 @@ const ActionSelect = ({ state }: { state: FarmingState }) => {
             <ButtonGroup
                 selectedIndex={index}
                 onPress={onPress}
-                buttons={["DEPOSIT", "WITHDRAW"]}
-                buttonStyle={{
-                    borderTopLeftRadius: index === 0 ? Spacing.tiny : 0,
-                    borderBottomLeftRadius: index === 0 ? Spacing.tiny : 0,
-                    borderTopRightRadius: index === 1 ? Spacing.tiny : 0,
-                    borderBottomRightRadius: index === 1 ? Spacing.tiny : 0
-                }}
+                buttons={[{ element: DepositText }, { element: WithdrawText }]}
                 containerStyle={{ marginHorizontal: Spacing.small }}
             />
         </Column>
+    );
+};
+
+const DepositText = () => {
+    return (
+        <FlexView style={{ alignItems: "center" }}>
+            <Text style={{ color: "black" }}>Deposit</Text>
+            <Icon
+                type={"material-community"}
+                name={"chevron-right"}
+                color={"black"}
+                style={{ marginLeft: Spacing.tiny, marginTop: 2 }}
+            />
+        </FlexView>
+    );
+};
+
+const WithdrawText = () => {
+    return (
+        <FlexView style={{ alignItems: "center" }}>
+            <Text style={{ color: "black" }}>Withdraw</Text>
+            <Icon
+                type={"material-community"}
+                name={"chevron-right"}
+                color={"black"}
+                style={{ marginLeft: Spacing.tiny, marginTop: 2 }}
+            />
+        </FlexView>
     );
 };
 

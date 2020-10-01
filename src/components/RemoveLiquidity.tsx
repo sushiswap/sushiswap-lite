@@ -1,7 +1,5 @@
-import React, { FC, useCallback, useState } from "react";
-import { Image, TouchableHighlight, View } from "react-native";
+import React, { useCallback, useState } from "react";
 import { Icon } from "react-native-elements";
-import { Hoverable } from "react-native-web-hover";
 
 import useAsyncEffect from "use-async-effect";
 import { ROUTER } from "../constants/contracts";
@@ -9,17 +7,15 @@ import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 import { RemoveLiquidityState } from "../hooks/useRemoveLiquidityState";
 import MetamaskError from "../types/MetamaskError";
-import { formatBalance, isEmptyValue, parseBalance } from "../utils";
+import { isEmptyValue, parseBalance } from "../utils";
 import ApproveButton from "./ApproveButton";
 import Button from "./Button";
-import CloseIcon from "./CloseIcon";
 import Column from "./Column";
 import ErrorMessage from "./ErrorMessage";
 import FetchingButton from "./FetchingButton";
-import FlexView from "./FlexView";
 import InsufficientBalanceButton from "./InsufficientBalanceButton";
-import LPTokenSelect, { LPTokenItemProps } from "./LPTokenSelect";
-import SelectIcon from "./SelectIcon";
+import LPTokenItem from "./LPTokenItem";
+import LPTokenSelect from "./LPTokenSelect";
 import Text from "./Text";
 import TokenInput from "./TokenInput";
 
@@ -34,7 +30,7 @@ const RemoveLiquidity = ({ state }: { state: RemoveLiquidityState }) => (
             state={state}
             title={"1. Select the pool to REMOVE liquidity from:"}
             emptyText={"You don't have any liquidity."}
-            Item={TokenItem}
+            Item={LPTokenItem}
         />
         <TokenInput
             title={"2. How many tokens do you want to REMOVE?"}
@@ -47,54 +43,6 @@ const RemoveLiquidity = ({ state }: { state: RemoveLiquidityState }) => (
         <Controls state={state} />
     </>
 );
-
-const TokenItem: FC<LPTokenItemProps> = props => {
-    const { background, backgroundHovered, textMedium } = useColors();
-    const balance = formatBalance(props.token.balance, props.token.decimals, 18);
-    const onPress = useCallback(() => {
-        props.onSelectToken(props.token);
-    }, [props.onSelectToken, props.token]);
-    return (
-        <Hoverable>
-            {({ hovered }) => (
-                <TouchableHighlight onPress={onPress}>
-                    <View style={{ backgroundColor: hovered ? backgroundHovered : background }}>
-                        <FlexView style={{ alignItems: "center", margin: Spacing.small }}>
-                            <View>
-                                <LogoSymbol token={props.token.tokenA} />
-                                <LogoSymbol token={props.token.tokenB} />
-                            </View>
-                            <View style={{ flex: 1 }}>
-                                <Text note={true} style={{ textAlign: "right" }}>
-                                    My Balance
-                                </Text>
-                                <Text light={true} style={{ textAlign: "right", fontSize: 22, color: textMedium }}>
-                                    {balance}
-                                </Text>
-                            </View>
-                            {props.selected ? <CloseIcon /> : <SelectIcon />}
-                        </FlexView>
-                    </View>
-                </TouchableHighlight>
-            )}
-        </Hoverable>
-    );
-};
-
-const LogoSymbol = ({ token }) => {
-    const { textMedium } = useColors();
-    return (
-        <FlexView style={{ alignItems: "center", marginBottom: Spacing.tiny }}>
-            <Image
-                source={{ uri: token.logoURI }}
-                style={{ width: 24, height: 24, backgroundColor: "white", borderRadius: 12 }}
-            />
-            <Text light={true} style={{ fontSize: 22, color: textMedium, marginLeft: Spacing.small }}>
-                {token.symbol}
-            </Text>
-        </FlexView>
-    );
-};
 
 const AmountInfo = ({ state }: { state: RemoveLiquidityState }) => {
     if (!state.selectedLPToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount)) {
@@ -122,7 +70,6 @@ const Amount = ({ amount, token }) => {
         </Text>
     );
 };
-
 // tslint:disable-next-line:max-func-body-length
 const Controls = ({ state }: { state: RemoveLiquidityState }) => {
     const [error, setError] = useState<MetamaskError>({});

@@ -22,8 +22,11 @@ const MobileNotSupported = () => {
                 minHeight: "100%",
                 padding: Spacing.normal
             }}>
+            <Image
+                source={require("../../../assets/sushiswap.jpg")}
+                style={{ width: 192, height: 192, marginBottom: Spacing.normal }}
+            />
             <Title />
-            <Image source={require("../../../assets/sushiswap.jpg")} style={{ width: 192, height: 192 }} />
             <Text style={{ marginTop: Spacing.normal }}>Mobile devices not supported yet.</Text>
             <Social />
         </View>

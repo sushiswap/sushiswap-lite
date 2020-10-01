@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 
 import { EthersContext } from "../context/EthersContext";
 import LPToken from "../types/LPToken";
-import { fetchMyLPTokens, fetchPools } from "../utils/fetch-utils";
+import { fetchMyLPTokens, fetchMyUniswapLPTokens, fetchPools } from "../utils/fetch-utils";
 import useLiquidityState, { LiquidityState } from "./useLiquidityState";
 
 export interface LPTokensState extends LiquidityState {
@@ -17,8 +17,10 @@ export interface LPTokensState extends LiquidityState {
     setAmount: (amount: string) => void;
 }
 
+type Mode = "pools" | "my-lp-tokens" | "my-uniswap-lp-tokens";
+
 // tslint:disable-next-line:max-func-body-length
-const useLPTokensState: (loadPools: boolean) => LPTokensState = loadPools => {
+const useLPTokensState: (mode: Mode) => LPTokensState = mode => {
     const state = useLiquidityState();
     const { provider, signer, address, addOnBlockListener, removeOnBlockListener, tokens } = useContext(EthersContext);
     const [lastTimeRefreshed, setLastTimeRefreshed] = useState(0);
@@ -30,7 +32,8 @@ const useLPTokensState: (loadPools: boolean) => LPTokensState = loadPools => {
 
     const updateLPTokens = async () => {
         try {
-            const data = await (loadPools ? fetchPools(provider, signer) : fetchMyLPTokens(tokens, provider, signer));
+            const method = mode === "pools" ? fetchPools : mode === "my-lp-tokens" ? fetchMyLPTokens : getMyUniswapLPTokens;
+            const data = await method();
             if (data) {
                 setLPTokens(data);
             }
@@ -46,7 +49,7 @@ const useLPTokensState: (loadPools: boolean) => LPTokensState = loadPools => {
     }, [selectedLPToken]);
 
     useEffect(() => {
-        if (provider && signer && (loadPools || tokens.length > 0)) {
+        if (provider && signer && (mode === "pools" || tokens.length > 0)) {
             setLoading(true);
             updateLPTokens();
 

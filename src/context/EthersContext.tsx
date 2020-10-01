@@ -45,7 +45,7 @@ export const EthersContextProvider = ({ children }) => {
     useAsyncEffect(async () => {
         if (window.ethereum) {
             const web3 = new ethers.providers.Web3Provider(window.ethereum);
-            const alchemy = new ethers.providers.AlchemyProvider(web3.network, Constants.manifest.extra.alchemyApiKey);
+            const alchemy = new ethers.providers.AlchemyProvider(web3.network, "yLD5iJzUEo_Kvlg_PwMXl7N9ESK2_b6E");
             setProvider(alchemy);
             setSigner(await web3.getSigner());
         }

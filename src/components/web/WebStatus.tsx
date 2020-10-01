@@ -11,9 +11,11 @@ import Text from "../Text";
 const WebStatus = () => {
     const { textMedium, textLight, green } = useColors();
     const { shadow } = useStyles();
-    const { chainId } = useContext(EthersContext);
-    const connected = chainId === 1;
-    const title = connected ? "Connected" : "Not connected";
+    const { chainId, address } = useContext(EthersContext);
+    const connected = chainId === 1 && address;
+    const title = connected
+        ? address!.substring(0, 6) + "..." + address!.substring(address!.length - 4, address!.length)
+        : "Not connected";
     const color = connected ? green : textLight;
     return (
         <FlexView

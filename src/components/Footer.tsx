@@ -18,7 +18,7 @@ const Footer = () => (
             Built by <Link to={"https://levx.io"} text={"Team LevX"} />
         </Text>
         <FlexView>
-            <Link to={"https://github.com/lev-x"} text={"GitHub"} />
+            <Link to={"https://github.com/sushiswap-community"} text={"GitHub"} />
             <Link to={"https://twitter.com/LevxApp"} text={"Twitter"} />
             <Link to={"https://discord.gg/Mcdm7v"} text={"Discord"} />
         </FlexView>

@@ -1,8 +1,8 @@
 import { useCallback, useContext } from "react";
 
-import { CurrencyAmount, Fetcher, Percent, Router, TokenAmount, Trade, WETH } from "@levx/sushiswap-sdk";
+import { CurrencyAmount, Fetcher, Percent, Router, TokenAmount, Trade, WETH } from "@sushiswap/sdk";
 import { ethers } from "ethers";
-import { MASTER_CHEF, ROUTER } from "../constants/contracts";
+import { MASTER_CHEF, MIGRATOR2, ROUTER, SUSHI_BAR } from "../constants/contracts";
 import { ETH } from "../constants/tokens";
 import { EthersContext } from "../context/EthersContext";
 import LPToken from "../types/LPToken";

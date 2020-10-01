@@ -13,6 +13,8 @@ import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
 import FarmingScreen from "./FarmingScreen";
 import LiquidityScreen from "./LiquidityScreen";
+import MigrateScreen from "./MigrateScreen";
+import StakingScreen from "./StakingScreen";
 import SwapScreen from "./SwapScreen";
 
 export const Screens = () => {
@@ -31,6 +33,12 @@ const WebScreens = () => {
                     </Route>
                     <Route path={"/farming"}>
                         <FarmingScreen />
+                    </Route>
+                    <Route path={"/staking"}>
+                        <StakingScreen />
+                    </Route>
+                    <Route path={"/migrate"}>
+                        <MigrateScreen />
                     </Route>
                     <Route path={"/"}>
                         <SwapScreen />

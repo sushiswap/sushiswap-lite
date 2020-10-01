@@ -11,7 +11,6 @@ const WebFooter = () => (
         style={{
             position: "fixed",
             bottom: 0,
-            width: "100%",
             margin: Spacing.content
         }}>
         <Text note={true} style={{ marginLeft: 12 }}>

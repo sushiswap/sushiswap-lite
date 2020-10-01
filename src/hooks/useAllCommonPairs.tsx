@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import { ChainId, Currency, ETHER, Fetcher, Pair, Token, WETH } from "@levx/sushiswap-sdk";
+import { ChainId, Currency, ETHER, Fetcher, Pair, Token, WETH } from "@sushiswap/sdk";
 import { ethers } from "ethers";
 
 const DAI = new Token(ChainId.MAINNET, "0x6B175474E89094C44Da98b954EedeAC495271d0F", 18, "DAI", "Dai Stablecoin");

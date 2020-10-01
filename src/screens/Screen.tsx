@@ -10,7 +10,6 @@ import ConnectToWallet from "../components/web/ConnectToWallet";
 import MobileNotSupported from "../components/web/MobileNotSupported";
 import { EthersContext } from "../context/EthersContext";
 import { GlobalContext } from "../context/GlobalContext";
-import useColors from "../hooks/useColors";
 
 const Screen = props => {
     const { deviceType } = useContext(GlobalContext);

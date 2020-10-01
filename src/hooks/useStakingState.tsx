@@ -2,11 +2,11 @@ import { useCallback, useContext, useEffect, useState } from "react";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
+import { SUSHI_BAR } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
-import { GlobalContext } from "../context/GlobalContext";
 import Token from "../types/Token";
 import { getContract, parseBalance } from "../utils";
-import useSDK, { SUSHI_BAR } from "./useSDK";
+import useSDK from "./useSDK";
 
 export type Action = "enter" | "leave";
 
@@ -33,8 +33,7 @@ export interface StakingState {
 
 // tslint:disable-next-line:max-func-body-length
 const useStakingState: () => StakingState = () => {
-    const { tokens, updateTokens } = useContext(GlobalContext);
-    const { provider, signer, address, getTokenAllowance } = useContext(EthersContext);
+    const { provider, signer, address, getTokenAllowance, tokens, updateTokens } = useContext(EthersContext);
     const { enterSushiBar, leaveSushiBar } = useSDK();
     const [action, setAction] = useState<Action>();
     const [sushiStaked, setSushiStaked] = useState<ethers.BigNumber>();

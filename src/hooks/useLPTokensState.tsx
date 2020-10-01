@@ -32,8 +32,11 @@ const useLPTokensState: (mode: Mode) => LPTokensState = mode => {
 
     const updateLPTokens = async () => {
         try {
-            const method = mode === "pools" ? fetchPools : mode === "my-lp-tokens" ? fetchMyLPTokens : getMyUniswapLPTokens;
-            const data = await method();
+            const data = await (mode === "pools"
+                ? fetchPools(provider, signer)
+                : mode === "my-lp-tokens"
+                ? fetchMyLPTokens(tokens, provider, signer)
+                : fetchMyUniswapLPTokens(tokens, provider, signer));
             if (data) {
                 setLPTokens(data);
             }

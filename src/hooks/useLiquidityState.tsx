@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 
-import { Pair } from "@levx/sushiswap-sdk";
+import { Pair } from "@sushiswap/sdk";
 import { EthersContext } from "../context/EthersContext";
 import useSDK from "./useSDK";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";

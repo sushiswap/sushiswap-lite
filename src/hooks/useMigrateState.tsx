@@ -2,11 +2,11 @@ import { useCallback, useContext, useState } from "react";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
+import { MIGRATOR2 } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
-import { GlobalContext } from "../context/GlobalContext";
 import { parseBalance } from "../utils";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
-import useSDK, { MIGRATOR2 } from "./useSDK";
+import useSDK from "./useSDK";
 
 export interface MigrateState extends LPTokensState {
     onMigrate: () => Promise<void>;
@@ -16,8 +16,7 @@ export interface MigrateState extends LPTokensState {
 // tslint:disable-next-line:max-func-body-length
 const useMigrateState: () => MigrateState = () => {
     const state = useLPTokensState("my-uniswap-lp-tokens");
-    const { provider, signer, getTokenAllowance } = useContext(EthersContext);
-    const { updateTokens } = useContext(GlobalContext);
+    const { provider, signer, getTokenAllowance, updateTokens } = useContext(EthersContext);
     const { migrate } = useSDK();
     const [loading, setLoading] = useState(false);
     const [migrating, setMigrating] = useState(false);

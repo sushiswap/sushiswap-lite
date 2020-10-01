@@ -1,10 +1,12 @@
-import ERC20 from "@levx/sushiswap-core/build/contracts/ERC20.json";
-import IUniswapV2Factory from "@levx/sushiswap-core/build/contracts/IUniswapV2Factory.json";
-import IUniswapV2Pair from "@levx/sushiswap-core/build/contracts/IUniswapV2Pair.json";
-import IUniswapV2Router02 from "@levx/sushiswap-core/build/contracts/IUniswapV2Router02.json";
-import IWETH from "@levx/sushiswap-core/build/contracts/IWETH.json";
-import MasterChef from "@levx/sushiswap-core/build/contracts/MasterChef.json";
-import { ChainId, CurrencyAmount, Token as SDKToken, TokenAmount, WETH } from "@levx/sushiswap-sdk";
+import ERC20 from "@sushiswap/core/build/contracts/ERC20.json";
+import IUniswapV2Factory from "@sushiswap/core/build/contracts/IUniswapV2Factory.json";
+import IUniswapV2Pair from "@sushiswap/core/build/contracts/IUniswapV2Pair.json";
+import IUniswapV2Router02 from "@sushiswap/core/build/contracts/IUniswapV2Router02.json";
+import IWETH from "@sushiswap/core/build/contracts/IWETH.json";
+import MasterChef from "@sushiswap/core/build/contracts/MasterChef.json";
+import Migrator2 from "@sushiswap/core/build/contracts/Migrator2.json";
+import SushiBar from "@sushiswap/core/build/contracts/SushiBar.json";
+import { ChainId, CurrencyAmount, Token as SDKToken, TokenAmount, WETH } from "@sushiswap/sdk";
 import { ethers } from "ethers";
 import Token from "../types/Token";
 
@@ -14,7 +16,9 @@ const CONTRACTS = {
     IUniswapV2Pair,
     IUniswapV2Router02,
     IWETH,
-    MasterChef
+    MasterChef,
+    Migrator2,
+    SushiBar
 };
 
 export const formatBalance = (value: ethers.BigNumberish, decimals = 18, maxFraction = 0) => {

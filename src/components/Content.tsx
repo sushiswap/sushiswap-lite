@@ -17,7 +17,7 @@ const Content: React.FunctionComponent<ContentProps> = props => {
     }[props.contentPadding || "normal"];
     return (
         <View style={{ alignItems: "center", flex: 1, width: "100%", backgroundColor: background }}>
-            <View style={{ width: Platform.OS === "web" ? 1280 : "100%", flex: 1 }}>
+            <View style={{ width: Platform.OS === "web" ? 1280 : "100%", flex: 1, marginBottom: Spacing.huge }}>
                 <View
                     {...props}
                     style={[

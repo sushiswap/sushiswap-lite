@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 
-import { Trade } from "@levx/sushiswap-sdk";
+import { Trade } from "@sushiswap/sdk";
 import { EthersContext } from "../context/EthersContext";
 import { parseBalance } from "../utils";
 import useSDK from "./useSDK";

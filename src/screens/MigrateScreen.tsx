@@ -44,7 +44,7 @@ const Migrate = () => {
                 </Text>
                 <Notice
                     text={
-                        "This is an experimental feature that is using an unaudited contract: https://github.com/lev-x/sushiswap-core/blob/master/contracts/Migrator2.sol. Read the contract and use it with caution."
+                        "This is an experimental feature that is using an unaudited contract: https://github.com/sushiswap-community/sushiswap-core/blob/master/contracts/Migrator2.sol. Read the contract and use it with caution."
                     }
                     color={"orange"}
                 />

@@ -35,7 +35,7 @@ const MobileNotSupported = () => {
 
 const Social = () => {
     const onPressTwitter = useCallback(() => Linking.openURL("https://twitter.com/LevxApp"), []);
-    const onPressGithub = useCallback(() => Linking.openURL("https://github.com/lev-x"), []);
+    const onPressGithub = useCallback(() => Linking.openURL("https://github.com/sushiswap-community"), []);
     const onPressDiscord = useCallback(() => Linking.openURL("https://discord.gg/3QKsgf"), []);
     return (
         <FlexView style={{ marginTop: Spacing.large, marginBottom: Spacing.huge, justifyContent: "center" }}>

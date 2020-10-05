@@ -1,6 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 
 import Constants from "expo-constants";
+import * as Analytics from "expo-firebase-analytics";
 
 import { EventType, Listener } from "@ethersproject/abstract-provider";
 import { ethers } from "ethers";
@@ -8,6 +9,7 @@ import useAsyncEffect from "use-async-effect";
 import { ETH } from "../constants/tokens";
 import Token from "../types/Token";
 import { getContract } from "../utils";
+import { logTransaction } from "../utils/analytics-utils";
 import { fetchTokens } from "../utils/fetch-utils";
 import { GlobalContext } from "./GlobalContext";
 
@@ -18,15 +20,15 @@ export const EthersContext = React.createContext({
     signer: undefined as ethers.Signer | undefined,
     chainId: 0,
     address: null as string | null,
-    addOnBlockListener: (name: string, listener: OnBlockListener) => {},
-    removeOnBlockListener: (name: string) => {},
+    addOnBlockListener: (_name: string, _listener: OnBlockListener) => {},
+    removeOnBlockListener: (_name: string) => {},
     tokens: [ETH] as Token[],
     updateTokens: async () => {},
     loadingTokens: false,
-    approveToken: async (token: string, spender: string, amount?: ethers.BigNumber) => {
-        return {} as ethers.providers.TransactionResponse;
+    approveToken: async (_token: string, _spender: string, _amount?: ethers.BigNumber) => {
+        return {} as ethers.providers.TransactionResponse | undefined;
     },
-    getTokenAllowance: async (token: string, spender: string) => {
+    getTokenAllowance: async (_token: string, _spender: string) => {
         return ethers.constants.Zero as ethers.BigNumber | undefined;
     }
 });
@@ -55,12 +57,12 @@ export const EthersContextProvider = ({ children }) => {
         if (window.ethereum) {
             const onAccountsChanged = () => {
                 setAddress(window.ethereum.selectedAddress);
-            };
-            const onChainChanged = async () => {
-                const network = await signer?.provider?.getNetwork();
-                if (network) {
-                    setChainId(network.chainId);
+                if (window.ethereum.chainId && window.ethereum.selectedAddress) {
+                    Analytics.setUserId(Number(window.ethereum.chainId) + ":" + window.ethereum.selectedAddress);
                 }
+            };
+            const onChainChanged = () => {
+                setChainId(Number(window.ethereum.chainId));
             };
             onAccountsChanged();
             onChainChanged();
@@ -106,9 +108,10 @@ export const EthersContextProvider = ({ children }) => {
                 amount = amount || ethers.constants.MaxUint256;
                 const erc20 = getContract("ERC20", token, signer);
                 const gasLimit = await erc20.estimateGas.approve(spender, amount);
-                return await erc20.approve(spender, amount, {
+                const tx = await erc20.approve(spender, amount, {
                     gasLimit
                 });
+                return await logTransaction(tx, "ERC20.approve()", spender, amount.toString());
             }
         },
         [signer]
@@ -206,6 +209,7 @@ declare global {
             send(payload: any, callback: any): any;
             send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any;
             selectedAddress: string;
+            chainId: string;
             on(eventName: EventType, listener: Listener);
             off(eventName: EventType, listener: Listener);
         };

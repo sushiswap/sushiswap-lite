@@ -8,6 +8,7 @@ import { EthersContext } from "../context/EthersContext";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
 import { convertToken, getContract } from "../utils";
+import { logTransaction } from "../utils/analytics-utils";
 import useAllCommonPairs from "./useAllCommonPairs";
 
 // tslint:disable-next-line:max-func-body-length
@@ -51,6 +52,11 @@ const useSDK = () => {
                         value: params.value,
                         gasLimit: gasLimit.mul(120).div(100)
                     });
+                    await logTransaction(
+                        tx,
+                        "UniswapV2Router02." + params.methodName + "()",
+                        ...params.args.map(arg => arg.toString())
+                    );
                     return {
                         trade,
                         tx
@@ -68,10 +74,11 @@ const useSDK = () => {
                 const gasLimit = await weth.estimateGas.deposit({
                     value: amount
                 });
-                return await weth.deposit({
+                const tx = await weth.deposit({
                     value: amount,
                     gasLimit
                 });
+                return await logTransaction(tx, "WETH.deposit()");
             }
         },
         [signer]
@@ -82,9 +89,10 @@ const useSDK = () => {
             if (signer) {
                 const weth = getContract("IWETH", WETH[1].address, signer);
                 const gasLimit = await weth.estimateGas.withdraw(amount);
-                return await weth.withdraw(amount, {
+                const tx = await weth.withdraw(amount, {
                     gasLimit
                 });
+                return await logTransaction(tx, "WETH.withdraw()");
             }
         },
         [signer]
@@ -117,9 +125,10 @@ const useSDK = () => {
                     deadline
                 ];
                 const gasLimit = await router.estimateGas.addLiquidity(...args);
-                return await router.functions.addLiquidity(...args, {
+                const tx = await router.functions.addLiquidity(...args, {
                     gasLimit: gasLimit.mul(120).div(100)
                 });
+                return logTransaction(tx, "UniswapV2Router02.addLiquidity()", ...args.map(arg => arg.toString()));
             }
         },
         [signer]
@@ -139,9 +148,10 @@ const useSDK = () => {
                     deadline
                 ];
                 const gasLimit = await router.estimateGas.removeLiquidityETH(...args);
-                return await router.functions.removeLiquidityETH(...args, {
+                const tx = await router.functions.removeLiquidityETH(...args, {
                     gasLimit: gasLimit.mul(120).div(100)
                 });
+                return logTransaction(tx, "UniswapV2Router02.removeLiquidityETH()", ...args.map(arg => arg.toString()));
             }
         },
         [signer]
@@ -168,9 +178,10 @@ const useSDK = () => {
                     deadline
                 ];
                 const gasLimit = await router.estimateGas.removeLiquidity(...args);
-                return await router.functions.removeLiquidity(...args, {
+                const tx = await router.functions.removeLiquidity(...args, {
                     gasLimit: gasLimit.mul(120).div(100)
                 });
+                return logTransaction(tx, "UniswapV2Router02.removeLiquidity()", ...args.map(arg => arg.toString()));
             }
         },
         [signer]
@@ -192,10 +203,11 @@ const useSDK = () => {
                 const gasLimit = await router.estimateGas.addLiquidityETH(...args, {
                     value: amountETH
                 });
-                return await router.functions.addLiquidityETH(...args, {
+                const tx = await router.functions.addLiquidityETH(...args, {
                     gasLimit: gasLimit.mul(120).div(100),
                     value: amountETH
                 });
+                return logTransaction(tx, "UniswapV2Router02.addLiquidityETH()", ...args.map(arg => arg.toString()));
             }
         },
         [signer]
@@ -221,9 +233,10 @@ const useSDK = () => {
             if (signer) {
                 const masterChef = getContract("MasterChef", MASTER_CHEF, signer);
                 const gasLimit = await masterChef.estimateGas.deposit(lpTokenId, amount);
-                return await masterChef.deposit(lpTokenId, amount, {
+                const tx = await masterChef.deposit(lpTokenId, amount, {
                     gasLimit: gasLimit.mul(120).div(100)
                 });
+                return logTransaction(tx, "MasterChef.deposit()", lpTokenId, amount.toString());
             }
         },
         [signer]
@@ -234,9 +247,10 @@ const useSDK = () => {
             if (signer) {
                 const masterChef = getContract("MasterChef", MASTER_CHEF, signer);
                 const gasLimit = await masterChef.estimateGas.withdraw(lpTokenId, amount);
-                return await masterChef.withdraw(lpTokenId, amount, {
+                const tx = await masterChef.withdraw(lpTokenId, amount, {
                     gasLimit: gasLimit.mul(120).div(100)
                 });
+                return logTransaction(tx, "MasterChef.withdraw()", lpTokenId, amount.toString());
             }
         },
         [signer]
@@ -247,9 +261,10 @@ const useSDK = () => {
             if (signer) {
                 const sushiBar = getContract("SushiBar", SUSHI_BAR, signer);
                 const gasLimit = await sushiBar.estimateGas.enter(amount);
-                return await sushiBar.enter(amount, {
+                const tx = await sushiBar.enter(amount, {
                     gasLimit: gasLimit.mul(120).div(100)
                 });
+                return logTransaction(tx, "SushiBar.enter()", amount.toString());
             }
         },
         [signer]
@@ -260,9 +275,10 @@ const useSDK = () => {
             if (signer) {
                 const sushiBar = getContract("SushiBar", SUSHI_BAR, signer);
                 const gasLimit = await sushiBar.estimateGas.leave(amount);
-                return await sushiBar.leave(amount, {
+                const tx = await sushiBar.leave(amount, {
                     gasLimit: gasLimit.mul(120).div(100)
                 });
+                return logTransaction(tx, "SushiBar.leave()", amount.toString());
             }
         },
         [signer]
@@ -282,9 +298,10 @@ const useSDK = () => {
                     deadline
                 ];
                 const gasLimit = await migrator2.estimateGas.migrate(...args);
-                return await migrator2.migrate(...args, {
+                const tx = await migrator2.migrate(...args, {
                     gasLimit: gasLimit.mul(120).div(100)
                 });
+                return logTransaction(tx, "Migrator2.migrate()", ...args.map(arg => arg.toString()));
             }
         },
         [signer]

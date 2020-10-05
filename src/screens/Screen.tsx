@@ -10,29 +10,26 @@ import ConnectToWallet from "../components/web/ConnectToWallet";
 import MobileNotSupported from "../components/web/MobileNotSupported";
 import { EthersContext } from "../context/EthersContext";
 import { GlobalContext } from "../context/GlobalContext";
+import useColors from "../hooks/useColors";
 
 const Screen = props => {
     const { deviceType } = useContext(GlobalContext);
     const { address, chainId } = useContext(EthersContext);
+    const { background } = useColors();
     if (!deviceType) {
         return <AppLoading />;
     }
     if (Platform.OS === "web") {
-        if (deviceType === DeviceType.PHONE) {
-            return <MobileNotSupported />;
-        }
-        if (!address) {
-            return <ConnectToWallet />;
-        }
-        if (chainId !== 1) {
+        if (deviceType === DeviceType.PHONE) return <MobileNotSupported />;
+        if (!address) return <ConnectToWallet />;
+        if (chainId !== 1)
             return (
-                <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+                <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: background }}>
                     <Text light={true} style={{ textAlign: "center" }}>
                         {"Please switch network to\n'Ethereum Mainnet'"}
                     </Text>
                 </View>
             );
-        }
         return <View {...props} style={[{ flex: 1 }, props.style]} />;
     } else {
         return (

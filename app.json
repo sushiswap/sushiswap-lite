@@ -20,7 +20,7 @@
       "supportsTablet": true
     },
     "web": {
-      "favicon": "./assets/sushiswap.jpg",
+      "favicon": "./assets/icon.png",
       "config": {
         "firebase": {
           "apiKey": "AIzaSyANcyrmKaNPrM3QuRR17eA5a6iIDYt4NfQ",

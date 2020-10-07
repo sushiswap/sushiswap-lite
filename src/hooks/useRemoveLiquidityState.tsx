@@ -92,10 +92,17 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
                         state.fromSymbol === "WETH"
                             ? [state.toToken!, toAmount, fromAmount]
                             : [state.fromToken!, fromAmount, toAmount];
-                    const tx = await removeLiquidityETH(token, liquidity, amountToRemove, amountToRemoveETH);
+                    const tx = await removeLiquidityETH(token, liquidity, amountToRemove, amountToRemoveETH, signer);
                     await tx.wait();
                 } else {
-                    const tx = await removeLiquidity(state.fromToken!, state.toToken!, liquidity, fromAmount, toAmount);
+                    const tx = await removeLiquidity(
+                        state.fromToken!,
+                        state.toToken!,
+                        liquidity,
+                        fromAmount,
+                        toAmount,
+                        signer
+                    );
                     await tx.wait();
                 }
                 await updateTokens();

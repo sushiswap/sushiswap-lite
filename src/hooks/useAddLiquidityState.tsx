@@ -28,10 +28,10 @@ const useAddLiquidityState: () => AddLiquidityState = () => {
                         state.fromSymbol === "ETH"
                             ? [state.toToken, toAmount, fromAmount]
                             : [state.fromToken, fromAmount, toAmount];
-                    const tx = await addLiquidityETH(token, amount, amountETH);
+                    const tx = await addLiquidityETH(token, amount, amountETH, signer);
                     await tx.wait();
                 } else {
-                    const tx = await addLiquidity(state.fromToken, state.toToken, fromAmount, toAmount);
+                    const tx = await addLiquidity(state.fromToken, state.toToken, fromAmount, toAmount, signer);
                     await tx.wait();
                 }
                 await updateTokens();

@@ -23,7 +23,7 @@ const useLiquidityState: () => LiquidityState = () => {
                 if (state.fromToken && state.toToken && provider) {
                     setPair(undefined);
                     try {
-                        setPair(await getPair(state.fromToken, state.toToken));
+                        setPair(await getPair(state.fromToken, state.toToken, provider));
                     } catch (e) {
                     } finally {
                         setLoading(false);

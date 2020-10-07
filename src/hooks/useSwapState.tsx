@@ -32,7 +32,7 @@ const useSwapState: () => SwapState = () => {
                         setTrade(undefined);
                         setUnsupported(false);
                         try {
-                            setTrade(await getTrade(state.fromToken, state.toToken, amount));
+                            setTrade(await getTrade(state.fromToken, state.toToken, amount, provider));
                         } catch (e) {
                             setUnsupported(true);
                         } finally {
@@ -57,7 +57,7 @@ const useSwapState: () => SwapState = () => {
         if (state.fromToken && state.toToken && state.fromAmount && signer && trade) {
             setSwapping(true);
             try {
-                const result = await swap(trade);
+                const result = await swap(trade, signer);
                 if (result) {
                     await result.tx.wait();
                     await updateTokens();

@@ -82,7 +82,7 @@ const useStakingState: () => StakingState = () => {
         if (amount && signer) {
             setEntering(true);
             try {
-                const tx = await enterSushiBar(parseBalance(amount));
+                const tx = await enterSushiBar(parseBalance(amount), signer);
                 if (tx) {
                     await tx.wait();
                     await updateTokens();
@@ -98,7 +98,7 @@ const useStakingState: () => StakingState = () => {
         if (amount && signer) {
             setLeaving(true);
             try {
-                const tx = await leaveSushiBar(parseBalance(amount));
+                const tx = await leaveSushiBar(parseBalance(amount), signer);
                 if (tx) {
                     await tx.wait();
                     await updateTokens();

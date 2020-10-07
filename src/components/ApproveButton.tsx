@@ -23,8 +23,7 @@ const ApproveButton: FC<ApproveButtonProps> = props => {
             setLoading(true);
             try {
                 const tx = await approveToken(props.token.address, props.spender);
-                await tx.wait();
-                props.onSuccess();
+                tx?.wait().then(() => props.onSuccess());
             } catch (e) {
                 props.onError(e);
             } finally {

@@ -29,7 +29,7 @@ const WebStatus = () => {
                 justifyContent: "center",
                 paddingHorizontal: Spacing.small,
                 borderRadius: 16,
-                ...shadow
+                ...shadow()
             }}>
             <View style={{ backgroundColor: color, width: 6, height: 6, borderRadius: 3, marginRight: 12 }} />
             <Text style={{ fontSize: 16, color: textMedium, marginRight: 2 }}>{title}</Text>

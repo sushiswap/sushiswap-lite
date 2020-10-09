@@ -1,23 +1,17 @@
-import React, { useContext } from "react";
+import React from "react";
 
-import { Spacing } from "../constants/dimension";
-import { GlobalContext } from "../context/GlobalContext";
-import useColors from "../hooks/useColors";
+import useStyles from "../hooks/useStyles";
 import Text from "./Text";
 
 const Notice = (props: { text: string; color?: string }) => {
-    const { darkMode } = useContext(GlobalContext);
-    const { primary, secondary } = useColors();
-    const color = props.color || (darkMode ? secondary : primary);
+    const { border } = useStyles();
+    const borderStyle = border(props.color);
     return (
         <Text
             note={true}
             style={{
-                color,
-                borderColor: color,
-                borderWidth: 1,
-                borderRadius: 4,
-                padding: Spacing.small
+                color: props.color || borderStyle.borderColor,
+                ...borderStyle
             }}>
             {props.text}
         </Text>

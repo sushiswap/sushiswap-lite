@@ -35,7 +35,7 @@ const Button: FC<ButtonProps> = props => {
                 props.buttonStyle
             ]}
             titleStyle={[{ fontSize, fontFamily, color }, props.titleStyle]}
-            containerStyle={[type === "solid" || type === "outline" ? shadow : {}, props.containerStyle]}
+            containerStyle={[type === "solid" || type === "outline" ? shadow() : {}, props.containerStyle]}
         />
     );
 };

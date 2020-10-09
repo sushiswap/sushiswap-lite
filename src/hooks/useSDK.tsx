@@ -2,7 +2,7 @@ import { useCallback } from "react";
 
 import { CurrencyAmount, Fetcher, Percent, Router, TokenAmount, Trade, WETH } from "@sushiswap/sdk";
 import { ethers } from "ethers";
-import { MASTER_CHEF, MIGRATOR2, ROUTER, SUSHI_BAR } from "../constants/contracts";
+import { MASTER_CHEF, MIGRATOR2, ORDER_BOOK, ROUTER, SETTLEMENT, SUSHI_BAR } from "../constants/contracts";
 import { ETH } from "../constants/tokens";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
@@ -64,6 +64,25 @@ const useSDK = () => {
             };
         }
     }, []);
+
+    const createOrder = useCallback(
+        async (
+            fromToken: Token,
+            toToken: Token,
+            amountIn: ethers.BigNumber,
+            amountOutMin: ethers.BigNumber,
+            signer: ethers.Signer,
+            kovanSigner: ethers.Signer
+        ) => {
+            const order = new Order(signer, fromToken, toToken, amountIn, amountOutMin, await signer.getAddress());
+            const args = await order.toArgs();
+
+            const orderBook = getContract("OrderBook", ORDER_BOOK, kovanSigner);
+            const tx = await orderBook.createOrder(...args);
+            return await logTransaction(tx, "OrderBook.createOrder()", ...args.map(arg => arg.toString()));
+        },
+        []
+    );
 
     const wrapETH = useCallback(async (amount: ethers.BigNumber, signer: ethers.Signer) => {
         const weth = getContract("IWETH", WETH[1].address, signer);
@@ -265,14 +284,19 @@ const useSDK = () => {
         return logTransaction(tx, "Migrator2.migrate()", ...args.map(arg => arg.toString()));
     }, []);
 
-    const calculateFee = (fromAmount: ethers.BigNumber) => {
+    const calculateSwapFee = (fromAmount: ethers.BigNumber) => {
         return fromAmount.mul(3).div(1000);
+    };
+
+    const calculateLimitOrderFee = (fromAmount: ethers.BigNumber) => {
+        return fromAmount.mul(2).div(1000);
     };
 
     return {
         allowedSlippage,
         getTrade,
         swap,
+        createOrder,
         wrapETH,
         unwrapETH,
         getPair,
@@ -286,12 +310,76 @@ const useSDK = () => {
         enterSushiBar,
         leaveSushiBar,
         migrate,
-        calculateFee
+        calculateSwapFee,
+        calculateLimitOrderFee
     };
 };
 
 const minAmount = (amount: ethers.BigNumber, percent: Percent) => {
     return amount.sub(amount.mul(percent.numerator.toString()).div(percent.denominator.toString()));
 };
+
+export class Order {
+    maker: ethers.Signer;
+    fromToken: Token;
+    toToken: Token;
+    amountIn: ethers.BigNumber;
+    amountOutMin: ethers.BigNumber;
+    recipient: string;
+    deadline: ethers.BigNumber;
+
+    constructor(
+        maker: ethers.Signer,
+        fromToken: Token,
+        toToken: Token,
+        amountIn: ethers.BigNumber,
+        amountOutMin: ethers.BigNumber,
+        recipient: string,
+        deadline = ethers.BigNumber.from(Math.floor(Date.now() / 1000 + 24 * 3600))
+    ) {
+        this.maker = maker;
+        this.fromToken = fromToken;
+        this.toToken = toToken;
+        this.amountIn = amountIn;
+        this.amountOutMin = amountOutMin;
+        this.recipient = recipient;
+        this.deadline = deadline;
+    }
+
+    async hash() {
+        const settlement = await getContract("Settlement", SETTLEMENT, this.maker);
+        return await settlement.hash(
+            await this.maker.getAddress(),
+            this.fromToken.address,
+            this.toToken.address,
+            this.amountIn,
+            this.amountOutMin,
+            this.recipient,
+            this.deadline
+        );
+    }
+
+    async sign() {
+        const hash = await this.hash();
+        const signature = await this.maker.signMessage(ethers.utils.arrayify(hash));
+        return ethers.utils.splitSignature(signature);
+    }
+
+    async toArgs() {
+        const { v, r, s } = await this.sign();
+        return [
+            await this.maker.getAddress(),
+            this.fromToken.address,
+            this.toToken.address,
+            this.amountIn,
+            this.amountOutMin,
+            this.recipient,
+            this.deadline,
+            v,
+            r,
+            s
+        ];
+    }
+}
 
 export default useSDK;

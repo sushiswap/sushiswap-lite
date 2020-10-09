@@ -247,11 +247,11 @@ const DepositInfo = ({ state }: { state: FarmingState }) => {
                       .div(ethers.BigNumber.from(10).pow(18)),
                   18
               )
-            : null;
+            : undefined;
     return (
         <Column noTopMargin={true}>
             <Meta label={"My Balance"} text={balance} />
-            {!isEmptyValue(state.amount) && <Meta label={"SUSHI Reward per Block"} text={sushiReward || "…"} />}
+            {!isEmptyValue(state.amount) && <Meta label={"SUSHI Reward per Block"} text={sushiReward} />}
         </Column>
     );
 };

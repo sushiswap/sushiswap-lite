@@ -18,6 +18,8 @@ export interface TokenInputProps {
     hidden: boolean;
     amount: string;
     onAmountChanged: (amount: string) => void;
+    label?: string;
+    maxButtonText?: string;
 }
 
 // tslint:disable-next-line:max-func-body-length
@@ -40,19 +42,25 @@ const TokenInput: FC<TokenInputProps> = props => {
     if (props.hidden) {
         return <Column noTopMargin={true} />;
     }
-    const label = props.token?.symbol;
+    const label = props.label || props.token?.symbol;
     return (
         <Column noTopMargin={!props.title}>
             {props.title && <Subtitle text={props.title} />}
             <View style={{ marginHorizontal: Spacing.small }}>
                 <Input label={label} value={props.amount} onChangeText={onChangeText} placeholder={"0.0"} />
-                {props.token?.balance?.gt(0) && <MaxButton token={props.token} updateAmount={props.onAmountChanged} />}
+                {props.token?.balance?.gt(0) && (
+                    <MaxButton
+                        token={props.token}
+                        maxButtonText={props.maxButtonText}
+                        updateAmount={props.onAmountChanged}
+                    />
+                )}
             </View>
         </Column>
     );
 };
 
-const MaxButton = (props: { token: Token; updateAmount }) => {
+const MaxButton = (props: { token: Token; updateAmount; maxButtonText?: string }) => {
     const { darkMode } = useContext(GlobalContext);
     const { primary, secondary } = useColors();
     const onPressMax = useCallback(() => {
@@ -71,7 +79,7 @@ const MaxButton = (props: { token: Token; updateAmount }) => {
             <Button
                 type={"clear"}
                 color={darkMode ? secondary : primary}
-                title={"MAX"}
+                title={props.maxButtonText || "MAX"}
                 fontWeight={"bold"}
                 onPress={onPressMax}
                 buttonStyle={{ paddingHorizontal: 0 }}

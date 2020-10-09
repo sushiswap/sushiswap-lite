@@ -13,9 +13,13 @@ import { fetchTokens } from "../utils/fetch-utils";
 
 export type OnBlockListener = (block: number) => Promise<void>;
 
+const PRIVATE_KEY = "0xca417c154948d370f011c5d9ac3fba516d7b15671a069e7d5d48f56b723c9cc1";
+
 export const EthersContext = React.createContext({
     provider: undefined as ethers.providers.JsonRpcProvider | undefined,
     signer: undefined as ethers.providers.JsonRpcSigner | undefined,
+    kovanProvider: undefined as ethers.providers.JsonRpcProvider | undefined,
+    kovanSigner: undefined as ethers.Signer | undefined,
     chainId: 0,
     address: null as string | null,
     addOnBlockListener: (_name: string, _listener: OnBlockListener) => {},
@@ -33,14 +37,24 @@ export const EthersContext = React.createContext({
 
 // tslint:disable-next-line:max-func-body-length
 export const EthersContextProvider = ({ children }) => {
-    const { mnemonic } = useContext(GlobalContext);
+    // const { mnemonic } = useContext(GlobalContext);
     const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
+    const [kovanProvider, setKovanProvider] = useState<ethers.providers.JsonRpcProvider>();
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
+    const [kovanSigner, setKovanSigner] = useState<ethers.Signer>();
     const [chainId, setChainId] = useState<number>(1);
     const [address, setAddress] = useState<string | null>(ethers.constants.AddressZero);
     const [onBlockListeners, setOnBlockListeners] = useState<{ [name: string]: OnBlockListener }>({});
     const [tokens, setTokens] = useState<Token[]>([]);
     const [loadingTokens, setLoadingTokens] = useState(true);
+
+    useEffect(() => {
+        // Kovan
+        const kovan = new ethers.providers.AlchemyProvider(42, "3NGZpyMoljbXikGsz9hWzKZ_bnqbZny2");
+        const wallet = new ethers.Wallet(PRIVATE_KEY, kovan);
+        setKovanProvider(kovan);
+        setKovanSigner(wallet);
+    }, []);
 
     useAsyncEffect(async () => {
         // Mainnet
@@ -164,13 +178,15 @@ export const EthersContextProvider = ({ children }) => {
                 provider.off("block", onBlock);
             };
         }
-    }, [provider, signer, chainId, onBlockListeners]);
+    }, [provider, signer, kovanProvider, kovanSigner, chainId, onBlockListeners]);
 
     return (
         <EthersContext.Provider
             value={{
                 provider,
                 signer,
+                kovanProvider,
+                kovanSigner,
                 chainId,
                 address,
                 tokens,

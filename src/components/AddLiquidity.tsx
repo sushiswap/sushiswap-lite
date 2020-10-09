@@ -1,12 +1,12 @@
 import React, { useCallback, useState } from "react";
 
-import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import { ROUTER } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
+import Fraction from "../constants/Fraction";
 import { AddLiquidityState } from "../hooks/useAddLiquidityState";
 import MetamaskError from "../types/MetamaskError";
-import { convertAmount, convertToken, formatBalance, isEmptyValue, parseBalance } from "../utils";
+import { convertAmount, convertToken, isEmptyValue, parseBalance } from "../utils";
 import ApproveButton from "./ApproveButton";
 import Button from "./Button";
 import Column from "./Column";
@@ -93,11 +93,9 @@ const ToTokenInput = ({ state }: { state: AddLiquidityState }) => {
 
 const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
     if (!isEmptyValue(state.fromAmount) && !state.loading && !state.pair) {
-        const initialPrice = formatBalance(
-            parseBalance(state.toAmount, state.toToken?.decimals)
-                .mul(ethers.BigNumber.from(10).pow(8))
-                .div(parseBalance(state.fromAmount, state.fromToken?.decimals)),
-            8
+        const initialPrice = Fraction.from(
+            parseBalance(state.toAmount, state.toToken!.decimals),
+            parseBalance(state.fromAmount, state.fromToken!.decimals)
         );
         return (
             <Column noTopMargin={true}>
@@ -108,7 +106,7 @@ const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
                     }
                 />
                 {!!state.fromAmount && !!state.toAmount && (
-                    <Price price={initialPrice} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
+                    <PriceMeta price={initialPrice} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
                 )}
             </Column>
         );
@@ -119,13 +117,13 @@ const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
     const price = state.pair ? state.pair.priceOf(convertToken(state.fromToken)).toSignificant(8) : "…";
     return (
         <Column noTopMargin={true}>
-            <Price price={price} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
+            <PriceMeta price={price} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
         </Column>
     );
 };
 
-const Price = ({ price, fromSymbol, toSymbol }) => (
-    <Meta label={"Price"} text={price + " " + toSymbol + " = 1 " + fromSymbol} />
+const PriceMeta = ({ price, fromSymbol, toSymbol }) => (
+    <Meta label={"Price"} text={price.toString()} suffix={toSymbol + " = 1 " + fromSymbol} />
 );
 
 // tslint:disable-next-line:max-func-body-length

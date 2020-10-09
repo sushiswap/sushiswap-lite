@@ -16,7 +16,7 @@ export interface SwapState extends TokenPairState {
 // tslint:disable-next-line:max-func-body-length
 const useSwapState: () => SwapState = () => {
     const state = useTokenPairState();
-    const { provider, signer, addOnBlockListener, removeOnBlockListener, updateTokens } = useContext(EthersContext);
+    const { signer, addOnBlockListener, removeOnBlockListener, updateTokens } = useContext(EthersContext);
     const { getTrade, swap } = useSDK();
     const [loading, setLoading] = useState(true);
     const [trade, setTrade] = useState<Trade>();
@@ -26,13 +26,12 @@ const useSwapState: () => SwapState = () => {
     useEffect(() => {
         if (state.fromSymbol && state.toSymbol && state.fromAmount) {
             const updateTrade = async () => {
-                if (state.fromToken && state.toToken && state.fromAmount && provider) {
+                if (state.fromToken && state.toToken && state.fromAmount && signer?.provider) {
                     const amount = parseBalance(state.fromAmount, state.fromToken.decimals);
                     if (!amount.isZero()) {
-                        setTrade(undefined);
                         setUnsupported(false);
                         try {
-                            setTrade(await getTrade(state.fromToken, state.toToken, amount, provider));
+                            setTrade(await getTrade(state.fromToken, state.toToken, amount, signer?.provider));
                         } catch (e) {
                             setUnsupported(true);
                         } finally {

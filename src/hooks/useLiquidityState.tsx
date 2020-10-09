@@ -12,7 +12,7 @@ export interface LiquidityState extends TokenPairState {
 // tslint:disable-next-line:max-func-body-length
 const useLiquidityState: () => LiquidityState = () => {
     const state = useTokenPairState();
-    const { provider, addOnBlockListener, removeOnBlockListener } = useContext(EthersContext);
+    const { signer, addOnBlockListener, removeOnBlockListener } = useContext(EthersContext);
     const [loading, setLoading] = useState(false);
     const [pair, setPair] = useState<Pair>();
     const { getPair } = useSDK();
@@ -20,10 +20,9 @@ const useLiquidityState: () => LiquidityState = () => {
     useEffect(() => {
         if (state.fromSymbol && state.toSymbol) {
             const updatePair = async () => {
-                if (state.fromToken && state.toToken && provider) {
-                    setPair(undefined);
+                if (state.fromToken && state.toToken && signer?.provider) {
                     try {
-                        setPair(await getPair(state.fromToken, state.toToken, provider));
+                        setPair(await getPair(state.fromToken, state.toToken, signer?.provider));
                     } catch (e) {
                     } finally {
                         setLoading(false);

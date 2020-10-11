@@ -1,7 +1,8 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 
 import { Pair } from "@sushiswap/sdk";
 import { EthersContext } from "../context/EthersContext";
+import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useSDK from "./useSDK";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";
 
@@ -12,34 +13,28 @@ export interface LiquidityState extends TokenPairState {
 // tslint:disable-next-line:max-func-body-length
 const useLiquidityState: () => LiquidityState = () => {
     const state = useTokenPairState();
-    const { signer, addOnBlockListener, removeOnBlockListener } = useContext(EthersContext);
+    const { provider } = useContext(EthersContext);
     const [loading, setLoading] = useState(false);
     const [pair, setPair] = useState<Pair>();
     const { getPair } = useSDK();
 
-    useEffect(() => {
-        if (state.fromSymbol && state.toSymbol) {
-            const updatePair = async () => {
-                if (state.fromToken && state.toToken && signer?.provider) {
-                    try {
-                        setPair(await getPair(state.fromToken, state.toToken, signer?.provider));
-                    } catch (e) {
-                    } finally {
-                        setLoading(false);
-                    }
+    useDelayedOnBlockEffect(
+        async block => {
+            if (state.fromToken && state.toToken && provider) {
+                if (!block) {
+                    setLoading(true);
                 }
-            };
-
-            setLoading(true);
-            updatePair();
-            const name = "updatePair(" + state.fromSymbol + "," + state.toSymbol + ")";
-
-            addOnBlockListener(name, updatePair);
-            return () => {
-                removeOnBlockListener(name);
-            };
-        }
-    }, [state.fromSymbol, state.toSymbol]);
+                try {
+                    setPair(await getPair(state.fromToken, state.toToken, provider));
+                } finally {
+                    setLoading(false);
+                }
+            }
+        },
+        () => "getPair(" + state.fromSymbol + "," + state.toSymbol + ")",
+        [state.fromSymbol, state.toSymbol, provider],
+        0
+    );
 
     return {
         ...state,

@@ -4,7 +4,7 @@ import { Hoverable } from "react-native-web-hover";
 
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
-import { MyLimitOrdersState } from "../hooks/useMyLimitOrdersState";
+import useMyLimitOrdersState, { MyLimitOrdersState } from "../hooks/useMyLimitOrdersState";
 import { Order } from "../hooks/useSDK";
 import { formatBalance } from "../utils";
 import Border from "./Border";
@@ -14,7 +14,8 @@ import FlexView from "./FlexView";
 import SelectIcon from "./SelectIcon";
 import Text from "./Text";
 
-const MyLimitOrders = ({ state }: { state: MyLimitOrdersState }) => {
+const MyLimitOrders = () => {
+    const state = useMyLimitOrdersState();
     return (
         <>
             <Column style={{ alignItems: "center" }}>

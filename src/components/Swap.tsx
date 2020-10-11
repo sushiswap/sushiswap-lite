@@ -12,7 +12,7 @@ import useColors from "../hooks/useColors";
 import useDelayedEffect from "../hooks/useDelayedEffect";
 import useSDK from "../hooks/useSDK";
 import useStyles from "../hooks/useStyles";
-import { OrderType, SwapState } from "../hooks/useSwapState";
+import useSwapState, { OrderType, SwapState } from "../hooks/useSwapState";
 import MetamaskError from "../types/MetamaskError";
 import Token from "../types/Token";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
@@ -31,7 +31,8 @@ import TokenInput from "./TokenInput";
 import TokenSelect from "./TokenSelect";
 import UnsupportedButton from "./UnsupportedButton";
 
-const Swap = ({ state }: { state: SwapState }) => {
+const Swap = () => {
+    const state = useSwapState();
     return (
         <>
             <Column style={{ alignItems: "center" }}>

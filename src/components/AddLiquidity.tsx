@@ -1,10 +1,11 @@
 import React, { useCallback, useState } from "react";
+import { ActivityIndicator } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
 import { ROUTER } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
-import { AddLiquidityState } from "../hooks/useAddLiquidityState";
+import useAddLiquidityState, { AddLiquidityState } from "../hooks/useAddLiquidityState";
 import MetamaskError from "../types/MetamaskError";
 import { convertAmount, convertToken, isEmptyValue, parseBalance } from "../utils";
 import ApproveButton from "./ApproveButton";
@@ -20,33 +21,36 @@ import TokenInput from "./TokenInput";
 import TokenSelect from "./TokenSelect";
 import UnsupportedButton from "./UnsupportedButton";
 
-const AddLiquidity = ({ state }: { state: AddLiquidityState }) => (
-    <>
-        <Column>
-            <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
-                🔥 Add Liquidity
-            </Text>
-        </Column>
-        <TokenSelect
-            title={"1. Select the 1st token you want to ADD:"}
-            hidden={false}
-            symbol={state.fromSymbol}
-            onChangeSymbol={state.setFromSymbol}
-            filterTokens={token => token.balance && !token.balance.isZero()}
-        />
-        <TokenSelect
-            title={"2. Select the 2nd token you want to ADD:"}
-            hidden={state.fromSymbol === ""}
-            symbol={state.toSymbol}
-            onChangeSymbol={state.setToSymbol}
-            filterTokens={token => token.symbol !== state.fromSymbol && token.balance && !token.balance.isZero()}
-        />
-        <FromTokenInput state={state} />
-        <ToTokenInput state={state} />
-        <PriceInfo state={state} />
-        <Controls state={state} />
-    </>
-);
+const AddLiquidity = () => {
+    const state = useAddLiquidityState();
+    return (
+        <>
+            <Column>
+                <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
+                    🔥 Add Liquidity
+                </Text>
+            </Column>
+            <TokenSelect
+                title={"1. Select the 1st token you want to ADD:"}
+                hidden={false}
+                symbol={state.fromSymbol}
+                onChangeSymbol={state.setFromSymbol}
+                filterTokens={token => token.balance && !token.balance.isZero()}
+            />
+            <TokenSelect
+                title={"2. Select the 2nd token you want to ADD:"}
+                hidden={state.fromSymbol === ""}
+                symbol={state.toSymbol}
+                onChangeSymbol={state.setToSymbol}
+                filterTokens={token => token.symbol !== state.fromSymbol && token.balance && !token.balance.isZero()}
+            />
+            <FromTokenInput state={state} />
+            <ToTokenInput state={state} />
+            <PriceInfo state={state} />
+            <Controls state={state} />
+        </>
+    );
+};
 
 const FromTokenInput = ({ state }: { state: AddLiquidityState }) => {
     const onAmountChanged = useCallback(
@@ -59,11 +63,17 @@ const FromTokenInput = ({ state }: { state: AddLiquidityState }) => {
         },
         [state.pair, state.fromToken]
     );
+    if (state.loading)
+        return (
+            <Column>
+                <ActivityIndicator size={"large"} />
+            </Column>
+        );
     return (
         <TokenInput
-            title={"3. How many " + state.fromSymbol + "-" + state.toSymbol + " do you want to supply?"}
+            title={"3. How many tokens do you want to supply?"}
             token={state.fromToken}
-            hidden={!state.fromToken || !state.toToken}
+            hidden={!state.fromToken || !state.toToken || state.loading}
             amount={state.fromAmount}
             onAmountChanged={onAmountChanged}
         />
@@ -84,7 +94,7 @@ const ToTokenInput = ({ state }: { state: AddLiquidityState }) => {
     return (
         <TokenInput
             token={state.toToken}
-            hidden={!state.fromToken || !state.toToken}
+            hidden={!state.fromToken || !state.toToken || state.loading}
             amount={state.toAmount}
             onAmountChanged={onAmountChanged}
         />
@@ -92,10 +102,13 @@ const ToTokenInput = ({ state }: { state: AddLiquidityState }) => {
 };
 
 const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
+    if (!state.fromToken || !state.toToken || state.loading) {
+        return <Column noTopMargin={true} />;
+    }
     if (!isEmptyValue(state.fromAmount) && !state.loading && !state.pair) {
         const initialPrice = Fraction.from(
-            parseBalance(state.toAmount, state.toToken!.decimals),
-            parseBalance(state.fromAmount, state.fromToken!.decimals)
+            parseBalance(state.toAmount, state.toToken.decimals),
+            parseBalance(state.fromAmount, state.fromToken.decimals)
         );
         return (
             <Column noTopMargin={true}>
@@ -110,9 +123,6 @@ const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
                 )}
             </Column>
         );
-    }
-    if (!state.fromToken || !state.toToken) {
-        return <Column noTopMargin={true} />;
     }
     const price = state.pair ? state.pair.priceOf(convertToken(state.fromToken)).toSignificant(8) : "…";
     return (
@@ -130,7 +140,7 @@ const PriceMeta = ({ price, fromSymbol, toSymbol }) => (
 const Controls = ({ state }: { state: AddLiquidityState }) => {
     const [error, setError] = useState<MetamaskError>({});
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
-    if (!state.fromToken || !state.toToken) {
+    if (!state.fromToken || !state.toToken || state.loading) {
         return <Column noTopMargin={true} />;
     }
     const insufficientFromToken = parseBalance(state.fromAmount, state.fromToken.decimals).gt(state.fromToken.balance);

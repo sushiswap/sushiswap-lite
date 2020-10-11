@@ -40,7 +40,7 @@ const useAddLiquidityState: () => AddLiquidityState = () => {
                 setAdding(false);
             }
         }
-    }, [state.fromToken, state.toToken, state.fromAmount, state.toAmount, signer, updateTokens]);
+    }, [state.fromToken, state.toToken, state.fromAmount, state.toAmount, signer]);
 
     return {
         ...state,

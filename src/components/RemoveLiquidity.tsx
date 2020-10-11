@@ -5,7 +5,7 @@ import useAsyncEffect from "use-async-effect";
 import { ROUTER } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
-import { RemoveLiquidityState } from "../hooks/useRemoveLiquidityState";
+import useRemoveLiquidityState, { RemoveLiquidityState } from "../hooks/useRemoveLiquidityState";
 import MetamaskError from "../types/MetamaskError";
 import { isEmptyValue, parseBalance } from "../utils";
 import ApproveButton from "./ApproveButton";
@@ -19,30 +19,33 @@ import LPTokenSelect from "./LPTokenSelect";
 import Text from "./Text";
 import TokenInput from "./TokenInput";
 
-const RemoveLiquidity = ({ state }: { state: RemoveLiquidityState }) => (
-    <>
-        <Column>
-            <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
-                🎉 Remove Liquidity
-            </Text>
-        </Column>
-        <LPTokenSelect
-            state={state}
-            title={"1. Select the pool to REMOVE liquidity from:"}
-            emptyText={"You don't have any liquidity."}
-            Item={LPTokenItem}
-        />
-        <TokenInput
-            title={"2. How many tokens do you want to REMOVE?"}
-            token={state.selectedLPToken}
-            hidden={!state.selectedLPToken}
-            amount={state.amount}
-            onAmountChanged={state.setAmount}
-        />
-        <AmountInfo state={state} />
-        <Controls state={state} />
-    </>
-);
+const RemoveLiquidity = () => {
+    const state = useRemoveLiquidityState();
+    return (
+        <>
+            <Column>
+                <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
+                    🎉 Remove Liquidity
+                </Text>
+            </Column>
+            <LPTokenSelect
+                state={state}
+                title={"1. Select the pool to REMOVE liquidity from:"}
+                emptyText={"You don't have any liquidity."}
+                Item={LPTokenItem}
+            />
+            <TokenInput
+                title={"2. How many tokens do you want to REMOVE?"}
+                token={state.selectedLPToken}
+                hidden={!state.selectedLPToken}
+                amount={state.amount}
+                onAmountChanged={state.setAmount}
+            />
+            <AmountInfo state={state} />
+            <Controls state={state} />
+        </>
+    );
+};
 
 const AmountInfo = ({ state }: { state: RemoveLiquidityState }) => {
     if (!state.selectedLPToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount)) {

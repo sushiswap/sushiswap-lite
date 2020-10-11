@@ -11,7 +11,7 @@ import { getContract } from "../utils";
 import { logTransaction } from "../utils/analytics-utils";
 import { fetchTokens } from "../utils/fetch-utils";
 
-export type OnBlockListener = (block: number) => Promise<void>;
+export type OnBlockListener = (block?: number) => void | Promise<void>;
 
 const PRIVATE_KEY = "0xca417c154948d370f011c5d9ac3fba516d7b15671a069e7d5d48f56b723c9cc1";
 

@@ -5,6 +5,7 @@ import useAsyncEffect from "use-async-effect";
 import Fraction from "../constants/Fraction";
 import { EthersContext } from "../context/EthersContext";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
+import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useSDK from "./useSDK";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";
 
@@ -30,7 +31,7 @@ export interface SwapState extends TokenPairState {
 // tslint:disable-next-line:max-func-body-length
 const useSwapState: () => SwapState = () => {
     const state = useTokenPairState();
-    const { signer, kovanSigner, addOnBlockListener, removeOnBlockListener, updateTokens } = useContext(EthersContext);
+    const { signer, kovanSigner, updateTokens } = useContext(EthersContext);
     const { getTrade, swap, createOrder, calculateSwapFee, calculateLimitOrderFee } = useSDK();
     const [loading, setLoading] = useState(true);
     const [orderType, setOrderType] = useState<OrderType>("market");
@@ -53,35 +54,28 @@ const useSwapState: () => SwapState = () => {
         }
     }, [state.fromAmount]);
 
-    // tslint:disable-next-line:max-func-body-length
-    useEffect(() => {
-        if (state.fromSymbol && state.toSymbol && state.fromAmount) {
-            const updateTrade = async () => {
-                if (state.fromToken && state.toToken && state.fromAmount && signer?.provider) {
-                    const amount = parseBalance(state.fromAmount, state.fromToken.decimals);
-                    if (!amount.isZero()) {
-                        setUnsupported(false);
-                        try {
-                            setTrade(await getTrade(state.fromToken, state.toToken, amount, signer?.provider));
-                        } catch (e) {
-                            setUnsupported(true);
-                        } finally {
-                            setLoading(false);
-                        }
+    useDelayedOnBlockEffect(
+        async block => {
+            if (!block) {
+                setLoading(true);
+            }
+            if (state.fromToken && state.toToken && state.fromAmount && signer?.provider) {
+                const amount = parseBalance(state.fromAmount, state.fromToken.decimals);
+                if (!amount.isZero()) {
+                    setUnsupported(false);
+                    try {
+                        setTrade(await getTrade(state.fromToken, state.toToken, amount, signer?.provider));
+                    } catch (e) {
+                        setUnsupported(true);
+                    } finally {
+                        setLoading(false);
                     }
                 }
-            };
-
-            setLoading(true);
-            updateTrade();
-            const name = "updateTrade(" + state.fromSymbol + "," + state.toSymbol + "," + state.fromAmount + ")";
-
-            addOnBlockListener(name, updateTrade);
-            return () => {
-                removeOnBlockListener(name);
-            };
-        }
-    }, [state.fromSymbol, state.toSymbol, state.fromAmount]);
+            }
+        },
+        () => "getTrade(" + state.fromSymbol + "," + state.toSymbol + "," + state.fromAmount + ")",
+        [state.fromSymbol, state.toSymbol, state.fromAmount]
+    );
 
     useAsyncEffect(() => {
         if (trade && !isEmptyValue(state.fromAmount)) {

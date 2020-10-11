@@ -16,8 +16,8 @@ export interface SwapState extends TokenPairState {
     trade?: Trade;
     unsupported: boolean;
     limitOrderUnsupported: boolean;
-    limitOrderPrice: Fraction;
-    setLimitOrderPrice: (price: Fraction) => void;
+    limitOrderPrice: string;
+    setLimitOrderPrice: (price: string) => void;
     swapFee: string;
     limitOrderFee: string;
     limitOrderSwapFee: string;
@@ -37,19 +37,19 @@ const useSwapState: () => SwapState = () => {
     const [trade, setTrade] = useState<Trade>();
     const [unsupported, setUnsupported] = useState(false);
     const [swapFee, setSwapFee] = useState("");
-    const [limitOrderPrice, setLimitOrderPrice] = useState<Fraction>(Fraction.NAN);
+    const [limitOrderPrice, setLimitOrderPrice] = useState<string>("");
     const [limitOrderFee, setLimitOrderFee] = useState("");
     const [limitOrderSwapFee, setLimitOrderSwapFee] = useState("");
     const [swapping, setSwapping] = useState(false);
     const [creatingOrder, setCreatingOrder] = useState(false);
 
     useEffect(() => {
-        setLimitOrderPrice(Fraction.NAN);
+        setLimitOrderPrice("");
     }, [orderType]);
 
     useEffect(() => {
         if (isEmptyValue(state.fromAmount)) {
-            setLimitOrderPrice(Fraction.NAN);
+            setLimitOrderPrice("");
         }
     }, [state.fromAmount]);
 
@@ -117,7 +117,8 @@ const useSwapState: () => SwapState = () => {
     }, [state.fromToken, state.toToken, state.fromAmount, signer, trade]);
 
     const onCreateOrder = useCallback(async () => {
-        if (state.fromToken && state.toToken && state.fromAmount && signer && kovanSigner && !limitOrderPrice.isNaN()) {
+        const price = Fraction.parse(limitOrderPrice);
+        if (state.fromToken && state.toToken && state.fromAmount && signer && kovanSigner && !price.isNaN()) {
             setCreatingOrder(true);
             try {
                 const amountIn = parseBalance(state.fromAmount, state.fromToken.decimals);
@@ -125,7 +126,7 @@ const useSwapState: () => SwapState = () => {
                     state.fromToken,
                     state.toToken,
                     amountIn,
-                    limitOrderPrice.apply(amountIn),
+                    price.apply(amountIn),
                     signer,
                     kovanSigner
                 );

@@ -1,5 +1,6 @@
 import { Fraction as SDKFraction } from "@sushiswap/sdk";
 import { ethers } from "ethers";
+import Token from "../types/Token";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
 
 class Fraction {
@@ -14,6 +15,17 @@ class Fraction {
     }
     static from(numerator: ethers.BigNumberish, denominator: ethers.BigNumberish) {
         return new Fraction(ethers.BigNumber.from(numerator), ethers.BigNumber.from(denominator));
+    }
+    static fromTokens(
+        numerator: ethers.BigNumberish,
+        denominator: ethers.BigNumberish,
+        numeratorToken: Token,
+        denominatorToken: Token
+    ) {
+        return new Fraction(
+            ethers.BigNumber.from(numerator).mul(ethers.BigNumber.from(10).pow(denominatorToken.decimals)),
+            ethers.BigNumber.from(denominator).mul(ethers.BigNumber.from(10).pow(numeratorToken.decimals))
+        );
     }
     static parse(value: string) {
         return value === ""

@@ -48,7 +48,7 @@ const RemoveLiquidity = () => {
             </Column>
             <LPTokenSelect
                 state={state}
-                title={"1. Select the pool to REMOVE liquidity from:"}
+                title={"1. Select a pool to REMOVE liquidity from:"}
                 emptyText={"You don't have any liquidity."}
                 Item={LPTokenItem}
             />

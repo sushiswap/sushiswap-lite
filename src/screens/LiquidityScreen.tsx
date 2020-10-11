@@ -144,7 +144,7 @@ const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
             </Column>
         );
     }
-    const price = state.pair ? state.pair.priceOf(convertToken(state.fromToken)).toSignificant(8) : "…";
+    const price = state.pair ? state.pair.priceOf(convertToken(state.fromToken)).toFixed(8) : "…";
     return (
         <Column noTopMargin={true}>
             <PriceMeta price={price} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />

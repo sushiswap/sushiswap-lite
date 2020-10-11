@@ -34,7 +34,7 @@ import useStyles from "../hooks/useStyles";
 import useSwapState, { OrderType, SwapState } from "../hooks/useSwapState";
 import MetamaskError from "../types/MetamaskError";
 import Token from "../types/Token";
-import { formatBalance, isEmptyValue, parseBalance } from "../utils";
+import { formatBalance, isEmptyValue, parseBalance, pow10 } from "../utils";
 import Screen from "./Screen";
 
 const SwapScreen = () => {
@@ -104,10 +104,9 @@ const Inputs = ({ state }: { state: SwapState }) => {
 
 const PriceInput = ({ state }: { state: SwapState }) => {
     if (state.limitOrderUnsupported) return <Column noTopMargin={true} />;
-    const fromAmount = parseBalance(state.fromAmount, state.fromToken!.decimals);
     const marketPrice =
-        state.toToken && state.trade && fromAmount.eq(state.trade.inputAmount.raw.toString())
-            ? parseBalance(Fraction.convert(state.trade.executionPrice).toString(), state.toToken.decimals)
+        state.toToken && state.trade
+            ? parseBalance(state.trade.executionPrice.toFixed(state.toToken.decimals), state.toToken.decimals)
             : ethers.constants.Zero;
     return (
         <TokenInput
@@ -212,9 +211,9 @@ const WrapInfo = ({ state }: { state: SwapState }) => {
 };
 
 const SwapInfo = ({ state }: { state: SwapState }) => {
-    const amount = state.trade?.outputAmount?.toSignificant(8);
-    const price = state.trade?.executionPrice?.toSignificant(8);
-    const impact = state.trade?.priceImpact?.toSignificant(2);
+    const amount = state.trade?.outputAmount?.toFixed(8);
+    const price = state.trade?.executionPrice?.toFixed(8);
+    const impact = state.trade?.priceImpact?.toFixed(2);
     return (
         <Column noTopMargin={true}>
             <ArrowDown />
@@ -233,18 +232,27 @@ const LimitOrderInfo = ({ state }: { state: SwapState }) => {
     const price = Fraction.parse(state.limitOrderPrice);
     const fromAmount = parseBalance(state.fromAmount, state.fromToken!.decimals);
     const toAmount =
-        !isEmptyValue(state.fromAmount) && !price.isZero()
-            ? formatBalance(price.apply(fromAmount.sub(calculateLimitOrderFee(fromAmount))), state.toToken!.decimals, 8)
+        !isEmptyValue(state.fromAmount) && state.fromToken && state.toToken && !price.isZero()
+            ? formatBalance(
+                  price.apply(
+                      fromAmount
+                          .sub(calculateLimitOrderFee(fromAmount))
+                          .mul(pow10(state.toToken.decimals))
+                          .div(pow10(state.fromToken.decimals))
+                  ),
+                  state.toToken.decimals,
+                  8
+              )
             : undefined;
-    const marketPrice = state.trade ? Fraction.convert(state.trade.executionPrice) : undefined;
+    const marketPrice = state.trade ? state.trade.executionPrice : undefined;
     return (
         <Column noTopMargin={true}>
-            <Meta label={"Minimum Amount"} text={toAmount} suffix={state.toSymbol} />
+            <Meta label={"Desired Amount To Take"} text={toAmount} suffix={state.toSymbol} />
             <Meta label={"Relayer Fee (0.20%)"} text={state.limitOrderFee} suffix={state.fromSymbol} />
             <Meta label={"Swap Fee (0.30%)"} text={state.limitOrderSwapFee} suffix={state.fromSymbol} />
             <Meta
                 label={"Market Price"}
-                text={marketPrice?.toString() || undefined}
+                text={marketPrice?.toFixed(8) || undefined}
                 suffix={state.toSymbol + " / " + state.fromSymbol + ""}
             />
         </Column>
@@ -341,19 +349,21 @@ const LimitOrderControls = ({ state }: { state: SwapState }) => {
         500,
         [state.fromToken, state.fromAmount]
     );
-    const price = Fraction.parse(state.limitOrderPrice);
     if (
         state.orderType === "market" ||
         state.toSymbol === "" ||
         !state.fromToken ||
+        !state.toToken ||
         isEmptyValue(state.fromAmount) ||
         !state.trade ||
-        price.isNaN()
+        isEmptyValue(state.limitOrderPrice)
     )
         return <Column noTopMargin={true} />;
+    const price = Fraction.parse(state.limitOrderPrice);
+    const marketPrice = Fraction.parse(state.trade.executionPrice.toFixed(state.toToken.decimals));
     return (
         <Column>
-            {price.lt(Fraction.convert(state.trade.executionPrice)) ? (
+            {!price.gt(marketPrice) ? (
                 <PriceTooLowButton />
             ) : state.unsupported ? (
                 <UnsupportedButton state={state} />

@@ -4,7 +4,7 @@ import { Trade } from "@sushiswap/sdk";
 import useAsyncEffect from "use-async-effect";
 import Fraction from "../constants/Fraction";
 import { EthersContext } from "../context/EthersContext";
-import { formatBalance, isEmptyValue, parseBalance } from "../utils";
+import { formatBalance, isEmptyValue, parseBalance, pow10 } from "../utils";
 import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useSDK from "./useSDK";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";
@@ -51,6 +51,7 @@ const useSwapState: () => SwapState = () => {
     useEffect(() => {
         if (isEmptyValue(state.fromAmount)) {
             setLimitOrderPrice("");
+            setTrade(undefined);
         }
     }, [state.fromAmount]);
 
@@ -111,8 +112,14 @@ const useSwapState: () => SwapState = () => {
     }, [state.fromToken, state.toToken, state.fromAmount, signer, trade]);
 
     const onCreateOrder = useCallback(async () => {
-        const price = Fraction.parse(limitOrderPrice);
-        if (state.fromToken && state.toToken && state.fromAmount && signer && kovanSigner && !price.isNaN()) {
+        if (
+            state.fromToken &&
+            state.toToken &&
+            state.fromAmount &&
+            !isEmptyValue(limitOrderPrice) &&
+            signer &&
+            kovanSigner
+        ) {
             setCreatingOrder(true);
             try {
                 const amountIn = parseBalance(state.fromAmount, state.fromToken.decimals);
@@ -120,7 +127,10 @@ const useSwapState: () => SwapState = () => {
                     state.fromToken,
                     state.toToken,
                     amountIn,
-                    price.apply(amountIn),
+                    Fraction.parse(limitOrderPrice)
+                        .apply(amountIn)
+                        .mul(pow10(state.toToken.decimals))
+                        .div(pow10(state.fromToken.decimals)),
                     signer,
                     kovanSigner
                 );

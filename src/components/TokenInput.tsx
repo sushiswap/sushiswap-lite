@@ -6,7 +6,7 @@ import { Spacing } from "../constants/dimension";
 import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
 import Token from "../types/Token";
-import { formatBalance, parseBalance } from "../utils";
+import { formatBalance, parseBalance, pow10 } from "../utils";
 import Button from "./Button";
 import Column from "./Column";
 import Input from "./Input";
@@ -68,7 +68,7 @@ const MaxButton = (props: { token: Token; updateAmount; maxButtonText?: string }
             let balance = props.token.balance;
             if (props.token.symbol === "ETH") {
                 // Subtract 0.01 ETH for gas fee
-                const fee = ethers.BigNumber.from(10).pow(16);
+                const fee = pow10(16);
                 balance = balance.gt(fee) ? balance.sub(fee) : ethers.constants.Zero;
             }
             props.updateAmount(formatBalance(balance, props.token.decimals));

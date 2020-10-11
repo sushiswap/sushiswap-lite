@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 import { Spacing } from "../constants/dimension";
 import { LPTokensState } from "../hooks/useLPTokensState";
 import LPToken from "../types/LPToken";
+import { pow10 } from "../utils";
 import Border from "./Border";
 import CheckBox from "./CheckBox";
 import Column from "./Column";
@@ -101,7 +102,7 @@ const LPTokenList = ({
     let data = state.lpTokens.sort((t1, t2) => {
         return (t2.totalDeposited || ethers.constants.Zero)
             .sub(t1.totalDeposited || ethers.constants.Zero)
-            .div(ethers.BigNumber.from(10).pow(14))
+            .div(pow10(14))
             .toNumber();
     });
     if (filter === "amountDeposited") {

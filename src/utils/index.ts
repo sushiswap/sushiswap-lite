@@ -61,3 +61,7 @@ export const getContract = (name: string, address: string, signer: ethers.Signer
     const contract = CONTRACTS[name];
     return ethers.ContractFactory.getContract(address, contract.abi, signer);
 };
+
+export const pow10 = (exp: ethers.BigNumberish) => {
+    return ethers.BigNumber.from(10).pow(exp);
+};

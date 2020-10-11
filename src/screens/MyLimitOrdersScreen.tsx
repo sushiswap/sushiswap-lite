@@ -12,6 +12,7 @@ import SelectIcon from "../components/SelectIcon";
 import Text from "../components/Text";
 import WebFooter from "../components/web/WebFooter";
 import { Spacing } from "../constants/dimension";
+import Fraction from "../constants/Fraction";
 import useColors from "../hooks/useColors";
 import useMyLimitOrdersState, { MyLimitOrdersState } from "../hooks/useMyLimitOrdersState";
 import { Order } from "../hooks/useSDK";
@@ -98,10 +99,9 @@ const EmptyList = () => {
 
 const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (order: Order) => void }) => {
     const { background, backgroundHovered, textMedium } = useColors();
-    const amountIn = formatBalance(props.order.amountIn, props.order.fromToken.decimals, 18);
-    const onPress = useCallback(() => {
-        props.onSelectOrder(props.order);
-    }, [props.onSelectOrder, props.order]);
+    const { amountIn, amountOutMin, fromToken, toToken } = props.order;
+    const price = Fraction.fromTokens(amountOutMin, amountIn, toToken, fromToken);
+    const onPress = useCallback(() => props.onSelectOrder(props.order), [props.onSelectOrder, props.order]);
     return (
         <Hoverable>
             {({ hovered }) => (
@@ -109,15 +109,15 @@ const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (ord
                     <View style={{ backgroundColor: hovered ? backgroundHovered : background }}>
                         <FlexView style={{ alignItems: "center", margin: Spacing.small }}>
                             <View>
-                                <LogoSymbol token={props.order.fromToken} />
-                                <LogoSymbol token={props.order.toToken} />
+                                <TokenAmount token={fromToken} amount={amountIn} buy={false} />
+                                <TokenAmount token={toToken} amount={amountOutMin} buy={true} />
                             </View>
                             <View style={{ flex: 1 }}>
                                 <Text note={true} style={{ textAlign: "right" }}>
-                                    Amount
+                                    Minimum Price
                                 </Text>
                                 <Text light={true} style={{ textAlign: "right", fontSize: 22, color: textMedium }}>
-                                    {amountIn}
+                                    {price.toString()}
                                 </Text>
                             </View>
                             {props.selected ? <CloseIcon /> : <SelectIcon />}
@@ -129,8 +129,8 @@ const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (ord
     );
 };
 
-const LogoSymbol = ({ token }) => {
-    const { textMedium } = useColors();
+const TokenAmount = ({ token, amount, buy }) => {
+    const { textMedium, green, red } = useColors();
     const [isEmpty, setIsEmpty] = useState(false);
     const source = isEmpty ? require("../../assets/empty-token.png") : { uri: token.logoURI };
     return (
@@ -140,8 +140,17 @@ const LogoSymbol = ({ token }) => {
                 onError={() => setIsEmpty(true)}
                 style={{ width: 24, height: 24, backgroundColor: "white", borderRadius: 12 }}
             />
-            <Text light={true} style={{ fontSize: 22, color: textMedium, marginLeft: Spacing.small }}>
-                {token.symbol.replace(/\+/g, "+\n")}
+            <Text
+                light={true}
+                fontWeight={"light"}
+                style={{ fontSize: 22, color: textMedium, marginLeft: Spacing.tiny }}>
+                {" " + formatBalance(amount, token.decimals, 4)}
+            </Text>
+            <Text light={true} style={{ fontSize: 22, color: textMedium }}>
+                {" " + token.symbol.replace(/\+/g, "+\n")}
+            </Text>
+            <Text light={true} style={{ fontSize: 22, color: buy ? green : red }}>
+                {" " + (buy ? "+" : "−")}
             </Text>
         </FlexView>
     );

@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useState } from "react";
-import { Image, TouchableHighlight, View } from "react-native";
+import { Image, Platform, TouchableHighlight, View } from "react-native";
 import { Icon } from "react-native-elements";
 import { Hoverable } from "react-native-web-hover";
 
@@ -23,6 +23,7 @@ import SelectIcon from "../components/SelectIcon";
 import Subtitle from "../components/Subtitle";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
+import WebFooter from "../components/web/WebFooter";
 import { MASTER_CHEF } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
@@ -40,9 +41,8 @@ const FarmingScreen = () => {
         <Screen>
             <Container>
                 <Content>
-                    <View style={{ alignItems: "center", marginBottom: Spacing.large }}>
-                        <Farming />
-                    </View>
+                    <Farming />
+                    {Platform.OS === "web" && <WebFooter />}
                 </Content>
             </Container>
         </Screen>
@@ -289,7 +289,7 @@ const DepositControls = ({ state }: { state: FarmingState }) => {
 
 const AddLiquidityButton = () => {
     const { green } = useColors();
-    const onPress = useLinker("/liquidity", "Liquidity");
+    const onPress = useLinker("/#/liquidity", "Liquidity");
     return (
         <Button
             color={green}

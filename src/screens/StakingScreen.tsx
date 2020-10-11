@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Platform, View } from "react-native";
 import { Icon } from "react-native-elements";
 
 import useAsyncEffect from "use-async-effect";
@@ -18,6 +18,7 @@ import Notice from "../components/Notice";
 import Subtitle from "../components/Subtitle";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
+import WebFooter from "../components/web/WebFooter";
 import { SUSHI_BAR } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
@@ -35,6 +36,7 @@ const StakingScreen = () => {
             <Container>
                 <Content>
                     <Staking />
+                    {Platform.OS === "web" && <WebFooter />}
                 </Content>
             </Container>
         </Screen>

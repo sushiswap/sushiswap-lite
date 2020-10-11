@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
 import ApproveButton from "../components/ApproveButton";
@@ -15,6 +15,7 @@ import LPTokenSelect from "../components/LPTokenSelect";
 import Notice from "../components/Notice";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
+import WebFooter from "../components/web/WebFooter";
 import { MIGRATOR2 } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import useMigrateState, { MigrateState } from "../hooks/useMigrateState";
@@ -28,6 +29,7 @@ const MigrateScreen = () => {
             <Container>
                 <Content>
                     <Migrate />
+                    {Platform.OS === "web" && <WebFooter />}
                 </Content>
             </Container>
         </Screen>

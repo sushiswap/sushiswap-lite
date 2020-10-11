@@ -6,7 +6,6 @@ import { HashRouter as Router, Route, Switch } from "react-router-dom";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { DefaultTheme, NavigationContainer, Theme } from "@react-navigation/native";
 import useAsyncEffect from "use-async-effect";
-import WebFooter from "../components/web/WebFooter";
 import WebHeader from "../components/web/WebHeader";
 import WebStatus from "../components/web/WebStatus";
 import { GlobalContext } from "../context/GlobalContext";
@@ -14,6 +13,8 @@ import useColors from "../hooks/useColors";
 import FarmingScreen from "./FarmingScreen";
 import LiquidityScreen from "./LiquidityScreen";
 import MigrateScreen from "./MigrateScreen";
+import MyLimitOrdersScreen from "./MyLimitOrdersScreen";
+import RemoveLiquidityScreen from "./RemoveLiquidityScreen";
 import StakingScreen from "./StakingScreen";
 import SwapScreen from "./SwapScreen";
 
@@ -23,11 +24,18 @@ export const Screens = () => {
     return Platform.OS === "web" ? <WebScreens /> : <AppScreens />;
 };
 
+// tslint:disable-next-line:max-func-body-length
 const WebScreens = () => {
     return (
         <Router>
             <View style={{ flex: 1 }}>
                 <Switch>
+                    <Route path={"/limit-orders"}>
+                        <MyLimitOrdersScreen />
+                    </Route>
+                    <Route path={"/liquidity/remove"}>
+                        <RemoveLiquidityScreen />
+                    </Route>
                     <Route path={"/liquidity"}>
                         <LiquidityScreen />
                     </Route>
@@ -46,7 +54,6 @@ const WebScreens = () => {
                 </Switch>
                 <WebHeader />
                 <WebStatus />
-                <WebFooter />
             </View>
         </Router>
     );

@@ -1,18 +1,35 @@
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, FlatList, Image, TouchableHighlight, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, Platform, TouchableHighlight, View } from "react-native";
 import { Hoverable } from "react-native-web-hover";
 
+import Border from "../components/Border";
+import CloseIcon from "../components/CloseIcon";
+import Column from "../components/Column";
+import Container from "../components/Container";
+import Content from "../components/Content";
+import FlexView from "../components/FlexView";
+import SelectIcon from "../components/SelectIcon";
+import Text from "../components/Text";
+import WebFooter from "../components/web/WebFooter";
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 import useMyLimitOrdersState, { MyLimitOrdersState } from "../hooks/useMyLimitOrdersState";
 import { Order } from "../hooks/useSDK";
 import { formatBalance } from "../utils";
-import Border from "./Border";
-import CloseIcon from "./CloseIcon";
-import Column from "./Column";
-import FlexView from "./FlexView";
-import SelectIcon from "./SelectIcon";
-import Text from "./Text";
+import Screen from "./Screen";
+
+const MyLimitOrdersScreen = () => {
+    return (
+        <Screen>
+            <Container>
+                <Content>
+                    <MyLimitOrders />
+                    {Platform.OS === "web" && <WebFooter />}
+                </Content>
+            </Container>
+        </Screen>
+    );
+};
 
 const MyLimitOrders = () => {
     const state = useMyLimitOrdersState();
@@ -20,7 +37,7 @@ const MyLimitOrders = () => {
         <>
             <Column style={{ alignItems: "center" }}>
                 <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
-                    📝 My Orders
+                    📈 My Limit Orders
                 </Text>
                 <OrderSelect state={state} />
             </Column>
@@ -35,7 +52,7 @@ const OrderSelect = (props: { state: MyLimitOrdersState }) => {
     return (
         <Column>
             <Text fontWeight={"bold"} medium={true} style={{ marginBottom: Spacing.normal, fontSize: 20 }}>
-                {"1. Select an order you want to CANCEL:"}
+                {"1. Select a limit order you've placed:"}
             </Text>
             {props.state.selectedOrder ? (
                 <OrderItem order={props.state.selectedOrder} selected={true} onSelectOrder={onUnselectOrder} />
@@ -130,4 +147,4 @@ const LogoSymbol = ({ token }) => {
     );
 };
 
-export default MyLimitOrders;
+export default MyLimitOrdersScreen;

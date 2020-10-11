@@ -1,23 +1,41 @@
 import React, { useCallback, useState } from "react";
+import { Platform } from "react-native";
 import { Icon } from "react-native-elements";
 
 import useAsyncEffect from "use-async-effect";
+import ApproveButton from "../components/ApproveButton";
+import Button from "../components/Button";
+import Column from "../components/Column";
+import Container from "../components/Container";
+import Content from "../components/Content";
+import ErrorMessage from "../components/ErrorMessage";
+import FetchingButton from "../components/FetchingButton";
+import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
+import LPTokenItem from "../components/LPTokenItem";
+import LPTokenSelect from "../components/LPTokenSelect";
+import Text from "../components/Text";
+import TokenInput from "../components/TokenInput";
+import WebFooter from "../components/web/WebFooter";
 import { ROUTER } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 import useRemoveLiquidityState, { RemoveLiquidityState } from "../hooks/useRemoveLiquidityState";
 import MetamaskError from "../types/MetamaskError";
 import { isEmptyValue, parseBalance } from "../utils";
-import ApproveButton from "./ApproveButton";
-import Button from "./Button";
-import Column from "./Column";
-import ErrorMessage from "./ErrorMessage";
-import FetchingButton from "./FetchingButton";
-import InsufficientBalanceButton from "./InsufficientBalanceButton";
-import LPTokenItem from "./LPTokenItem";
-import LPTokenSelect from "./LPTokenSelect";
-import Text from "./Text";
-import TokenInput from "./TokenInput";
+import Screen from "./Screen";
+
+const RemoveLiquidityScreen = () => {
+    return (
+        <Screen>
+            <Container>
+                <Content>
+                    <RemoveLiquidity />
+                    {Platform.OS === "web" && <WebFooter />}
+                </Content>
+            </Container>
+        </Screen>
+    );
+};
 
 const RemoveLiquidity = () => {
     const state = useRemoveLiquidityState();
@@ -121,4 +139,4 @@ const RemoveButton = ({
     return <Button size={"large"} title={"Remove"} disabled={disabled} loading={state.removing} onPress={onPress} />;
 };
 
-export default RemoveLiquidity;
+export default RemoveLiquidityScreen;

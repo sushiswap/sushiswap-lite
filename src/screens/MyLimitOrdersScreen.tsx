@@ -2,13 +2,18 @@ import React, { useCallback, useState } from "react";
 import { ActivityIndicator, FlatList, Image, Platform, TouchableHighlight, View } from "react-native";
 import { Hoverable } from "react-native-web-hover";
 
+import useAsyncEffect from "use-async-effect";
 import Border from "../components/Border";
+import Button from "../components/Button";
 import CloseIcon from "../components/CloseIcon";
 import Column from "../components/Column";
 import Container from "../components/Container";
 import Content from "../components/Content";
+import ErrorMessage from "../components/ErrorMessage";
 import FlexView from "../components/FlexView";
+import Meta from "../components/Meta";
 import SelectIcon from "../components/SelectIcon";
+import Subtitle from "../components/Subtitle";
 import Text from "../components/Text";
 import WebFooter from "../components/web/WebFooter";
 import { Spacing } from "../constants/dimension";
@@ -16,6 +21,7 @@ import Fraction from "../constants/Fraction";
 import useColors from "../hooks/useColors";
 import useMyLimitOrdersState, { MyLimitOrdersState } from "../hooks/useMyLimitOrdersState";
 import { Order } from "../hooks/useSDK";
+import MetamaskError from "../types/MetamaskError";
 import { formatBalance } from "../utils";
 import Screen from "./Screen";
 
@@ -41,6 +47,8 @@ const MyLimitOrders = () => {
                     📈 My Limit Orders
                 </Text>
                 <OrderSelect state={state} />
+                <OrderInfo state={state} />
+                <Controls state={state} />
             </Column>
         </>
     );
@@ -114,7 +122,7 @@ const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (ord
                             </View>
                             <View style={{ flex: 1 }}>
                                 <Text note={true} style={{ textAlign: "right" }}>
-                                    Minimum Price
+                                    Min. Price
                                 </Text>
                                 <Text light={true} style={{ textAlign: "right", fontSize: 22, color: textMedium }}>
                                     {price.toString()}
@@ -144,16 +152,64 @@ const TokenAmount = ({ token, amount, buy }) => {
                 light={true}
                 fontWeight={"light"}
                 style={{ fontSize: 22, color: textMedium, marginLeft: Spacing.tiny }}>
-                {" " + formatBalance(amount, token.decimals, 4)}
+                {formatBalance(amount, token.decimals, 4)}
             </Text>
-            <Text light={true} style={{ fontSize: 22, color: textMedium }}>
-                {" " + token.symbol.replace(/\+/g, "+\n")}
+            <Text medium={true} style={{ fontSize: 22, marginLeft: Spacing.tiny }}>
+                {token.symbol.replace(/\+/g, "+\n")}
             </Text>
-            <Text light={true} style={{ fontSize: 22, color: buy ? green : red }}>
-                {" " + (buy ? "+" : "−")}
+            <Text note={true} style={{ color: buy ? green : red, marginLeft: Spacing.tiny, marginTop: 4 }}>
+                {buy ? "MIN. BUY" : "SELL"}
             </Text>
         </FlexView>
     );
+};
+
+const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
+    if (!state.selectedOrder) return <Column noTopMargin={true} />;
+    const filledAmountIn = state.orderInfo?.filledAmountIn;
+    const { amountIn, amountOutMin, fromToken, toToken } = state.selectedOrder;
+    const price = Fraction.fromTokens(amountOutMin, amountIn, toToken, fromToken);
+    return (
+        <Column>
+            <Subtitle text={"2. Do you want to cancel the order?"} />
+            <Meta
+                label={"Amount Filled"}
+                text={filledAmountIn ? formatBalance(filledAmountIn, fromToken.decimals) : undefined}
+                suffix={fromToken.symbol}
+            />
+            <Meta
+                label={"Amount To Sell"}
+                text={formatBalance(amountIn, fromToken.decimals)}
+                suffix={fromToken.symbol}
+            />
+            <Meta
+                label={"Min. Amount To Buy"}
+                text={formatBalance(amountOutMin, toToken.decimals)}
+                suffix={toToken.symbol}
+            />
+            <Meta label={"Min. Price"} text={price.toString()} suffix={toToken.symbol + " / " + fromToken.symbol} />
+        </Column>
+    );
+};
+
+const Controls = ({ state }: { state: MyLimitOrdersState }) => {
+    const [error, setError] = useState<MetamaskError>({});
+    useAsyncEffect(() => setError({}), [state.selectedOrder]);
+    if (!state.selectedOrder) return <Column noTopMargin={true} />;
+    return (
+        <Column>
+            <CancelButton state={state} onError={setError} />
+            {error.message && error.code !== 4001 && <ErrorMessage error={error} />}
+        </Column>
+    );
+};
+
+const CancelButton = ({ state, onError }: { state: MyLimitOrdersState; onError: (e) => void }) => {
+    const onPress = useCallback(() => {
+        onError({});
+        state.onCancelOrder().catch(onError);
+    }, [state.onCancelOrder, onError]);
+    return <Button size={"large"} title={"Cancel"} loading={state.cancellingOrder} onPress={onPress} />;
 };
 
 export default MyLimitOrdersScreen;

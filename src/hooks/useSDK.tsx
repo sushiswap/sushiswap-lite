@@ -78,11 +78,28 @@ const useSDK = () => {
             const args = await order.toArgs();
 
             const orderBook = getContract("OrderBook", ORDER_BOOK, kovanSigner);
-            const tx = await orderBook.createOrder(...args);
+            const gasLimit = await orderBook.estimateGas.createOrder(...args);
+            const tx = await orderBook.createOrder(...args, {
+                gasLimit: gasLimit.mul(120).div(100)
+            });
             return await logTransaction(tx, "OrderBook.createOrder()", ...args.map(arg => arg.toString()));
         },
         []
     );
+
+    const cancelOrder = useCallback(async (hash: string, signer: ethers.Signer, kovanSigner: ethers.Signer) => {
+        const orderBook = getContract("OrderBook", ORDER_BOOK, kovanSigner);
+        const callHash = await orderBook.cancelOrderCallHash(hash);
+        const signature = await signer.signMessage(ethers.utils.arrayify(callHash));
+        const { v, r, s } = ethers.utils.splitSignature(signature);
+        const args = [hash, v, r, s];
+
+        const gasLimit = await orderBook.estimateGas.cancelOrder(...args);
+        const tx = await orderBook.cancelOrder(...args, {
+            gasLimit: gasLimit.mul(120).div(100)
+        });
+        return await logTransaction(tx, "OrderBook.cancelOrder()", ...args.map(arg => arg.toString()));
+    }, []);
 
     const wrapETH = useCallback(async (amount: ethers.BigNumber, signer: ethers.Signer) => {
         const weth = getContract("IWETH", WETH[1].address, signer);
@@ -297,6 +314,7 @@ const useSDK = () => {
         getTrade,
         swap,
         createOrder,
+        cancelOrder,
         wrapETH,
         unwrapETH,
         getPair,

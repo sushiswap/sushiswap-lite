@@ -1,19 +1,18 @@
-import React, { useCallback, useContext } from "react";
+import React, { useContext } from "react";
 import { Icon, SocialIcon as NativeSocialIcon, SocialIconProps } from "react-native-elements";
-
-import * as Linking from "expo-linking";
 
 import { Spacing } from "../constants/dimension";
 import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
+import useLinker from "../hooks/useLinker";
 import FlexView from "./FlexView";
 
 const SocialIcons = () => {
     const { darkMode } = useContext(GlobalContext);
     const { background, textLight } = useColors();
-    const onPressTwitter = useCallback(() => Linking.openURL("https://twitter.com/LevxApp"), []);
-    const onPressGithub = useCallback(() => Linking.openURL("https://github.com/sushiswap-community"), []);
-    const onPressDiscord = useCallback(() => Linking.openURL("https://discord.gg/3QKsgf"), []);
+    const onPressTwitter = useLinker("https://twitter.com/LevxApp", "", "_blank");
+    const onPressGithub = useLinker("https://github.com/sushiswap-community", "", "_blank");
+    const onPressDiscord = useLinker("https://discord.gg/RPsPTfJ", "", "_blank");
     return (
         <FlexView style={{ width: "100%", marginTop: Spacing.large, justifyContent: "center" }}>
             <SocialIcon type="github-alt" onPress={onPressGithub} />

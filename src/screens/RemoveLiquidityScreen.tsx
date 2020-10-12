@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from "react";
 import { Platform } from "react-native";
-import { Icon } from "react-native-elements";
 
 import useAsyncEffect from "use-async-effect";
 import ApproveButton from "../components/ApproveButton";
@@ -13,12 +12,12 @@ import FetchingButton from "../components/FetchingButton";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
 import LPTokenItem from "../components/LPTokenItem";
 import LPTokenSelect from "../components/LPTokenSelect";
+import Meta from "../components/Meta";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
 import WebFooter from "../components/web/WebFooter";
 import { ROUTER } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
-import useColors from "../hooks/useColors";
 import useRemoveLiquidityState, { RemoveLiquidityState } from "../hooks/useRemoveLiquidityState";
 import MetamaskError from "../types/MetamaskError";
 import { isEmptyValue, parseBalance } from "../utils";
@@ -66,31 +65,21 @@ const RemoveLiquidity = () => {
 };
 
 const AmountInfo = ({ state }: { state: RemoveLiquidityState }) => {
-    if (!state.selectedLPToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount)) {
+    if (!state.selectedLPToken || !state.fromToken || !state.toToken) {
         return <Column noTopMargin={true} />;
     }
     return (
         <Column noTopMargin={true}>
-            <ArrowDown />
-            <Amount amount={state.fromAmount} token={state.fromToken} />
-            <Amount amount={state.toAmount} token={state.toToken} />
+            <Meta
+                label={"Amount of " + state.fromToken.symbol}
+                text={state.fromAmount}
+                suffix={state.fromToken.symbol}
+            />
+            <Meta label={"Amount of " + state.toToken.symbol} text={state.toAmount} suffix={state.toToken.symbol} />
         </Column>
     );
 };
 
-const ArrowDown = () => {
-    const { textLight } = useColors();
-    return <Icon type={"material-community"} name={"arrow-down"} color={textLight} style={{ margin: Spacing.small }} />;
-};
-
-const Amount = ({ amount, token }) => {
-    const symbol = token.symbol === "WETH" ? "ETH" : token.symbol;
-    return (
-        <Text style={{ fontSize: 22, textAlign: "center" }}>
-            {amount} {symbol}
-        </Text>
-    );
-};
 // tslint:disable-next-line:max-func-body-length
 const Controls = ({ state }: { state: RemoveLiquidityState }) => {
     const [error, setError] = useState<MetamaskError>({});

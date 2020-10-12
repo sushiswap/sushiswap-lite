@@ -23,7 +23,10 @@ const ApproveButton: FC<ApproveButtonProps> = props => {
             setLoading(true);
             try {
                 const tx = await approveToken(props.token.address, props.spender);
-                tx?.wait().then(() => props.onSuccess());
+                if (tx) {
+                    await tx.wait();
+                    props.onSuccess();
+                }
             } catch (e) {
                 props.onError(e);
             } finally {
@@ -31,9 +34,7 @@ const ApproveButton: FC<ApproveButtonProps> = props => {
             }
         }
     }, [props.token]);
-    if (props.hidden) {
-        return <View />;
-    }
+    if (props.hidden) return <View />;
     return (
         <Button
             size={"large"}

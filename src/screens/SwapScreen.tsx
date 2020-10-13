@@ -148,13 +148,6 @@ const OrderTypeSelect = ({ state }: { state: SwapState }) => {
                 <OrderCheckBox state={state} orderType={"market"} />
                 <OrderCheckBox state={state} orderType={"limit"} />
             </View>
-            {state.orderType === "limit" && (
-                <ExperimentalNotice
-                    contractURL={
-                        "https://github.com/sushiswap/sushiswap-settlement/blob/master/contracts/Settlement.sol"
-                    }
-                />
-            )}
         </Column>
     );
 };
@@ -371,6 +364,13 @@ const LimitOrderControls = ({ state }: { state: SwapState }) => {
     const marketPrice = Fraction.parse(state.trade.executionPrice.toFixed(state.toToken.decimals));
     return (
         <Column>
+            {state.orderType === "limit" && (
+                <ExperimentalNotice
+                    contractURL={
+                        "https://github.com/sushiswap/sushiswap-settlement/blob/master/contracts/Settlement.sol"
+                    }
+                />
+            )}
             {!price.gt(marketPrice) ? (
                 <PriceTooLowButton />
             ) : state.unsupported ? (
@@ -407,10 +407,16 @@ const PlaceOrderButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
-    const onPress = useCallback(() => {
+    const goToLimitOrders = useLinker("/#/limit-orders", "LimitOrders", "_self");
+    const onPress = useCallback(async () => {
         onError({});
-        state.onCreateOrder().catch(onError);
-    }, [state.onCreateOrder, onError]);
+        try {
+            await state.onCreateOrder();
+            goToLimitOrders();
+        } catch (e) {
+            onError(e);
+        }
+    }, [state.onCreateOrder, goToLimitOrders, onError]);
     return (
         <Button
             size={"large"}

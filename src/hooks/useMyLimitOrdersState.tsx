@@ -35,33 +35,41 @@ const useMyLimitOrdersState = () => {
     const [loading, setLoading] = useState(true);
     const [cancellingOrder, setCancellingOrder] = useState(false);
 
+    // tslint:disable-next-line:max-func-body-length
     const updateOrders = async () => {
         if (signer && kovanSigner && provider && tokens) {
             const orderBook = getContract("OrderBook", ORDER_BOOK, kovanSigner);
             const address = await signer.getAddress();
             const length = await orderBook.numberOfHashesOfMaker(address);
-            const LIMIT = 10;
-            const array: Order[] = [];
+            const LIMIT = 20;
+            const pages: number[] = [];
             for (let i = 0; i * LIMIT < length; i++) {
-                const hashes = await orderBook.hashesOfMaker(address, i * LIMIT, LIMIT);
-                for (const hash of hashes) {
-                    if (hash !== ethers.constants.HashZero) {
-                        const order = await orderBook.orderOfHash(hash);
-                        array.push(
-                            new Order(
-                                signer,
-                                await findOrFetchToken(provider, order.fromToken, tokens),
-                                await findOrFetchToken(provider, order.toToken, tokens),
-                                order.amountIn,
-                                order.amountOutMin,
-                                order.recipient,
-                                order.deadline
-                            )
-                        );
-                    }
-                }
+                pages.push(i);
             }
-            setOrders(array);
+            const hashes = (
+                await Promise.all(
+                    pages.map(async page => {
+                        return await orderBook.allHashes(page, LIMIT);
+                    })
+                )
+            ).flat();
+            const myOrders = await Promise.all(
+                hashes
+                    .filter(hash => hash !== ethers.constants.HashZero)
+                    .map(async hash => {
+                        const order = await orderBook.orderOfHash(hash);
+                        return new Order(
+                            signer,
+                            await findOrFetchToken(provider, order.fromToken, tokens),
+                            await findOrFetchToken(provider, order.toToken, tokens),
+                            order.amountIn,
+                            order.amountOutMin,
+                            order.recipient,
+                            order.deadline
+                        );
+                    })
+            );
+            setOrders(myOrders);
             setLoading(false);
         }
     };

@@ -11,6 +11,7 @@ import Column from "../components/Column";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
+import ExperimentalNotice from "../components/ExperimentalNotice";
 import FetchingButton from "../components/FetchingButton";
 import Guide from "../components/Guide";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
@@ -147,6 +148,13 @@ const OrderTypeSelect = ({ state }: { state: SwapState }) => {
                 <OrderCheckBox state={state} orderType={"market"} />
                 <OrderCheckBox state={state} orderType={"limit"} />
             </View>
+            {state.orderType === "limit" && (
+                <ExperimentalNotice
+                    contractURL={
+                        "https://github.com/sushiswap/sushiswap-settlement/blob/master/contracts/Settlement.sol"
+                    }
+                />
+            )}
         </Column>
     );
 };

@@ -10,6 +10,7 @@ import Column from "../components/Column";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
+import ExperimentalNotice from "../components/ExperimentalNotice";
 import FlexView from "../components/FlexView";
 import Meta from "../components/Meta";
 import SelectIcon from "../components/SelectIcon";
@@ -63,6 +64,9 @@ const OrderSelect = (props: { state: MyLimitOrdersState }) => {
             <Text fontWeight={"bold"} medium={true} style={{ marginBottom: Spacing.normal, fontSize: 20 }}>
                 {"1. Select a limit order you've placed:"}
             </Text>
+            <ExperimentalNotice
+                contractURL={"https://github.com/sushiswap/sushiswap-settlement/blob/master/contracts/OrderBook.sol"}
+            />
             {props.state.selectedOrder ? (
                 <OrderItem order={props.state.selectedOrder} selected={true} onSelectOrder={onUnselectOrder} />
             ) : (

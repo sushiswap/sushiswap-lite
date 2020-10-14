@@ -49,7 +49,7 @@ const Staking = () => {
         <View style={{ alignItems: "center", marginBottom: Spacing.huge * 2 }}>
             <Column>
                 <Text h4={true} style={{ textAlign: "center" }}>
-                    💰 Staking
+                    💰 Stake/Unstake
                 </Text>
             </Column>
             <ActionSelect state={state} />

@@ -434,7 +434,7 @@ const MyLimitOrdersGuide = ({ state }: { state: SwapState }) => {
     return (
         <Guide
             hidden={state.fromSymbol !== ""}
-            text={"☘️ What if you want to scan limit orders you've placed?"}
+            text={"☘️ Do you want to scan limit orders you've placed?"}
             buttonTitle={"Click Here!"}
             onPressButton={onPress}
         />

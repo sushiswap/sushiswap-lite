@@ -233,7 +233,7 @@ const RemoveLiquidityGuide = ({ state }: { state: AddLiquidityState }) => {
     return (
         <Guide
             hidden={state.fromSymbol !== ""}
-            text={"☘️ What if you want to remove existing liquidity?"}
+            text={"☘️ Do you want to remove existing liquidity?"}
             buttonTitle={"Click Here!"}
             onPressButton={onPress}
         />

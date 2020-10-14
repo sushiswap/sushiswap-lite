@@ -3,6 +3,8 @@ import { Platform, View } from "react-native";
 import { Icon } from "react-native-elements";
 import { HashRouter as Router, Route, Switch } from "react-router-dom";
 
+import { DeviceType } from "expo-device";
+
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { DefaultTheme, NavigationContainer, Theme } from "@react-navigation/native";
 import useAsyncEffect from "use-async-effect";
@@ -26,6 +28,7 @@ export const Screens = () => {
 
 // tslint:disable-next-line:max-func-body-length
 const WebScreens = () => {
+    const { deviceType } = useContext(GlobalContext);
     return (
         <Router>
             <View style={{ flex: 1 }}>
@@ -52,8 +55,8 @@ const WebScreens = () => {
                         <SwapScreen />
                     </Route>
                 </Switch>
-                <WebHeader />
-                <WebStatus />
+                {deviceType !== DeviceType.PHONE && <WebHeader />}
+                {deviceType !== DeviceType.PHONE && <WebStatus />}
             </View>
         </Router>
     );

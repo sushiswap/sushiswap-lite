@@ -10,7 +10,7 @@ const ExperimentalNotice = (props: { contractURL: string }) => {
     return (
         <View style={{ marginBottom: Spacing.normal }}>
             <Notice
-                text={"This is an experimental feature. Read the contract yourself and use it with caution."}
+                text={"This feature is in beta. Read the contract yourself and use it with caution."}
                 color={"orange"}
                 buttonText={"Read Contract"}
                 onPressButton={onPressContract}

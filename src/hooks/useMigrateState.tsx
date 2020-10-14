@@ -42,7 +42,7 @@ const useMigrateState: () => MigrateState = () => {
             setMigrating(true);
             try {
                 const amount = parseBalance(state.amount, state.selectedLPToken.decimals);
-                const tx = await migrate(state.selectedLPToken, amount);
+                const tx = await migrate(state.selectedLPToken, amount, signer);
                 await tx.wait();
                 await updateTokens();
                 state.setSelectedLPToken(undefined);

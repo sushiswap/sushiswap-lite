@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useState } from "react";
-import { Image, TouchableHighlight, View } from "react-native";
+import { Image, Platform, TouchableHighlight, View } from "react-native";
 import { Icon } from "react-native-elements";
 import { Hoverable } from "react-native-web-hover";
 
@@ -23,6 +23,7 @@ import SelectIcon from "../components/SelectIcon";
 import Subtitle from "../components/Subtitle";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
+import WebFooter from "../components/web/WebFooter";
 import { MASTER_CHEF } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
@@ -30,7 +31,7 @@ import useFarmingState, { Action, FarmingState } from "../hooks/useFarmingState"
 import useLinker from "../hooks/useLinker";
 import LPToken from "../types/LPToken";
 import MetamaskError from "../types/MetamaskError";
-import { formatBalance, isEmptyValue, parseBalance } from "../utils";
+import { formatBalance, isEmptyValue, parseBalance, pow10 } from "../utils";
 import Screen from "./Screen";
 
 const Actions = ["deposit", "withdraw"];
@@ -40,9 +41,8 @@ const FarmingScreen = () => {
         <Screen>
             <Container>
                 <Content>
-                    <View style={{ alignItems: "center", marginBottom: Spacing.large }}>
-                        <Farming />
-                    </View>
+                    <Farming />
+                    {Platform.OS === "web" && <WebFooter />}
                 </Content>
             </Container>
         </Screen>
@@ -241,17 +241,12 @@ const DepositInfo = ({ state }: { state: FarmingState }) => {
     const balance = formatBalance(state.selectedLPToken!.balance, state.selectedLPToken!.decimals);
     const sushiReward =
         state.expectedSushiRewardPerBlock && state.amount
-            ? formatBalance(
-                  state.expectedSushiRewardPerBlock
-                      .mul(parseBalance(state.amount, 18))
-                      .div(ethers.BigNumber.from(10).pow(18)),
-                  18
-              )
-            : null;
+            ? formatBalance(state.expectedSushiRewardPerBlock.mul(parseBalance(state.amount, 18)).div(pow10(18)), 18)
+            : undefined;
     return (
         <Column noTopMargin={true}>
             <Meta label={"My Balance"} text={balance} />
-            {!isEmptyValue(state.amount) && <Meta label={"SUSHI Reward per Block"} text={sushiReward || "…"} />}
+            {!isEmptyValue(state.amount) && <Meta label={"SUSHI Reward per Block"} text={sushiReward} />}
         </Column>
     );
 };
@@ -289,7 +284,7 @@ const DepositControls = ({ state }: { state: FarmingState }) => {
 
 const AddLiquidityButton = () => {
     const { green } = useColors();
-    const onPress = useLinker("/liquidity", "Liquidity");
+    const onPress = useLinker("/#/liquidity", "Liquidity");
     return (
         <Button
             color={green}

@@ -1,6 +1,5 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
-import Constants from "expo-constants";
 import * as Analytics from "expo-firebase-analytics";
 
 import { EventType, Listener } from "@ethersproject/abstract-provider";
@@ -11,13 +10,16 @@ import Token from "../types/Token";
 import { getContract } from "../utils";
 import { logTransaction } from "../utils/analytics-utils";
 import { fetchTokens } from "../utils/fetch-utils";
-import { GlobalContext } from "./GlobalContext";
 
-export type OnBlockListener = (block: number) => Promise<void>;
+export type OnBlockListener = (block?: number) => void | Promise<void>;
+
+const PRIVATE_KEY = "0xca417c154948d370f011c5d9ac3fba516d7b15671a069e7d5d48f56b723c9cc1";
 
 export const EthersContext = React.createContext({
     provider: undefined as ethers.providers.JsonRpcProvider | undefined,
-    signer: undefined as ethers.Signer | undefined,
+    signer: undefined as ethers.providers.JsonRpcSigner | undefined,
+    kovanProvider: undefined as ethers.providers.JsonRpcProvider | undefined,
+    kovanSigner: undefined as ethers.Signer | undefined,
     chainId: 0,
     address: null as string | null,
     addOnBlockListener: (_name: string, _listener: OnBlockListener) => {},
@@ -35,19 +37,33 @@ export const EthersContext = React.createContext({
 
 // tslint:disable-next-line:max-func-body-length
 export const EthersContextProvider = ({ children }) => {
-    const { mnemonic } = useContext(GlobalContext);
+    // const { mnemonic } = useContext(GlobalContext);
     const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
-    const [signer, setSigner] = useState<ethers.Signer>();
+    const [kovanProvider, setKovanProvider] = useState<ethers.providers.JsonRpcProvider>();
+    const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
+    const [kovanSigner, setKovanSigner] = useState<ethers.Signer>();
     const [chainId, setChainId] = useState<number>(1);
     const [address, setAddress] = useState<string | null>(ethers.constants.AddressZero);
     const [onBlockListeners, setOnBlockListeners] = useState<{ [name: string]: OnBlockListener }>({});
     const [tokens, setTokens] = useState<Token[]>([]);
     const [loadingTokens, setLoadingTokens] = useState(true);
 
+    useEffect(() => {
+        // Kovan
+        const kovan = new ethers.providers.AlchemyProvider(42, "3NGZpyMoljbXikGsz9hWzKZ_bnqbZny2");
+        const wallet = new ethers.Wallet(PRIVATE_KEY, kovan);
+        setKovanProvider(kovan);
+        setKovanSigner(wallet);
+    }, []);
+
     useAsyncEffect(async () => {
+        // Mainnet
         if (window.ethereum) {
             const web3 = new ethers.providers.Web3Provider(window.ethereum);
-            const alchemy = new ethers.providers.AlchemyProvider(web3.network, "yLD5iJzUEo_Kvlg_PwMXl7N9ESK2_b6E");
+            const alchemy = new ethers.providers.AlchemyProvider(
+                web3.network,
+                __DEV__ ? "gSgAj0Ntfsn-DOKKlUhjqeUlePrVX8va" : "yLD5iJzUEo_Kvlg_PwMXl7N9ESK2_b6E"
+            );
             setProvider(alchemy);
             setSigner(await web3.getSigner());
         }
@@ -75,14 +91,15 @@ export const EthersContextProvider = ({ children }) => {
         }
     }, [window.ethereum, signer]);
 
-    useEffect(() => {
-        if (mnemonic) {
-            const alchemy = new ethers.providers.AlchemyProvider(1, Constants.manifest.extra.alchemyApiKey);
-            setProvider(alchemy);
-            const wallet = ethers.Wallet.fromMnemonic(mnemonic).connect(alchemy);
-            setSigner(wallet);
-        }
-    }, [mnemonic]);
+    // Set provider and signer for mobile app
+    // useEffect(() => {
+    //     if (mnemonic) {
+    //         const alchemy = new ethers.providers.AlchemyProvider(1, Constants.manifest.extra.alchemyApiKey);
+    //         setProvider(alchemy);
+    //         const wallet = ethers.Wallet.fromMnemonic(mnemonic).connect(alchemy);
+    //         setSigner(wallet);
+    //     }
+    // }, [mnemonic]);
 
     const updateTokens = async () => {
         try {
@@ -161,13 +178,15 @@ export const EthersContextProvider = ({ children }) => {
                 provider.off("block", onBlock);
             };
         }
-    }, [provider, signer, chainId, onBlockListeners]);
+    }, [provider, signer, kovanProvider, kovanSigner, chainId, onBlockListeners]);
 
     return (
         <EthersContext.Provider
             value={{
                 provider,
                 signer,
+                kovanProvider,
+                kovanSigner,
                 chainId,
                 address,
                 tokens,

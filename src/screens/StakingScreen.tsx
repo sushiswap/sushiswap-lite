@@ -1,8 +1,7 @@
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Platform, View } from "react-native";
 import { Icon } from "react-native-elements";
 
-import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import ApproveButton from "../components/ApproveButton";
 import Button from "../components/Button";
@@ -19,8 +18,10 @@ import Notice from "../components/Notice";
 import Subtitle from "../components/Subtitle";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
+import WebFooter from "../components/web/WebFooter";
 import { SUSHI_BAR } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
+import Fraction from "../constants/Fraction";
 import useColors from "../hooks/useColors";
 import useStakingState, { Action, StakingState } from "../hooks/useStakingState";
 import MetamaskError from "../types/MetamaskError";
@@ -35,6 +36,7 @@ const StakingScreen = () => {
             <Container>
                 <Content>
                     <Staking />
+                    {Platform.OS === "web" && <WebFooter />}
                 </Content>
             </Container>
         </Screen>
@@ -172,11 +174,11 @@ const StakeInfo = ({ state }: { state: StakingState }) => {
     }
     const amount = parseBalance(state.amount, state.sushi.decimals);
     const xSushiAmount = amount.mul(state.xSushiSupply).div(state.sushiSupply);
-    const share = xSushiAmount.mul(ethers.BigNumber.from(10).pow(8)).div(state.xSushiSupply);
+    const share = Fraction.from(xSushiAmount, state.xSushiSupply);
     return (
         <Column noTopMargin={true}>
             <Meta label={"xSUSHI Amount"} text={formatBalance(xSushiAmount, state.xSushi.decimals)} />
-            <Meta label={"xSUSHI Share"} text={formatBalance(share, 8) + "%"} />
+            <Meta label={"xSUSHI Share"} text={share.toString() + "%"} />
         </Column>
     );
 };

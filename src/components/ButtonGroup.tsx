@@ -47,7 +47,7 @@ const ButtonGroup: FC<ButtonGroupProps> = props => {
                     marginHorizontal: 0,
                     marginVertical: 0,
                     height: 56,
-                    ...shadow
+                    ...shadow()
                 },
                 props.containerStyle
             ]}

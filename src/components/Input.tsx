@@ -23,7 +23,7 @@ const Input: FC<InputProps> = props => {
     const { textDark, textMedium, textLight } = useColors();
     const size = props.size || "normal";
     const color = props.color || textDark;
-    const fontSize = size === "small" ? 24 : size === "large" ? 36 : 30;
+    const fontSize = size === "small" ? 24 : size === "large" ? 32 : 28;
     const onChangeText = useCallback(
         (text: string) => {
             props.onChangeText?.(text);

@@ -1,14 +1,13 @@
-import React, { FC, useCallback, useContext } from "react";
+import React, { FC, useCallback } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
-import { CheckBox as NativeCheckBox, CheckBoxProps } from "react-native-elements";
 
 import { ethers } from "ethers";
 import { Spacing } from "../constants/dimension";
-import { GlobalContext } from "../context/GlobalContext";
-import useColors from "../hooks/useColors";
 import { LPTokensState } from "../hooks/useLPTokensState";
 import LPToken from "../types/LPToken";
+import { pow10 } from "../utils";
 import Border from "./Border";
+import CheckBox from "./CheckBox";
 import Column from "./Column";
 import FlexView from "./FlexView";
 import Text from "./Text";
@@ -74,30 +73,6 @@ const Filter = ({ filter, onFilterChanged }) => {
     );
 };
 
-const CheckBox = (props: CheckBoxProps) => {
-    const { darkMode } = useContext(GlobalContext);
-    const { primary, secondary, textLight } = useColors();
-    return (
-        <NativeCheckBox
-            {...props}
-            textStyle={{ fontFamily: "regular", fontSize: 14, color: textLight, marginLeft: 0, marginRight: 4 }}
-            containerStyle={{
-                backgroundColor: "transparent",
-                borderWidth: 0,
-                marginLeft: Spacing.tiny,
-                marginRight: 0,
-                marginVertical: Spacing.small,
-                padding: 0
-            }}
-            iconRight={true}
-            iconType={"material-community"}
-            checkedIcon={"radiobox-marked"}
-            uncheckedIcon={"radiobox-blank"}
-            checkedColor={darkMode ? secondary : primary}
-        />
-    );
-};
-
 // tslint:disable-next-line:max-func-body-length
 const LPTokenList = ({
     state,
@@ -127,7 +102,7 @@ const LPTokenList = ({
     let data = state.lpTokens.sort((t1, t2) => {
         return (t2.totalDeposited || ethers.constants.Zero)
             .sub(t1.totalDeposited || ethers.constants.Zero)
-            .div(ethers.BigNumber.from(10).pow(14))
+            .div(pow10(14))
             .toNumber();
     });
     if (filter === "amountDeposited") {

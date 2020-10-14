@@ -2,26 +2,24 @@ import React, { useCallback } from "react";
 import { View } from "react-native";
 
 import { Spacing } from "../../constants/dimension";
-import FlexView from "../FlexView";
+import Column from "../Column";
+import SocialIcons from "../SocialIcons";
 import Text from "../Text";
 
 const WebFooter = () => (
-    <View
-        // @ts-ignore
-        style={{
-            position: "fixed",
-            bottom: 0,
-            margin: Spacing.content
-        }}>
-        <Text note={true} style={{ marginLeft: 12 }}>
-            Built by <Link to={"https://levx.io"} text={"Team LevX"} />
-        </Text>
-        <FlexView>
-            <Link to={"https://github.com/sushiswap-community"} text={"GitHub"} />
-            <Link to={"https://twitter.com/LevxApp"} text={"Twitter"} />
-            <Link to={"https://discord.gg/Mcdm7v"} text={"Discord"} />
-        </FlexView>
-    </View>
+    <Column noTopMargin={true}>
+        <View
+            style={{
+                width: "100%",
+                padding: Spacing.content,
+                marginTop: Spacing.huge
+            }}>
+            <SocialIcons />
+            <Text note={true} style={{ marginTop: Spacing.tiny, textAlign: "center", width: "100%" }}>
+                2020 Built by <Link to={"https://levx.io"} text={"LevX Team"} />
+            </Text>
+        </View>
+    </Column>
 );
 
 const Link = ({ to, text }) => {
@@ -29,7 +27,7 @@ const Link = ({ to, text }) => {
         window.open(to, "_blank");
     }, []);
     return (
-        <Text note={true} style={{ textDecorationLine: "underline", marginRight: 8 }} onPress={onPress}>
+        <Text note={true} style={{ textDecorationLine: "underline" }} onPress={onPress}>
             {text}
         </Text>
     );

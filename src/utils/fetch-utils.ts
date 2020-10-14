@@ -86,8 +86,8 @@ export const fetchMyLPTokens = async (
                 const erc20 = getContract("ERC20", address, signer);
                 const decimals = Number(await erc20.decimals());
                 const totalSupply = await erc20.totalSupply();
-                const tokenA = await findOrGetToken(await pair.token0(), tokens, provider);
-                const tokenB = await findOrGetToken(await pair.token1(), tokens, provider);
+                const tokenA = await findOrFetchToken(provider, await pair.token0(), tokens);
+                const tokenB = await findOrFetchToken(provider, await pair.token1(), tokens);
                 return { address, decimals, balance, totalSupply, tokenA, tokenB } as LPToken;
             })
         );
@@ -119,8 +119,8 @@ export const fetchMyUniswapLPTokens = async (
                 const erc20 = getContract("ERC20", pair.token, signer);
                 const decimals = Number(await erc20.decimals());
                 const totalSupply = await erc20.totalSupply();
-                const tokenA = await findOrGetToken(await pair.token0, tokens, provider);
-                const tokenB = await findOrGetToken(await pair.token1, tokens, provider);
+                const tokenA = await findOrFetchToken(provider, await pair.token0, tokens);
+                const tokenB = await findOrFetchToken(provider, await pair.token1, tokens);
                 return { address: pair.token, decimals, balance, totalSupply, tokenA, tokenB } as LPToken;
             })
         );
@@ -128,10 +128,16 @@ export const fetchMyUniswapLPTokens = async (
     }
 };
 
-const findOrGetToken = async (address: string, tokens: Token[], provider: ethers.providers.JsonRpcProvider) => {
-    const token = tokens.find(t => t.address.toLowerCase() === address.toLowerCase());
-    if (token) {
-        return token;
+export const findOrFetchToken = async (
+    provider: ethers.providers.JsonRpcProvider,
+    address: string,
+    tokens?: Token[]
+) => {
+    if (tokens) {
+        const token = tokens.find(t => t.address.toLowerCase() === address.toLowerCase());
+        if (token) {
+            return token;
+        }
     }
     const meta = await provider.send("alchemy_getTokenMetadata", [address]);
     return {

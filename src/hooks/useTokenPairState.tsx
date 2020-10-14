@@ -86,7 +86,7 @@ const useTokenPairState: () => TokenPairState = () => {
         if (fromAmount && signer) {
             setWrapping(true);
             try {
-                const tx = await wrapETH(parseBalance(fromAmount));
+                const tx = await wrapETH(parseBalance(fromAmount), signer);
                 if (tx) {
                     await tx.wait();
                     await updateTokens();
@@ -102,7 +102,7 @@ const useTokenPairState: () => TokenPairState = () => {
         if (fromAmount && signer) {
             setUnwrapping(true);
             try {
-                const tx = await unwrapETH(parseBalance(fromAmount));
+                const tx = await unwrapETH(parseBalance(fromAmount), signer);
                 if (tx) {
                     await tx.wait();
                     await updateTokens();

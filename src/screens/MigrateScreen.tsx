@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
 import ApproveButton from "../components/ApproveButton";
@@ -8,13 +8,14 @@ import Column from "../components/Column";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
+import ExperimentalNotice from "../components/ExperimentalNotice";
 import FetchingButton from "../components/FetchingButton";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
 import LPTokenItem from "../components/LPTokenItem";
 import LPTokenSelect from "../components/LPTokenSelect";
-import Notice from "../components/Notice";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
+import WebFooter from "../components/web/WebFooter";
 import { MIGRATOR2 } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import useMigrateState, { MigrateState } from "../hooks/useMigrateState";
@@ -28,6 +29,7 @@ const MigrateScreen = () => {
             <Container>
                 <Content>
                     <Migrate />
+                    {Platform.OS === "web" && <WebFooter />}
                 </Content>
             </Container>
         </Screen>
@@ -42,11 +44,10 @@ const Migrate = () => {
                 <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
                     🦄️ Migrate from Uniswap
                 </Text>
-                <Notice
-                    text={
-                        "This is an experimental feature that is using an unaudited contract: https://github.com/sushiswap-community/sushiswap-core/blob/master/contracts/Migrator2.sol. Read the contract and use it with caution."
+                <ExperimentalNotice
+                    contractURL={
+                        "https://github.com/sushiswap-community/sushiswap-core/blob/master/contracts/Migrator2.sol"
                     }
-                    color={"orange"}
                 />
                 <LPTokenSelect
                     state={state}

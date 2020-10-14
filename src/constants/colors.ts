@@ -5,6 +5,7 @@ export const Colors = {
         primary: "#291C64",
         secondary: "#9BECEE",
         green: "#32CD32",
+        red: "#FF0000",
         twitter: "#1da1f2",
         facebook: "#3B5998"
     },

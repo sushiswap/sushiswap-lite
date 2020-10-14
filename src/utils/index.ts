@@ -7,6 +7,8 @@ import MasterChef from "@sushiswap/core/build/contracts/MasterChef.json";
 import Migrator2 from "@sushiswap/core/build/contracts/Migrator2.json";
 import SushiBar from "@sushiswap/core/build/contracts/SushiBar.json";
 import { ChainId, CurrencyAmount, Token as SDKToken, TokenAmount, WETH } from "@sushiswap/sdk";
+import OrderBook from "@sushiswap/settlement/deployments/kovan/OrderBook.json";
+import Settlement from "@sushiswap/settlement/deployments/mainnet/Settlement.json";
 import { ethers } from "ethers";
 import Token from "../types/Token";
 
@@ -18,7 +20,9 @@ const CONTRACTS = {
     IWETH,
     MasterChef,
     Migrator2,
-    SushiBar
+    SushiBar,
+    OrderBook,
+    Settlement
 };
 
 export const formatBalance = (value: ethers.BigNumberish, decimals = 18, maxFraction = 0) => {
@@ -56,4 +60,12 @@ export const parseCurrencyAmount = (value: CurrencyAmount, decimals = 18) => {
 export const getContract = (name: string, address: string, signer: ethers.Signer) => {
     const contract = CONTRACTS[name];
     return ethers.ContractFactory.getContract(address, contract.abi, signer);
+};
+
+export const pow10 = (exp: ethers.BigNumberish) => {
+    return ethers.BigNumber.from(10).pow(exp);
+};
+
+export const formatDate = (date: Date) => {
+    return date.toLocaleDateString("en-US") + " " + date.toLocaleTimeString("en-US");
 };

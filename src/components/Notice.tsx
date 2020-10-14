@@ -1,26 +1,33 @@
-import React, { useContext } from "react";
+import React from "react";
+import { View } from "react-native";
 
 import { Spacing } from "../constants/dimension";
-import { GlobalContext } from "../context/GlobalContext";
-import useColors from "../hooks/useColors";
+import useStyles from "../hooks/useStyles";
 import Text from "./Text";
 
-const Notice = (props: { text: string; color?: string }) => {
-    const { darkMode } = useContext(GlobalContext);
-    const { primary, secondary } = useColors();
-    const color = props.color || (darkMode ? secondary : primary);
+const Notice = (props: { text: string; color?: string; buttonText?: string; onPressButton?: () => void }) => {
+    const { border } = useStyles();
+    const borderStyle = border(props.color);
+    const color = props.color || borderStyle.borderColor;
     return (
-        <Text
-            note={true}
-            style={{
-                color,
-                borderColor: color,
-                borderWidth: 1,
-                borderRadius: 4,
-                padding: Spacing.small
-            }}>
-            {props.text}
-        </Text>
+        <View style={borderStyle}>
+            <Text
+                note={true}
+                style={{
+                    color
+                }}>
+                {props.text}
+            </Text>
+            {props.buttonText && props.onPressButton && (
+                <Text
+                    note={true}
+                    onPress={props.onPressButton}
+                    fontWeight={"bold"}
+                    style={{ color, alignSelf: "flex-end", marginTop: Spacing.tiny }}>
+                    {props.buttonText}
+                </Text>
+            )}
+        </View>
     );
 };
 

@@ -48,7 +48,7 @@ const useFarmingState: () => FarmingState = () => {
         if (signer && state.selectedLPToken) {
             setLoading(true);
             try {
-                setExpectedSushiRewardPerBlock(await getExpectedSushiRewardPerBlock(state.selectedLPToken));
+                setExpectedSushiRewardPerBlock(await getExpectedSushiRewardPerBlock(state.selectedLPToken, signer));
             } finally {
                 setLoading(false);
             }
@@ -80,7 +80,7 @@ const useFarmingState: () => FarmingState = () => {
             setDepositing(true);
             try {
                 const amount = parseBalance(state.amount, state.selectedLPToken.decimals);
-                const tx = await deposit(state.selectedLPToken.id, amount);
+                const tx = await deposit(state.selectedLPToken.id, amount, signer);
                 await tx.wait();
                 state.setSelectedLPToken(undefined);
                 await state.updateLastTimeRefreshed();
@@ -95,7 +95,7 @@ const useFarmingState: () => FarmingState = () => {
             setWithdrawing(true);
             try {
                 const amount = parseBalance(state.amount, state.selectedLPToken.decimals);
-                const tx = await withdraw(state.selectedLPToken.id, amount);
+                const tx = await withdraw(state.selectedLPToken.id, amount, signer);
                 await tx.wait();
                 state.setSelectedLPToken(undefined);
                 await state.updateLastTimeRefreshed();

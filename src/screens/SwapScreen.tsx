@@ -248,14 +248,14 @@ const LimitOrderInfo = ({ state }: { state: SwapState }) => {
     const marketPrice = state.trade ? state.trade.executionPrice : undefined;
     return (
         <Column noTopMargin={true}>
-            <Meta label={"Desired Amount To Take"} text={toAmount} suffix={state.toSymbol} />
-            <Meta label={"Relayer Fee (0.20%)"} text={state.limitOrderFee} suffix={state.fromSymbol} />
-            <Meta label={"Swap Fee (0.30%)"} text={state.limitOrderSwapFee} suffix={state.fromSymbol} />
             <Meta
                 label={"Market Price"}
                 text={marketPrice?.toFixed(8) || undefined}
                 suffix={state.toSymbol + " / " + state.fromSymbol + ""}
             />
+            <Meta label={"Relayer Fee (0.20%)"} text={state.limitOrderFee} suffix={state.fromSymbol} />
+            <Meta label={"Swap Fee (0.30%)"} text={state.limitOrderSwapFee} suffix={state.fromSymbol} />
+            <Meta label={"Estimated Amount To Take"} text={toAmount} suffix={state.toSymbol} />
         </Column>
     );
 };

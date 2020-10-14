@@ -53,11 +53,15 @@ const useMyLimitOrdersState = () => {
                     })
                 )
             ).flat();
+            const now = Date.now();
             const myOrders = await Promise.all(
                 hashes
                     .filter(hash => hash !== ethers.constants.HashZero)
                     .map(async hash => {
                         const order = await orderBook.orderOfHash(hash);
+                        if (order.deadline.toNumber() * 1000 < now) {
+                            return null;
+                        }
                         return new Order(
                             signer,
                             await findOrFetchToken(provider, order.fromToken, tokens),
@@ -69,7 +73,7 @@ const useMyLimitOrdersState = () => {
                         );
                     })
             );
-            setOrders(myOrders);
+            setOrders(myOrders.filter(order => order !== null) as Order[]);
             setLoading(false);
         }
     };

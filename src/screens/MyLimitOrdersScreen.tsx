@@ -10,7 +10,6 @@ import Column from "../components/Column";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
-import ExperimentalNotice from "../components/ExperimentalNotice";
 import FlexView from "../components/FlexView";
 import Meta from "../components/Meta";
 import SelectIcon from "../components/SelectIcon";
@@ -64,9 +63,6 @@ const OrderSelect = (props: { state: MyLimitOrdersState }) => {
             <Text fontWeight={"bold"} medium={true} style={{ marginBottom: Spacing.normal, fontSize: 20 }}>
                 {"1. Select a limit order you've placed:"}
             </Text>
-            <ExperimentalNotice
-                contractURL={"https://github.com/sushiswap/sushiswap-settlement/blob/master/contracts/OrderBook.sol"}
-            />
             {props.state.selectedOrder ? (
                 <OrderItem order={props.state.selectedOrder} selected={true} onSelectOrder={onUnselectOrder} />
             ) : (
@@ -129,7 +125,7 @@ const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (ord
                                     Min. Price
                                 </Text>
                                 <Text light={true} style={{ textAlign: "right", fontSize: 22, color: textMedium }}>
-                                    {price.toString()}
+                                    {price.toString(4)}
                                 </Text>
                             </View>
                             {props.selected ? <CloseIcon /> : <SelectIcon />}
@@ -171,8 +167,9 @@ const TokenAmount = ({ token, amount, buy }) => {
 const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
     if (!state.selectedOrder) return <Column noTopMargin={true} />;
     const filledAmountIn = state.orderInfo?.filledAmountIn;
-    const { amountIn, amountOutMin, fromToken, toToken } = state.selectedOrder;
+    const { amountIn, amountOutMin, fromToken, toToken, deadline } = state.selectedOrder;
     const price = Fraction.fromTokens(amountOutMin, amountIn, toToken, fromToken);
+    const expiry = new Date(deadline.toNumber() * 1000);
     return (
         <Column>
             <Subtitle text={"2. Do you want to cancel the order?"} />
@@ -192,6 +189,10 @@ const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
                 suffix={toToken.symbol}
             />
             <Meta label={"Min. Price"} text={price.toString()} suffix={toToken.symbol + " / " + fromToken.symbol} />
+            <Meta
+                label={"Expiry"}
+                text={expiry.toLocaleDateString("en-US") + " " + expiry.toLocaleTimeString("en-US")}
+            />
         </Column>
     );
 };

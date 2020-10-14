@@ -2021,10 +2021,10 @@
     tiny-warning "^1.0.3"
     toformat "^2.0.0"
 
-"@sushiswap/settlement@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@sushiswap/settlement/-/settlement-0.2.2.tgz#43bf996e47cab59aa9a296efbce99edf1d88b73c"
-  integrity sha512-QSzY8hBfTdSASeH5ohyqSdZrGtFB203tscNS7y6MLJ4zhc18ZZi83+V86lzq6rVWeNvt3pfUzWTzB/sD35WNKw==
+"@sushiswap/settlement@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@sushiswap/settlement/-/settlement-0.3.0.tgz#a6514a0a3fc17043e06d4c1cb4d6cda54c67fab5"
+  integrity sha512-6927nGGIHw4TqMtCIDX7UCNDZM7HMGeqNydpffEevXfmwXYeJHV/0TFxeI+4wXDYOXy/OmbWP4vUILmmMyWbKQ==
   dependencies:
     "@sushiswap/core" "^1.2.1"
 

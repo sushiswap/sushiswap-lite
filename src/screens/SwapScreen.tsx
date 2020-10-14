@@ -255,7 +255,8 @@ const LimitOrderInfo = ({ state }: { state: SwapState }) => {
             />
             <Meta label={"Relayer Fee (0.20%)"} text={state.limitOrderFee} suffix={state.fromSymbol} />
             <Meta label={"Swap Fee (0.30%)"} text={state.limitOrderSwapFee} suffix={state.fromSymbol} />
-            <Meta label={"Estimated Amount To Take"} text={toAmount} suffix={state.toSymbol} />
+            <Meta label={"Expiration"} text={"24 Hours From Now"} />
+            <Meta label={"Estimated Amount You'll Get"} text={toAmount} suffix={state.toSymbol} />
         </Column>
     );
 };
@@ -429,7 +430,6 @@ const PlaceOrderButton = ({
 };
 
 const MyLimitOrdersGuide = ({ state }: { state: SwapState }) => {
-    if (state.fromSymbol !== "") return <Column noTopMargin={true} />;
     const onPress = useLinker("/#/limit-orders", "LimitOrders", "_self");
     return (
         <Guide

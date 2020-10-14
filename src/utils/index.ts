@@ -65,3 +65,7 @@ export const getContract = (name: string, address: string, signer: ethers.Signer
 export const pow10 = (exp: ethers.BigNumberish) => {
     return ethers.BigNumber.from(10).pow(exp);
 };
+
+export const formatDate = (date: Date) => {
+    return date.toLocaleDateString("en-US") + " " + date.toLocaleTimeString("en-US");
+};

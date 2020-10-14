@@ -22,7 +22,7 @@ import useColors from "../hooks/useColors";
 import useMyLimitOrdersState, { MyLimitOrdersState } from "../hooks/useMyLimitOrdersState";
 import { Order } from "../hooks/useSDK";
 import MetamaskError from "../types/MetamaskError";
-import { formatBalance } from "../utils";
+import { formatBalance, formatDate } from "../utils";
 import Screen from "./Screen";
 
 const MyLimitOrdersScreen = () => {
@@ -44,7 +44,7 @@ const MyLimitOrders = () => {
         <>
             <Column style={{ alignItems: "center" }}>
                 <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
-                    📈 My Limit Orders
+                    ⏳ My Limit Orders
                 </Text>
                 <OrderSelect state={state} />
                 <OrderInfo state={state} />
@@ -106,8 +106,10 @@ const EmptyList = () => {
 };
 
 const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (order: Order) => void }) => {
-    const { background, backgroundHovered, textMedium } = useColors();
+    const { background, backgroundHovered } = useColors();
     const { amountIn, amountOutMin, fromToken, toToken } = props.order;
+    const status = props.order.status();
+    const disabled = status !== "Open";
     const price = Fraction.fromTokens(amountOutMin, amountIn, toToken, fromToken);
     const onPress = useCallback(() => props.onSelectOrder(props.order), [props.onSelectOrder, props.order]);
     return (
@@ -117,17 +119,11 @@ const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (ord
                     <View style={{ backgroundColor: hovered ? backgroundHovered : background }}>
                         <FlexView style={{ alignItems: "center", margin: Spacing.small }}>
                             <View>
-                                <TokenAmount token={fromToken} amount={amountIn} buy={false} />
-                                <TokenAmount token={toToken} amount={amountOutMin} buy={true} />
+                                <TokenAmount token={fromToken} amount={amountIn} disabled={disabled} buy={false} />
+                                <TokenAmount token={toToken} amount={amountOutMin} disabled={disabled} buy={true} />
                             </View>
-                            <View style={{ flex: 1 }}>
-                                <Text note={true} style={{ textAlign: "right" }}>
-                                    Min. Price
-                                </Text>
-                                <Text light={true} style={{ textAlign: "right", fontSize: 22, color: textMedium }}>
-                                    {price.toString(4)}
-                                </Text>
-                            </View>
+                            <MetaColumn label={"Price"} value={price.toString(4)} disabled={disabled} minWidth={0} />
+                            <MetaColumn label={"Status"} value={status} disabled={disabled} minWidth={64} />
                             {props.selected ? <CloseIcon /> : <SelectIcon />}
                         </FlexView>
                     </View>
@@ -137,8 +133,8 @@ const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (ord
     );
 };
 
-const TokenAmount = ({ token, amount, buy }) => {
-    const { textMedium, green, red } = useColors();
+const TokenAmount = ({ token, amount, disabled, buy }) => {
+    const { textMedium, green, red, disabled: colorDisabled } = useColors();
     const [isEmpty, setIsEmpty] = useState(false);
     const source = isEmpty ? require("../../assets/empty-token.png") : { uri: token.logoURI };
     return (
@@ -149,25 +145,41 @@ const TokenAmount = ({ token, amount, buy }) => {
                 style={{ width: 24, height: 24, backgroundColor: "white", borderRadius: 12 }}
             />
             <Text
-                light={true}
                 fontWeight={"light"}
-                style={{ fontSize: 22, color: textMedium, marginLeft: Spacing.tiny }}>
+                style={{ fontSize: 22, color: disabled ? colorDisabled : textMedium, marginLeft: Spacing.tiny }}>
                 {formatBalance(amount, token.decimals, 4)}
             </Text>
-            <Text medium={true} style={{ fontSize: 22, marginLeft: Spacing.tiny }}>
+            <Text style={{ fontSize: 22, marginLeft: Spacing.tiny, color: disabled ? colorDisabled : textMedium }}>
                 {token.symbol.replace(/\+/g, "+\n")}
             </Text>
-            <Text note={true} style={{ color: buy ? green : red, marginLeft: Spacing.tiny, marginTop: 4 }}>
-                {buy ? "MIN. BUY" : "SELL"}
+            <Text
+                style={{ color: disabled ? colorDisabled : buy ? green : red, fontSize: 22, marginLeft: Spacing.tiny }}>
+                {buy ? "IN" : "OUT"}
             </Text>
         </FlexView>
     );
 };
 
+const MetaColumn = ({ label, value, disabled, minWidth }) => {
+    const { textMedium, textLight, disabled: colorDisabled } = useColors();
+    return (
+        <View style={{ flex: minWidth ? 0 : 1, minWidth, marginLeft: Spacing.tiny }}>
+            <Text note={true} style={{ textAlign: "right", color: disabled ? colorDisabled : textLight }}>
+                {label}
+            </Text>
+            <Text
+                light={true}
+                style={{ textAlign: "right", fontSize: 20, color: disabled ? colorDisabled : textMedium }}>
+                {value}
+            </Text>
+        </View>
+    );
+};
+
 const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
     if (!state.selectedOrder) return <Column noTopMargin={true} />;
-    const filledAmountIn = state.orderInfo?.filledAmountIn;
     const { amountIn, amountOutMin, fromToken, toToken, deadline } = state.selectedOrder;
+    const filledAmountIn = state.selectedOrder.filledAmountIn;
     const price = Fraction.fromTokens(amountOutMin, amountIn, toToken, fromToken);
     const expiry = new Date(deadline.toNumber() * 1000);
     return (
@@ -178,21 +190,10 @@ const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
                 text={filledAmountIn ? formatBalance(filledAmountIn, fromToken.decimals) : undefined}
                 suffix={fromToken.symbol}
             />
-            <Meta
-                label={"Amount To Sell"}
-                text={formatBalance(amountIn, fromToken.decimals)}
-                suffix={fromToken.symbol}
-            />
-            <Meta
-                label={"Min. Amount To Buy"}
-                text={formatBalance(amountOutMin, toToken.decimals)}
-                suffix={toToken.symbol}
-            />
-            <Meta label={"Min. Price"} text={price.toString()} suffix={toToken.symbol + " / " + fromToken.symbol} />
-            <Meta
-                label={"Expiry"}
-                text={expiry.toLocaleDateString("en-US") + " " + expiry.toLocaleTimeString("en-US")}
-            />
+            <Meta label={"Amount Out"} text={formatBalance(amountIn, fromToken.decimals)} suffix={fromToken.symbol} />
+            <Meta label={"Amount In"} text={formatBalance(amountOutMin, toToken.decimals)} suffix={toToken.symbol} />
+            <Meta label={"Price"} text={price.toString()} suffix={toToken.symbol + " / " + fromToken.symbol} />
+            <Meta label={"Expiration"} text={formatDate(expiry)} />
         </Column>
     );
 };
@@ -214,7 +215,10 @@ const CancelButton = ({ state, onError }: { state: MyLimitOrdersState; onError: 
         onError({});
         state.onCancelOrder().catch(onError);
     }, [state.onCancelOrder, onError]);
-    return <Button size={"large"} title={"Cancel"} loading={state.cancellingOrder} onPress={onPress} />;
+    const disabled = !state.selectedOrder || state.selectedOrder.status() !== "Open";
+    return (
+        <Button size={"large"} title={"Cancel"} loading={state.cancellingOrder} onPress={onPress} disabled={disabled} />
+    );
 };
 
 export default MyLimitOrdersScreen;

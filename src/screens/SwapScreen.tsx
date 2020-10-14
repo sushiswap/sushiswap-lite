@@ -433,7 +433,7 @@ const MyLimitOrdersGuide = ({ state }: { state: SwapState }) => {
     const onPress = useLinker("/#/limit-orders", "LimitOrders", "_self");
     return (
         <Guide
-            hidden={state.fromSymbol !== ""}
+            hidden={false}
             text={"☘️ Do you want to scan limit orders you've placed?"}
             buttonTitle={"Click Here!"}
             onPressButton={onPress}

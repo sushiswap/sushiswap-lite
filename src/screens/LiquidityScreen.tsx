@@ -232,7 +232,7 @@ const RemoveLiquidityGuide = ({ state }: { state: AddLiquidityState }) => {
     const onPress = useLinker("/#/liquidity/remove", "RemoveLiquidity", "_self");
     return (
         <Guide
-            hidden={state.fromSymbol !== ""}
+            hidden={false}
             text={"☘️ Do you want to remove existing liquidity?"}
             buttonTitle={"Click Here!"}
             onPressButton={onPress}

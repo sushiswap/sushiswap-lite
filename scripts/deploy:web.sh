@@ -9,5 +9,5 @@ fi
 
 gh-pages -d web-build --remote=gh-pages
 git checkout master
-git merge dev
+git merge dev --no-edit
 git checkout dev

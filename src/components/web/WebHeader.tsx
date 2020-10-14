@@ -68,7 +68,7 @@ const Menu = () => {
             }}>
             <MenuItem title={"SWAP"} path={"/"} />
             <MenuItem title={"LIQUIDITY"} path={"/liquidity"} />
-            <MenuItem title={"FARMING"} path={"/farming"} />
+            {/*<MenuItem title={"FARMING"} path={"/farming"} />*/}
             <MenuItem title={"STAKING"} path={"/staking"} />
             {/*<MenuItem title={"MIGRATE"} path={"/migrate"} />*/}
             <DarkModeSwitch />

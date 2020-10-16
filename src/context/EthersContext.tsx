@@ -22,6 +22,7 @@ export const EthersContext = React.createContext({
     kovanSigner: undefined as ethers.Signer | undefined,
     chainId: 0,
     address: null as string | null,
+    ensName: null as string | null,
     addOnBlockListener: (_name: string, _listener: OnBlockListener) => {},
     removeOnBlockListener: (_name: string) => {},
     tokens: [ETH] as Token[],
@@ -43,7 +44,8 @@ export const EthersContextProvider = ({ children }) => {
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
     const [kovanSigner, setKovanSigner] = useState<ethers.Signer>();
     const [chainId, setChainId] = useState<number>(1);
-    const [address, setAddress] = useState<string | null>(ethers.constants.AddressZero);
+    const [address, setAddress] = useState<string | null>(null);
+    const [ensName, setENSName] = useState<string | null>(null);
     const [onBlockListeners, setOnBlockListeners] = useState<{ [name: string]: OnBlockListener }>({});
     const [tokens, setTokens] = useState<Token[]>([]);
     const [loadingTokens, setLoadingTokens] = useState(true);
@@ -90,6 +92,13 @@ export const EthersContextProvider = ({ children }) => {
             };
         }
     }, [window.ethereum, signer]);
+
+    useAsyncEffect(async () => {
+        if (signer && address) {
+            const ens = await signer.provider.lookupAddress(address);
+            setENSName(ens);
+        }
+    }, [signer, address]);
 
     // Set provider and signer for mobile app
     // useEffect(() => {
@@ -189,6 +198,7 @@ export const EthersContextProvider = ({ children }) => {
                 kovanSigner,
                 chainId,
                 address,
+                ensName,
                 tokens,
                 updateTokens,
                 loadingTokens,

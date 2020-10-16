@@ -1,10 +1,11 @@
 import React, { useCallback, useContext } from "react";
-import { Image, View } from "react-native";
+import { View } from "react-native";
 import { Link, useRouteMatch } from "react-router-dom";
 
 import Switch from "expo-dark-mode-switch";
 
 import { HEADER_HEIGHT, Spacing } from "../../constants/dimension";
+import { EthersContext } from "../../context/EthersContext";
 import { GlobalContext } from "../../context/GlobalContext";
 import useColors from "../../hooks/useColors";
 import FlexView from "../FlexView";
@@ -21,12 +22,15 @@ const WebHeader = () => {
                 zIndex: 100,
                 width: "100%",
                 height: HEADER_HEIGHT,
-                paddingBottom: 16,
+                paddingBottom: 8,
                 backgroundColor: background
             }}>
             <FlexView
                 style={{
                     flex: 1,
+                    width: 1000,
+                    height: "100%",
+                    alignSelf: "center",
                     justifyContent: "space-between",
                     alignItems: "flex-end",
                     paddingTop: Spacing.small,
@@ -41,20 +45,12 @@ const WebHeader = () => {
 
 export const Title = () => {
     const { darkMode } = useContext(GlobalContext);
-    const { primary, white } = useColors();
+    const { textDark, white } = useColors();
     return (
         <View style={{ alignSelf: "center", alignItems: "center" }}>
             <Link to={"/"} style={{ textDecoration: "none" }}>
-                <Text style={{ fontFamily: "title", fontSize: 40, color: darkMode ? white : primary }}>SushiSwap</Text>
+                <Text style={{ fontFamily: "light", fontSize: 32, color: darkMode ? white : textDark }}>SushiSwap</Text>
             </Link>
-            <Image
-                source={
-                    darkMode
-                        ? require("../../../assets/levx-typography-dark.png")
-                        : require("../../../assets/levx-typography.png")
-                }
-                style={{ width: 76, height: 13 }}
-            />
         </View>
     );
 };
@@ -66,37 +62,55 @@ const Menu = () => {
                 height: "100%",
                 alignItems: "flex-end"
             }}>
-            <MenuItem title={"SWAP"} path={"/"} />
-            <MenuItem title={"LIQUIDITY"} path={"/liquidity"} />
-            {/*<MenuItem title={"FARMING"} path={"/farming"} />*/}
-            {/*<MenuItem title={"STAKE/UNSTAKE"} path={"/staking"} />*/}
-            <MenuItem title={"MIGRATE"} path={"/migrate"} />
+            <MenuItem title={"Swap"} path={"/"} />
+            <MenuItem title={"Liquidity"} path={"/liquidity"} />
+            {/*<MenuItem title={"Farming"} path={"/farming"} />*/}
+            {/*<MenuItem title={"Stake/Unstake"} path={"/staking"} />*/}
+            <MenuItem title={"Migrate"} path={"/migrate"} />
+            <Status />
             <DarkModeSwitch />
         </FlexView>
     );
 };
 
 const MenuItem = ({ title, path }) => {
-    const { textDark } = useColors();
+    const { textDark, textLight } = useColors();
     const match = useRouteMatch(path);
+    const active = match?.isExact;
     return (
-        <Link to={path} style={{ marginLeft: Spacing.small, marginBottom: 4, textDecoration: "none" }}>
+        <Link to={path} style={{ marginLeft: Spacing.tiny, textDecoration: "none" }}>
             <View>
-                <Text style={{ fontFamily: "regular", fontSize: 20, color: textDark, padding: 4 }}>{title}</Text>
-                {match?.isExact && (
-                    <View
-                        style={{
-                            position: "absolute",
-                            height: 2,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            backgroundColor: textDark
-                        }}
-                    />
-                )}
+                <Text style={{ fontFamily: "regular", fontSize: 18, color: active ? textDark : textLight, padding: 4 }}>
+                    {title}
+                </Text>
             </View>
         </Link>
+    );
+};
+
+const Status = () => {
+    const { textLight, green, border } = useColors();
+    const { chainId, address, ensName } = useContext(EthersContext);
+    const connected = chainId === 1 && address;
+    const title = connected
+        ? ensName || address!.substring(0, 6) + "..." + address!.substring(address!.length - 4, address!.length)
+        : "Not connected";
+    const color = connected ? green : textLight;
+    return (
+        <FlexView
+            style={{
+                height: 28,
+                justifyContent: "center",
+                alignItems: "center",
+                marginLeft: Spacing.small,
+                paddingHorizontal: Spacing.small,
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: border
+            }}>
+            <View style={{ backgroundColor: color, width: 6, height: 6, borderRadius: 3, marginRight: 12 }} />
+            <Text style={{ fontSize: 16, color: textLight, marginRight: 2 }}>{title}</Text>
+        </FlexView>
     );
 };
 
@@ -109,14 +123,14 @@ const DarkModeSwitch = () => {
         [setDarkMode]
     );
     return (
-        <View style={{ marginLeft: Spacing.small, marginBottom: 4 }}>
+        <View style={{ marginLeft: Spacing.tiny, marginBottom: -3 }}>
             <Switch
                 value={darkMode}
                 onChange={onChange}
                 style={{
                     transform: [
                         {
-                            scale: 0.7
+                            scale: 0.75
                         }
                     ]
                 }}

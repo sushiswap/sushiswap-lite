@@ -9,7 +9,6 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { DefaultTheme, NavigationContainer, Theme } from "@react-navigation/native";
 import useAsyncEffect from "use-async-effect";
 import WebHeader from "../components/web/WebHeader";
-import WebStatus from "../components/web/WebStatus";
 import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
 import FarmingScreen from "./FarmingScreen";
@@ -56,7 +55,6 @@ const WebScreens = () => {
                     </Route>
                 </Switch>
                 {deviceType !== DeviceType.PHONE && <WebHeader />}
-                {deviceType !== DeviceType.PHONE && <WebStatus />}
             </View>
         </Router>
     );

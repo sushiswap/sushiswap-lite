@@ -2,13 +2,15 @@ import React from "react";
 import { View } from "react-native";
 
 import { Spacing } from "../constants/dimension";
+import useColors from "../hooks/useColors";
 import useStyles from "../hooks/useStyles";
 import Column from "./Column";
 import Text from "./Text";
 
 const Guide = (props: { hidden: boolean; text: string; buttonTitle: string; onPressButton: () => void }) => {
+    const { accent } = useColors();
     const { border } = useStyles();
-    const borderStyle = border();
+    const borderStyle = border({ color: accent });
     if (props.hidden) return <Column noTopMargin={true} />;
     return (
         <Column style={{ marginTop: Spacing.huge }}>

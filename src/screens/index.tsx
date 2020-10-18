@@ -28,9 +28,10 @@ export const Screens = () => {
 // tslint:disable-next-line:max-func-body-length
 const WebScreens = () => {
     const { deviceType } = useContext(GlobalContext);
+    const { background } = useColors();
     return (
         <Router>
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, backgroundColor: background }}>
                 <Switch>
                     <Route path={"/limit-orders"}>
                         <MyLimitOrdersScreen />
@@ -64,7 +65,7 @@ const Tab = createBottomTabNavigator();
 
 const AppScreens = () => {
     const { darkMode } = useContext(GlobalContext);
-    const { primary, secondary, background, border, textDark, disabled } = useColors();
+    const { primary, accent, background, border, textDark, disabled } = useColors();
     const theme: Theme = {
         ...DefaultTheme,
         dark: darkMode,
@@ -81,7 +82,7 @@ const AppScreens = () => {
         <NavigationContainer theme={theme}>
             <Tab.Navigator
                 tabBarOptions={{
-                    activeTintColor: darkMode ? secondary : primary,
+                    activeTintColor: accent,
                     inactiveTintColor: disabled,
                     labelStyle: { marginBottom: 4 }
                 }}>

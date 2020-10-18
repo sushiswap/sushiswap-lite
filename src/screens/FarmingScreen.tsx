@@ -15,12 +15,12 @@ import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
 import FetchingButton from "../components/FetchingButton";
 import FlexView from "../components/FlexView";
+import Heading from "../components/Heading";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
 import LPTokenSelect, { LPTokenItemProps } from "../components/LPTokenSelect";
 import Meta from "../components/Meta";
 import Notice from "../components/Notice";
 import SelectIcon from "../components/SelectIcon";
-import Subtitle from "../components/Subtitle";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
 import WebFooter from "../components/web/WebFooter";
@@ -82,7 +82,7 @@ const Farming = () => {
 
 // tslint:disable-next-line:max-func-body-length
 const TokenItem: FC<LPTokenItemProps> = props => {
-    const { background, backgroundHovered, textMedium } = useColors();
+    const { background, backgroundLight, textMedium } = useColors();
     const amount =
         (props.filter === "balance"
             ? props.token.balance
@@ -98,7 +98,7 @@ const TokenItem: FC<LPTokenItemProps> = props => {
         <Hoverable>
             {({ hovered }) => (
                 <TouchableHighlight onPress={onPress}>
-                    <View style={{ backgroundColor: hovered ? backgroundHovered : background }}>
+                    <View style={{ backgroundColor: hovered ? backgroundLight : background }}>
                         <FlexView style={{ alignItems: "center", margin: Spacing.small }}>
                             <View>
                                 <LogoSymbol token={props.token.tokenA} />
@@ -149,7 +149,7 @@ const ActionSelect = ({ state }: { state: FarmingState }) => {
     const deposit = formatBalance(state.selectedLPToken.amountDeposited || "0", state.selectedLPToken!.decimals);
     return (
         <Column>
-            <Subtitle text={"2. Do you want to DEPOSIT or WITHDRAW?"} />
+            <Heading text={"2. Do you want to DEPOSIT or WITHDRAW?"} />
             <View style={{ marginHorizontal: Spacing.small, marginBottom: Spacing.normal }}>
                 <Meta label={"My Balance"} text={balance} />
                 <Meta label={"My Deposit"} text={deposit} />
@@ -308,7 +308,7 @@ const DepositButton = ({
         onError({});
         state.onDeposit().catch(onError);
     }, [state.onDeposit, onError]);
-    return <Button size={"large"} title={"Deposit"} disabled={disabled} loading={state.depositing} onPress={onPress} />;
+    return <Button title={"Deposit"} disabled={disabled} loading={state.depositing} onPress={onPress} />;
 };
 
 const Withdraw = ({ state }: { state: FarmingState }) => {

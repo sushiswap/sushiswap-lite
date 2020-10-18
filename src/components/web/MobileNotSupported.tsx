@@ -2,19 +2,16 @@ import React from "react";
 import { Image, View } from "react-native";
 
 import { Spacing } from "../../constants/dimension";
-import useColors from "../../hooks/useColors";
 import SocialIcons from "../SocialIcons";
 import Text from "../Text";
 import { Title } from "./WebHeader";
 
 const MobileNotSupported = () => {
-    const { background } = useColors();
     return (
         <View
             style={{
                 justifyContent: "center",
                 alignItems: "center",
-                backgroundColor: background,
                 width: "100%",
                 minHeight: "100%",
                 padding: Spacing.normal

@@ -37,11 +37,10 @@ const ApproveButton: FC<ApproveButtonProps> = props => {
     if (props.hidden) return <View />;
     return (
         <Button
-            size={"large"}
             title={"Approve " + (props.token?.symbol || "")}
             onPress={onPress}
             loading={loading}
-            containerStyle={{ marginBottom: Spacing.small }}
+            containerStyle={{ marginBottom: Spacing.tiny }}
         />
     );
 };

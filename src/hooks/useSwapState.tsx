@@ -12,8 +12,8 @@ import useTokenPairState, { TokenPairState } from "./useTokenPairState";
 export type OrderType = "market" | "limit";
 
 export interface SwapState extends TokenPairState {
-    orderType: OrderType;
-    setOrderType: (orderType: OrderType) => void;
+    orderType?: OrderType;
+    setOrderType: (orderType?: OrderType) => void;
     trade?: Trade;
     unsupported: boolean;
     limitOrderUnsupported: boolean;
@@ -22,6 +22,7 @@ export interface SwapState extends TokenPairState {
     swapFee: string;
     limitOrderFee: string;
     limitOrderSwapFee: string;
+    limitOrderReturn: string;
     onSwap: () => Promise<void>;
     swapping: boolean;
     onCreateOrder: () => Promise<void>;
@@ -32,19 +33,30 @@ export interface SwapState extends TokenPairState {
 const useSwapState: () => SwapState = () => {
     const state = useTokenPairState();
     const { signer, kovanSigner, updateTokens } = useContext(EthersContext);
-    const { getTrade, swap, createOrder, calculateSwapFee, calculateLimitOrderFee } = useSDK();
+    const {
+        getTrade,
+        swap,
+        createOrder,
+        calculateSwapFee,
+        calculateLimitOrderFee,
+        calculateLimitOrderReturn
+    } = useSDK();
     const [loading, setLoading] = useState(true);
-    const [orderType, setOrderType] = useState<OrderType>("market");
+    const [orderType, setOrderType] = useState<OrderType>();
     const [trade, setTrade] = useState<Trade>();
     const [unsupported, setUnsupported] = useState(false);
     const [swapFee, setSwapFee] = useState("");
     const [limitOrderPrice, setLimitOrderPrice] = useState<string>("");
     const [limitOrderFee, setLimitOrderFee] = useState("");
     const [limitOrderSwapFee, setLimitOrderSwapFee] = useState("");
+    const [limitOrderReturn, setLimitOrderReturn] = useState("");
     const [swapping, setSwapping] = useState(false);
     const [creatingOrder, setCreatingOrder] = useState(false);
 
     useEffect(() => {
+        if (!orderType) {
+            state.setFromSymbol("");
+        }
         setLimitOrderPrice("");
     }, [orderType]);
 
@@ -93,7 +105,24 @@ const useSwapState: () => SwapState = () => {
                 );
             }
         }
-    }, [orderType, trade, state.fromAmount, state.toAmount]);
+    }, [orderType, trade, state.fromAmount]);
+
+    useAsyncEffect(() => {
+        if (state.fromToken && state.toToken && !isEmptyValue(state.fromAmount) && !isEmptyValue(limitOrderPrice)) {
+            setLimitOrderReturn(
+                formatBalance(
+                    calculateLimitOrderReturn(
+                        state.fromToken,
+                        state.toToken,
+                        parseBalance(state.fromAmount, state.fromToken.decimals),
+                        limitOrderPrice
+                    ),
+                    state.toToken.decimals,
+                    8
+                )
+            );
+        }
+    }, [state.fromToken, state.toToken, state.fromAmount, limitOrderPrice]);
 
     const onSwap = useCallback(async () => {
         if (state.fromToken && state.toToken && state.fromAmount && signer && trade) {
@@ -103,7 +132,7 @@ const useSwapState: () => SwapState = () => {
                 if (result) {
                     await result.tx.wait();
                     await updateTokens();
-                    state.setFromSymbol("");
+                    setOrderType(undefined);
                 }
             } finally {
                 setSwapping(false);
@@ -135,7 +164,7 @@ const useSwapState: () => SwapState = () => {
                     kovanSigner
                 );
                 await tx.wait();
-                state.setFromSymbol("");
+                setOrderType(undefined);
             } finally {
                 setCreatingOrder(false);
             }
@@ -154,6 +183,7 @@ const useSwapState: () => SwapState = () => {
         setLimitOrderPrice,
         limitOrderFee,
         limitOrderSwapFee,
+        limitOrderReturn,
         onSwap,
         swapping,
         limitOrderUnsupported: orderType === "limit" && (state.fromSymbol === "ETH" || state.toSymbol === "ETH"),

@@ -12,7 +12,7 @@ import SelectIcon from "./SelectIcon";
 import Text from "./Text";
 
 const LPTokenItem: FC<LPTokenItemProps> = props => {
-    const { background, backgroundHovered, textMedium } = useColors();
+    const { background, backgroundLight, textMedium } = useColors();
     const balance = formatBalance(props.token.balance, props.token.decimals, 18);
     const onPress = useCallback(() => {
         props.onSelectToken(props.token);
@@ -21,7 +21,7 @@ const LPTokenItem: FC<LPTokenItemProps> = props => {
         <Hoverable>
             {({ hovered }) => (
                 <TouchableHighlight onPress={onPress}>
-                    <View style={{ backgroundColor: hovered ? backgroundHovered : background }}>
+                    <View style={{ backgroundColor: hovered ? backgroundLight : background }}>
                         <FlexView style={{ alignItems: "center", margin: Spacing.small }}>
                             <View>
                                 <LogoSymbol token={props.token.tokenA} />

@@ -12,10 +12,10 @@ import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
 import FetchingButton from "../components/FetchingButton";
 import FlexView from "../components/FlexView";
+import Heading from "../components/Heading";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
 import Meta from "../components/Meta";
 import Notice from "../components/Notice";
-import Subtitle from "../components/Subtitle";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";
 import WebFooter from "../components/web/WebFooter";
@@ -89,7 +89,7 @@ const ActionSelect = ({ state }: { state: StakingState }) => {
     }, []);
     return (
         <Column>
-            <Subtitle text={"1. Do you want to STAKE or UNSTAKE?"} />
+            <Heading text={"1. Do you want to STAKE or UNSTAKE?"} />
             <View style={{ marginHorizontal: Spacing.small, marginBottom: Spacing.normal }}>
                 <Meta label={"Total SUSHI Staked"} text={formatBalance(state.sushiStaked, state.sushi.decimals)} />
                 <Meta label={"My SUSHI Balance"} text={formatBalance(state.sushi.balance, state.sushi.decimals)} />
@@ -233,7 +233,7 @@ const StakeButton = ({
             onError(e);
         }
     }, []);
-    return <Button size={"large"} title={"Stake"} loading={state.entering} onPress={onPress} disabled={disabled} />;
+    return <Button title={"Stake"} loading={state.entering} onPress={onPress} disabled={disabled} />;
 };
 
 const UnstakeButton = ({ state, onError }: { state: StakingState; onError: (e) => void }) => {
@@ -246,7 +246,7 @@ const UnstakeButton = ({ state, onError }: { state: StakingState; onError: (e) =
             onError(e);
         }
     }, []);
-    return <Button size={"large"} title={"Unstake"} loading={state.leaving} onPress={onPress} />;
+    return <Button title={"Unstake"} loading={state.leaving} onPress={onPress} />;
 };
 
 export default StakingScreen;

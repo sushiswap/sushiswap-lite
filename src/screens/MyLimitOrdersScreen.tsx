@@ -11,9 +11,9 @@ import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
 import FlexView from "../components/FlexView";
+import Heading from "../components/Heading";
 import Meta from "../components/Meta";
 import SelectIcon from "../components/SelectIcon";
-import Subtitle from "../components/Subtitle";
 import Text from "../components/Text";
 import WebFooter from "../components/web/WebFooter";
 import { Spacing } from "../constants/dimension";
@@ -106,7 +106,7 @@ const EmptyList = () => {
 };
 
 const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (order: Order) => void }) => {
-    const { background, backgroundHovered } = useColors();
+    const { background, backgroundLight } = useColors();
     const { amountIn, amountOutMin, fromToken, toToken } = props.order;
     const status = props.order.status();
     const disabled = status !== "Open";
@@ -116,7 +116,7 @@ const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (ord
         <Hoverable>
             {({ hovered }) => (
                 <TouchableHighlight onPress={onPress}>
-                    <View style={{ backgroundColor: hovered ? backgroundHovered : background }}>
+                    <View style={{ backgroundColor: hovered ? backgroundLight : background }}>
                         <FlexView style={{ alignItems: "center", margin: Spacing.small }}>
                             <View>
                                 <TokenAmount token={fromToken} amount={amountIn} disabled={disabled} buy={false} />
@@ -184,7 +184,7 @@ const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
     const expiry = new Date(deadline.toNumber() * 1000);
     return (
         <Column>
-            <Subtitle text={"2. Do you want to cancel the order?"} />
+            <Heading text={"2. Do you want to cancel the order?"} />
             <Meta
                 label={"Amount Filled"}
                 text={filledAmountIn ? formatBalance(filledAmountIn, fromToken.decimals) : undefined}
@@ -216,9 +216,7 @@ const CancelButton = ({ state, onError }: { state: MyLimitOrdersState; onError: 
         state.onCancelOrder().catch(onError);
     }, [state.onCancelOrder, onError]);
     const disabled = !state.selectedOrder || state.selectedOrder.status() !== "Open";
-    return (
-        <Button size={"large"} title={"Cancel"} loading={state.cancellingOrder} onPress={onPress} disabled={disabled} />
-    );
+    return <Button title={"Cancel"} loading={state.cancellingOrder} onPress={onPress} disabled={disabled} />;
 };
 
 export default MyLimitOrdersScreen;

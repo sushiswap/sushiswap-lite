@@ -3,10 +3,11 @@ import { useCallback } from "react";
 import { CurrencyAmount, Fetcher, Percent, Router, TokenAmount, Trade, WETH } from "@sushiswap/sdk";
 import { ethers } from "ethers";
 import { MASTER_CHEF, MIGRATOR2, ORDER_BOOK, ROUTER, SETTLEMENT, SUSHI_BAR } from "../constants/contracts";
+import Fraction from "../constants/Fraction";
 import { ETH } from "../constants/tokens";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
-import { convertToken, getContract } from "../utils";
+import { convertToken, getContract, pow10 } from "../utils";
 import { logTransaction } from "../utils/analytics-utils";
 import useAllCommonPairs from "./useAllCommonPairs";
 
@@ -309,6 +310,20 @@ const useSDK = () => {
         return fromAmount.mul(2).div(1000);
     };
 
+    const calculateLimitOrderReturn = (
+        fromToken: Token,
+        toToken: Token,
+        fromAmount: ethers.BigNumber,
+        price: string
+    ) => {
+        return Fraction.parse(price).apply(
+            fromAmount
+                .sub(calculateLimitOrderFee(fromAmount))
+                .mul(pow10(toToken.decimals))
+                .div(pow10(fromToken.decimals))
+        );
+    };
+
     return {
         allowedSlippage,
         getTrade,
@@ -329,7 +344,8 @@ const useSDK = () => {
         leaveSushiBar,
         migrate,
         calculateSwapFee,
-        calculateLimitOrderFee
+        calculateLimitOrderFee,
+        calculateLimitOrderReturn
     };
 };
 

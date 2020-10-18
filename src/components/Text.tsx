@@ -9,12 +9,20 @@ export interface TextProps extends NativeTextProps {
     dark?: boolean;
     medium?: boolean;
     light?: boolean;
+    disabled?: boolean;
     fontWeight?: "light" | "regular" | "bold";
 }
 
 const Text: FC<TextProps> = props => {
-    const { textDark, textMedium, textLight } = useColors();
+    const { textDark, textMedium, textLight, placeholder } = useColors();
     const fontFamily = props.fontWeight || "regular";
+    const color = props.disabled
+        ? placeholder
+        : props.medium
+        ? textMedium
+        : props.note || props.light
+        ? textLight
+        : textDark;
     return (
         <NativeText
             {...props}
@@ -25,8 +33,8 @@ const Text: FC<TextProps> = props => {
             style={[
                 {
                     fontFamily,
-                    fontSize: props.note ? 15 : props.caption ? 22 : 18,
-                    color: props.note || props.light ? textLight : props.medium ? textMedium : textDark
+                    fontSize: props.note ? 13 : props.caption ? 18 : 15,
+                    color
                 },
                 props.style
             ]}

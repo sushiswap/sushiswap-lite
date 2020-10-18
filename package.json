@@ -14,7 +14,6 @@
   "dependencies": {
     "@codler/react-native-keyboard-aware-scroll-view": "^1.0.1",
     "@expo-google-fonts/open-sans": "^0.1.0",
-    "@expo-google-fonts/unica-one": "^0.1.0",
     "@react-native-community/async-storage": "~1.11.0",
     "@react-native-community/masked-view": "0.1.10",
     "@react-navigation/bottom-tabs": "^5.9.0",

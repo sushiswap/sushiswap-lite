@@ -11,7 +11,7 @@ const WebFooter = () => (
         <View
             style={{
                 width: "100%",
-                padding: Spacing.content,
+                padding: Spacing.normal,
                 marginTop: Spacing.huge
             }}>
             <SocialIcons />

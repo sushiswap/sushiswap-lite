@@ -4,7 +4,7 @@ import { Link, useRouteMatch } from "react-router-dom";
 
 import Switch from "expo-dark-mode-switch";
 
-import { HEADER_HEIGHT, Spacing } from "../../constants/dimension";
+import { HEADER_HEIGHT, HEADER_WIDTH, Spacing } from "../../constants/dimension";
 import { EthersContext } from "../../context/EthersContext";
 import { GlobalContext } from "../../context/GlobalContext";
 import useColors from "../../hooks/useColors";
@@ -28,13 +28,12 @@ const WebHeader = () => {
             <FlexView
                 style={{
                     flex: 1,
-                    width: 1000,
-                    height: "100%",
+                    width: HEADER_WIDTH,
                     alignSelf: "center",
                     justifyContent: "space-between",
                     alignItems: "flex-end",
                     paddingTop: Spacing.small,
-                    paddingHorizontal: Spacing.content
+                    paddingHorizontal: Spacing.normal
                 }}>
                 <Title />
                 <Menu />
@@ -46,10 +45,11 @@ const WebHeader = () => {
 export const Title = () => {
     const { darkMode } = useContext(GlobalContext);
     const { textDark, white } = useColors();
+    const color = darkMode ? white : textDark;
     return (
         <View style={{ alignSelf: "center", alignItems: "center" }}>
             <Link to={"/"} style={{ textDecoration: "none" }}>
-                <Text style={{ fontFamily: "light", fontSize: 32, color: darkMode ? white : textDark }}>SushiSwap</Text>
+                <Text style={{ fontSize: 28, color }}>SushiSwap</Text>
             </Link>
         </View>
     );
@@ -123,7 +123,7 @@ const DarkModeSwitch = () => {
         [setDarkMode]
     );
     return (
-        <View style={{ marginLeft: Spacing.tiny, marginBottom: -3 }}>
+        <View style={{ marginLeft: Spacing.tiny, marginRight: -8, marginBottom: -3 }}>
             <Switch
                 value={darkMode}
                 onChange={onChange}

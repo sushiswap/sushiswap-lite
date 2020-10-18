@@ -125,7 +125,7 @@ const RemoveButton = ({
         onError({});
         state.onRemove().catch(onError);
     }, [state.onRemove, onError]);
-    return <Button size={"large"} title={"Remove"} disabled={disabled} loading={state.removing} onPress={onPress} />;
+    return <Button title={"Remove"} disabled={disabled} loading={state.removing} onPress={onPress} />;
 };
 
 export default RemoveLiquidityScreen;

@@ -1,68 +1,70 @@
 import React, { FC, useCallback, useContext, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Image, TouchableHighlight, View } from "react-native";
-import { Hoverable } from "react-native-web-hover";
+import { ActivityIndicator, FlatList, Image, View, ViewStyle } from "react-native";
 
 import { Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
 import Token from "../types/Token";
 import { formatBalance } from "../utils";
-import Border from "./Border";
-import CloseIcon from "./CloseIcon";
-import Column from "./Column";
+import Expandable from "./Expandable";
 import FlexView from "./FlexView";
-import SelectIcon from "./SelectIcon";
-import Subtitle from "./Subtitle";
+import { ITEM_SEPARATOR_HEIGHT } from "./ItemSeparator";
+import Selectable from "./Selectable";
 import Text from "./Text";
 
 interface TokenSelectProps {
     title: string;
-    hidden: boolean;
     symbol: string;
     onChangeSymbol: (symbol: string) => void;
-    filterTokens: (token: Token) => boolean;
+    disabled?: (token: Token) => boolean;
+    hidden?: (token: Token) => boolean;
+    style?: ViewStyle;
 }
 
 const TokenSelect: FC<TokenSelectProps> = props => {
     const { tokens } = useContext(EthersContext);
-    const token = tokens.find(t => t.symbol === props.symbol);
-    const onSelectToken = useCallback(
-        t => {
-            props.onChangeSymbol(t.symbol);
-        },
-        [props.onChangeSymbol]
-    );
-    const onUnselectToken = useCallback(() => {
+    const token = useMemo(() => tokens.find(t => t.symbol === props.symbol), [tokens, props.symbol]);
+    const onSelectToken = t => {
+        props.onChangeSymbol(t.symbol);
+    };
+    const onUnselectToken = () => {
         props.onChangeSymbol("");
-    }, [props.onChangeSymbol]);
-    if (/*!props.from && props.oppositeSymbol === ""*/ props.hidden) {
-        return <Column noTopMargin={true} />;
-    }
+    };
     return (
-        <Column>
-            <Subtitle text={props.title} />
-            {token ? (
-                <TokenItem token={token} selected={true} onSelectToken={onUnselectToken} />
-            ) : (
-                <TokenList filterTokens={props.filterTokens} onSelectToken={onSelectToken} />
-            )}
-        </Column>
+        <View style={props.style}>
+            <Expandable title={props.title} expanded={!props.symbol} onExpand={() => props.onChangeSymbol("")}>
+                <TokenList disabled={props.disabled} hidden={props.hidden} onSelectToken={onSelectToken} />
+            </Expandable>
+            {token && <TokenItem token={token} selected={true} onSelectToken={onUnselectToken} selectable={true} />}
+        </View>
     );
 };
 
 // tslint:disable-next-line:max-func-body-length
-const TokenList = (props: { filterTokens: (token: Token) => boolean; onSelectToken: (token: Token) => void }) => {
+const TokenList = (props: {
+    onSelectToken: (token: Token) => void;
+    disabled?: (token: Token) => boolean;
+    hidden?: (token: Token) => boolean;
+}) => {
     const { loadingTokens, tokens } = useContext(EthersContext);
     const renderItem = useCallback(
         ({ item }) => {
-            return <TokenItem key={item.address} token={item} selected={false} onSelectToken={props.onSelectToken} />;
+            return (
+                <TokenItem
+                    key={item.address}
+                    token={item}
+                    selected={false}
+                    onSelectToken={props.onSelectToken}
+                    disabled={props.disabled?.(item)}
+                />
+            );
         },
-        [props.onSelectToken]
+        [props.onSelectToken, props.disabled]
     );
     const data = useMemo(
         () =>
             tokens
-                .filter(props.filterTokens)
+                .filter(token => (props.hidden ? !props.hidden(token) : true))
                 .sort(
                     (t1, t2) =>
                         (t2.balance.isZero() ? 0 : 10000000000) -
@@ -72,16 +74,11 @@ const TokenList = (props: { filterTokens: (token: Token) => boolean; onSelectTok
         [tokens]
     );
     return loadingTokens ? (
-        <ActivityIndicator size={"large"} style={{ marginTop: Spacing.large }} />
+        <ActivityIndicator size={"large"} style={{ marginVertical: Spacing.large }} />
     ) : data.length === 0 ? (
         <EmptyList />
     ) : (
-        <FlatList
-            keyExtractor={item => JSON.stringify(item)}
-            data={data}
-            renderItem={renderItem}
-            ItemSeparatorComponent={Border}
-        />
+        <FlatList keyExtractor={item => item.address} data={data} renderItem={renderItem} />
     );
 };
 
@@ -95,37 +92,72 @@ const EmptyList = () => {
     );
 };
 
-const TokenItem = (props: { token: Token; selected: boolean; onSelectToken: (token: Token) => void }) => {
-    const { background, backgroundHovered, textMedium } = useColors();
-    const [isEmpty, setIsEmpty] = useState(false);
+const TokenItem = (props: {
+    token: Token;
+    selected: boolean;
+    onSelectToken: (token: Token) => void;
+    disabled?: boolean;
+    selectable?: boolean;
+}) => {
+    const { backgroundLight } = useColors();
     const onPress = useCallback(() => {
         props.onSelectToken(props.token);
     }, [props.onSelectToken, props.token]);
-    const source = isEmpty ? require("../../assets/empty-token.png") : { uri: props.token.logoURI };
     return (
-        <Hoverable>
-            {({ hovered }) => (
-                <TouchableHighlight onPress={onPress}>
-                    <View style={{ backgroundColor: hovered ? backgroundHovered : background }}>
-                        <FlexView style={{ alignItems: "center", margin: Spacing.small }}>
-                            <Image
-                                source={source}
-                                onError={() => setIsEmpty(true)}
-                                style={{ width: 24, height: 24, backgroundColor: "white", borderRadius: 12 }}
-                            />
-                            <Text light={true} style={{ marginLeft: Spacing.small, fontSize: 22, color: textMedium }}>
-                                {props.token.symbol}
-                            </Text>
-                            <Text light={true} style={{ flex: 1, textAlign: "right", fontSize: 22, color: textMedium }}>
-                                {formatBalance(props.token.balance, props.token.decimals, 8)}
-                            </Text>
-                            {props.selected ? <CloseIcon /> : <SelectIcon />}
-                        </FlexView>
-                    </View>
-                </TouchableHighlight>
-            )}
-        </Hoverable>
+        <Selectable
+            selected={props.selected}
+            onPress={onPress}
+            disabled={props.disabled || props.selectable}
+            style={{
+                backgroundColor: props.disabled ? backgroundLight : undefined,
+                marginBottom: ITEM_SEPARATOR_HEIGHT
+            }}>
+            <FlexView style={{ alignItems: "center" }}>
+                <TokenLogo uri={props.token.logoURI} disabled={props.disabled} />
+                <TokenName token={props.token} disabled={props.disabled} />
+                <TokenBalance token={props.token} disabled={props.disabled} />
+                <Text medium={true} caption={true} disabled={props.disabled}>
+                    {" " + props.token.symbol}
+                </Text>
+            </FlexView>
+        </Selectable>
     );
 };
+
+const TokenLogo = ({ uri, disabled }) => {
+    const [error, setError] = useState(false);
+    const placeholder = require("../../assets/empty-token.png");
+    return (
+        <View style={{ width: 27, height: 27, backgroundColor: disabled ? "black" : "white", borderRadius: 13.5 }}>
+            <Image
+                source={error ? placeholder : { uri }}
+                onError={() => setError(true)}
+                style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: 12,
+                    opacity: disabled ? 0.25 : 1
+                }}
+            />
+        </View>
+    );
+};
+
+const TokenName = ({ token, disabled }) => (
+    <Text
+        caption={true}
+        numberOfLines={1}
+        ellipsizeMode={"tail"}
+        style={{ marginLeft: Spacing.small, width: 180 }}
+        disabled={disabled}>
+        {token.name}
+    </Text>
+);
+
+const TokenBalance = ({ token, disabled }) => (
+    <Text caption={true} style={{ flex: 1, textAlign: "right" }} disabled={disabled}>
+        {formatBalance(token.balance, token.decimals, 8)}
+    </Text>
+);
 
 export default TokenSelect;

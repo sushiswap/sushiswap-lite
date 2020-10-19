@@ -384,10 +384,10 @@ export class Order {
     }
 
     status(): OrderStatus {
-        return this.deadline.toNumber() * 1000 < Date.now()
-            ? "Expired"
-            : this.filledAmountIn?.eq(this.amountIn)
+        return this.filledAmountIn?.eq(this.amountIn)
             ? "Filled"
+            : this.deadline.toNumber() * 1000 < Date.now()
+            ? "Expired"
             : "Open";
     }
 

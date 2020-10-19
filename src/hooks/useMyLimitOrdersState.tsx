@@ -26,7 +26,7 @@ export interface MyLimitOrdersState {
 // tslint:disable-next-line:max-func-body-length
 const useMyLimitOrdersState = () => {
     const { cancelOrder } = useSDK();
-    const { kovanSigner, signer, provider, tokens } = useContext(EthersContext);
+    const { kovanSigner, signer, provider, address, tokens } = useContext(EthersContext);
     const [lastTimeRefreshed, setLastTimeRefreshed] = useState(0);
     const [orders, setOrders] = useState<Order[]>();
     const [selectedOrder, setSelectedOrder] = useState<Order>();
@@ -35,56 +35,53 @@ const useMyLimitOrdersState = () => {
 
     // tslint:disable-next-line:max-func-body-length
     const updateOrders = async () => {
-        if (signer && kovanSigner && provider && tokens) {
-            const orderBook = getContract("OrderBook", ORDER_BOOK, kovanSigner);
-            const settlement = await getContract("Settlement", SETTLEMENT, signer);
-            const address = await signer.getAddress();
-            const length = await orderBook.numberOfHashesOfMaker(address);
-            const LIMIT = 20;
-            const pages: number[] = [];
-            for (let i = 0; i * LIMIT < length; i++) {
-                pages.push(i);
+        if (signer && kovanSigner && provider && address && tokens) {
+            setLoading(true);
+            try {
+                const orderBook = getContract("OrderBook", ORDER_BOOK, kovanSigner);
+                const settlement = await getContract("Settlement", SETTLEMENT, signer);
+                const length = await orderBook.numberOfHashesOfMaker(address);
+                const LIMIT = 20;
+                const pages: number[] = [];
+                for (let i = 0; i * LIMIT < length; i++) {
+                    pages.push(i);
+                }
+                const hashes = (await Promise.all(pages.map(page => orderBook.allHashes(page, LIMIT)))).flat();
+                const myOrders = await Promise.all(
+                    hashes
+                        .filter(hash => hash !== ethers.constants.HashZero)
+                        .map(async hash => {
+                            const args = await orderBook.orderOfHash(hash);
+                            const order = new Order(
+                                signer,
+                                await findOrFetchToken(provider, args.fromToken, tokens),
+                                await findOrFetchToken(provider, args.toToken, tokens),
+                                args.amountIn,
+                                args.amountOutMin,
+                                args.recipient,
+                                args.deadline
+                            );
+                            order.filledAmountIn = await settlement.filledAmountInOfHash(hash);
+                            return order;
+                        })
+                );
+                setOrders(
+                    myOrders.sort((o0, o1) => {
+                        const status = (s: OrderStatus) => (s === "Open" ? 0 : s === "Filled" ? 1 : 2);
+                        const compared = status(o0.status()) - status(o1.status());
+                        if (compared === 0) {
+                            return o0.deadline.toNumber() - o1.deadline.toNumber();
+                        }
+                        return compared;
+                    }) as Order[]
+                );
+            } finally {
+                setLoading(false);
             }
-            const hashes = (
-                await Promise.all(
-                    pages.map(async page => {
-                        return await orderBook.allHashes(page, LIMIT);
-                    })
-                )
-            ).flat();
-            const myOrders = await Promise.all(
-                hashes
-                    .filter(hash => hash !== ethers.constants.HashZero)
-                    .map(async hash => {
-                        const args = await orderBook.orderOfHash(hash);
-                        const order = new Order(
-                            signer,
-                            await findOrFetchToken(provider, args.fromToken, tokens),
-                            await findOrFetchToken(provider, args.toToken, tokens),
-                            args.amountIn,
-                            args.amountOutMin,
-                            args.recipient,
-                            args.deadline
-                        );
-                        order.filledAmountIn = await settlement.filledAmountInOfHash(hash);
-                        return order;
-                    })
-            );
-            setOrders(
-                myOrders.sort((o0, o1) => {
-                    const status = (s: OrderStatus) => (s === "Open" ? 0 : s === "Filled" ? 1 : 2);
-                    const compared = status(o0.status()) - status(o1.status());
-                    if (compared === 0) {
-                        return o0.deadline.toNumber() - o1.deadline.toNumber();
-                    }
-                    return compared;
-                }) as Order[]
-            );
-            setLoading(false);
         }
     };
 
-    useAsyncEffect(updateOrders, [kovanSigner, signer, provider, tokens, lastTimeRefreshed]);
+    useAsyncEffect(updateOrders, [kovanSigner, signer, provider, address, tokens, lastTimeRefreshed]);
 
     const onCancelOrder = useCallback(async () => {
         if (selectedOrder && signer && kovanSigner) {

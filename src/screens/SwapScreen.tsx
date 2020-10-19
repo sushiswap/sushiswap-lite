@@ -13,6 +13,7 @@ import Expandable from "../components/Expandable";
 import ExperimentalNotice from "../components/ExperimentalNotice";
 import FetchingButton from "../components/FetchingButton";
 import Heading from "../components/Heading";
+import InfoBox from "../components/InfoBox";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
 import { ITEM_SEPARATOR_HEIGHT } from "../components/ItemSeparator";
 import Meta from "../components/Meta";
@@ -32,7 +33,6 @@ import { EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
 import useDelayedEffect from "../hooks/useDelayedEffect";
 import useLinker from "../hooks/useLinker";
-import useStyles from "../hooks/useStyles";
 import useSwapState, { OrderType, SwapState } from "../hooks/useSwapState";
 import MetamaskError from "../types/MetamaskError";
 import Token from "../types/Token";
@@ -50,7 +50,7 @@ const SwapScreen = () => {
                     },
                     {
                         title: "My Orders",
-                        path: "/limit-orders"
+                        path: "/my-orders"
                     }
                 ]}
             />
@@ -69,7 +69,7 @@ const SwapScreen = () => {
 const Swap = () => {
     const state = useSwapState();
     return (
-        <>
+        <View style={{ marginTop: Spacing.large }}>
             <OrderTypeSelect state={state} />
             <Border />
             <FromTokenSelect state={state} />
@@ -89,20 +89,14 @@ const Swap = () => {
                 </View>
             )}
             <TradeInfo state={state} />
-        </>
+        </View>
     );
 };
 
 const OrderTypeSelect = ({ state }: { state: SwapState }) => {
     return (
         <View>
-            <Expandable
-                title={"Order Type"}
-                expanded={!state.orderType}
-                onExpand={() => state.setOrderType()}
-                style={{
-                    marginTop: Spacing.large
-                }}>
+            <Expandable title={"Order Type"} expanded={!state.orderType} onExpand={() => state.setOrderType()}>
                 <OrderTypeItem state={state} orderType={"market"} />
                 <OrderTypeItem state={state} orderType={"limit"} />
             </Expandable>
@@ -236,8 +230,6 @@ const LimitOrderUnsupportedNotice = () => {
 };
 
 const TradeInfo = ({ state }: { state: SwapState }) => {
-    const { backgroundLight } = useColors();
-    const { border } = useStyles();
     if (
         !isEmptyValue(state.fromAmount) &&
         ((state.fromSymbol === "ETH" && state.toSymbol === "WETH") ||
@@ -251,19 +243,13 @@ const TradeInfo = ({ state }: { state: SwapState }) => {
         isEmptyValue(state.fromAmount) ||
         (state.orderType === "limit" && state.fromSymbol === "ETH");
     return (
-        <View
-            style={{
-                ...border({ color: backgroundLight }),
-                backgroundColor: backgroundLight,
-                marginTop: Spacing.normal,
-                padding: Spacing.small + Spacing.tiny
-            }}>
+        <InfoBox>
             {state.orderType === "limit" ? (
                 <LimitOrderInfo state={state} />
             ) : (
                 <SwapInfo state={state} disabled={disabled} />
             )}
-        </View>
+        </InfoBox>
     );
 };
 
@@ -311,7 +297,7 @@ const SwapControls = ({ state }: { state: SwapState }) => {
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
     const approveRequired = state.fromSymbol !== "ETH" && !state.fromTokenAllowed;
     return (
-        <View style={{ marginTop: Spacing.small }}>
+        <View style={{ marginTop: Spacing.normal }}>
             {!state.fromToken || !state.toToken || isEmptyValue(state.fromAmount) ? (
                 <SwapButton state={state} onError={setError} disabled={true} />
             ) : parseBalance(state.fromAmount, state.fromToken.decimals).gt(state.fromToken.balance) ? (
@@ -373,18 +359,13 @@ const UnwrapButton = ({ state, onError }: { state: SwapState; onError: (e) => vo
 };
 
 const LimitOrderInfo = ({ state }: { state: SwapState }) => {
-    const { textDark, placeholder } = useColors();
-    const d =
-        !state.fromToken || !state.toToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.limitOrderPrice);
+    const d = !state.trade?.executionPrice;
     return (
         <View>
             <Text
-                style={{
-                    fontSize: 28,
-                    marginBottom: Spacing.normal,
-                    color: d ? placeholder : textDark
-                }}>
-                {d ? "N/A" : state.limitOrderReturn + " " + state.toSymbol}
+                disabled={isEmptyValue(state.limitOrderReturn)}
+                style={{ fontSize: 28, marginBottom: Spacing.normal }}>
+                {isEmptyValue(state.limitOrderReturn) ? "N/A" : state.limitOrderReturn + " " + state.toSymbol}
             </Text>
             <Meta
                 label={"Market Price"}
@@ -426,7 +407,7 @@ const LimitOrderControls = ({ state }: { state: SwapState }) => {
         !state.trade ||
         isEmptyValue(state.limitOrderPrice);
     return (
-        <View style={{ marginTop: Spacing.small }}>
+        <View style={{ marginTop: Spacing.normal }}>
             {disabled ? (
                 <PlaceOrderButton state={state} onError={setError} disabled={true} />
             ) : !Fraction.parse(state.limitOrderPrice).gt(
@@ -467,7 +448,7 @@ const PlaceOrderButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
-    const goToLimitOrders = useLinker("/#/limit-orders", "LimitOrders", "_self");
+    const goToLimitOrders = useLinker("/my-orders", "LimitOrders");
     const onPress = useCallback(async () => {
         onError({});
         try {

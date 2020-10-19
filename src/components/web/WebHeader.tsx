@@ -89,7 +89,7 @@ const MenuItem = ({ title, path }) => {
 };
 
 const Status = () => {
-    const { textLight, green, border } = useColors();
+    const { textLight, green, borderDark } = useColors();
     const { chainId, address, ensName } = useContext(EthersContext);
     const connected = chainId === 1 && address;
     const title = connected
@@ -106,7 +106,7 @@ const Status = () => {
                 paddingHorizontal: Spacing.small,
                 borderRadius: 16,
                 borderWidth: 1,
-                borderColor: border
+                borderColor: borderDark
             }}>
             <View style={{ backgroundColor: color, width: 6, height: 6, borderRadius: 3, marginRight: 12 }} />
             <Text style={{ fontSize: 16, color: textLight, marginRight: 2 }}>{title}</Text>

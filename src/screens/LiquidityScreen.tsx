@@ -229,7 +229,7 @@ const SupplyButton = ({
 };
 
 const RemoveLiquidityGuide = ({ state }: { state: AddLiquidityState }) => {
-    const onPress = useLinker("/#/liquidity/remove", "RemoveLiquidity", "_self");
+    const onPress = useLinker("/liquidity/remove", "RemoveLiquidity", "_self");
     return (
         <Guide
             hidden={false}

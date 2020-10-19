@@ -1,11 +1,17 @@
 import { useCallback } from "react";
 import { Platform } from "react-native";
+import { useHistory } from "react-router-dom";
 
 import { useNavigation } from "@react-navigation/native";
 
 const useWebLinker = (path: string, route: string, target?: string) => {
+    const history = useHistory();
     return useCallback(() => {
-        window.open(path, target || "_self");
+        if (target) {
+            window.open(path, target);
+        } else {
+            history.push(path);
+        }
     }, [path, target]);
 };
 

@@ -284,7 +284,7 @@ const DepositControls = ({ state }: { state: FarmingState }) => {
 
 const AddLiquidityButton = () => {
     const { green } = useColors();
-    const onPress = useLinker("/#/liquidity", "Liquidity");
+    const onPress = useLinker("/liquidity", "Liquidity");
     return (
         <Button
             color={green}

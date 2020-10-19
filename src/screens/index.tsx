@@ -33,7 +33,7 @@ const WebScreens = () => {
         <Router>
             <View style={{ flex: 1, backgroundColor: background }}>
                 <Switch>
-                    <Route path={"/limit-orders"}>
+                    <Route path={"/my-orders"}>
                         <MyLimitOrdersScreen />
                     </Route>
                     <Route path={"/liquidity/remove"}>

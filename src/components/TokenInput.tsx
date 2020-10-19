@@ -17,6 +17,7 @@ export interface TokenInputProps {
     amount: string;
     onAmountChanged: (amount: string) => void;
     label?: string;
+    hideMaxButton?: boolean;
     maxButtonText?: string;
     autoFocus?: boolean;
 }
@@ -59,7 +60,7 @@ const TokenInput: FC<TokenInputProps> = props => {
                         paddingBottom: 0
                     }}
                 />
-                {props.token?.balance?.gt(0) && (
+                {props.token?.balance?.gt(0) && !props.hideMaxButton && (
                     <MaxButton
                         token={props.token}
                         maxButtonText={props.maxButtonText}
@@ -85,7 +86,7 @@ const MaxButton = (props: { token: Token; updateAmount; maxButtonText?: string }
         }
     }, [props.token, props.updateAmount]);
     return (
-        <View style={{ position: "absolute", right: 12, bottom: Platform.OS === "web" ? 14 : 28 }}>
+        <View style={{ position: "absolute", right: 12, bottom: Platform.OS === "web" ? 10 : 20 }}>
             <Button
                 type={"clear"}
                 size={"small"}

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Platform, View } from "react-native";
+import { FlatList, Platform, View } from "react-native";
 
 import moment from "moment";
 import useAsyncEffect from "use-async-effect";
@@ -11,6 +11,7 @@ import Expandable from "../components/Expandable";
 import FlexView from "../components/FlexView";
 import InfoBox from "../components/InfoBox";
 import { ITEM_SEPARATOR_HEIGHT } from "../components/ItemSeparator";
+import Loading from "../components/Loading";
 import Meta from "../components/Meta";
 import Selectable from "../components/Selectable";
 import Text from "../components/Text";
@@ -96,7 +97,7 @@ const OrderList = ({ state }: { state: MyLimitOrdersState }) => {
         [state.setSelectedOrder]
     );
     return state.loading || !state.orders ? (
-        <ActivityIndicator size={"large"} style={{ marginVertical: Spacing.large }} />
+        <Loading />
     ) : state.orders.length === 0 ? (
         <EmptyList />
     ) : (

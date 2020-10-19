@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useContext, useMemo } from "react";
-import { ActivityIndicator, FlatList, View, ViewStyle } from "react-native";
+import { FlatList, View, ViewStyle } from "react-native";
 
 import { Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
@@ -7,6 +7,7 @@ import Token from "../types/Token";
 import Expandable from "./Expandable";
 import FlexView from "./FlexView";
 import { ITEM_SEPARATOR_HEIGHT } from "./ItemSeparator";
+import Loading from "./Loading";
 import Selectable from "./Selectable";
 import Text from "./Text";
 import TokenAmount from "./TokenAmount";
@@ -76,7 +77,7 @@ const TokenList = (props: {
         [tokens]
     );
     return loadingTokens ? (
-        <ActivityIndicator size={"large"} style={{ marginVertical: Spacing.large }} />
+        <Loading />
     ) : data.length === 0 ? (
         <EmptyList />
     ) : (

@@ -7,20 +7,19 @@ import LPToken from "../types/LPToken";
 import Token from "../types/Token";
 import { getContract } from "./index";
 
-export const fetchTokens = async (provider?: ethers.providers.JsonRpcProvider, signer?: ethers.Signer) => {
-    if (provider && signer) {
+export const fetchTokens = async (address: string, provider?: ethers.providers.JsonRpcProvider) => {
+    if (provider) {
         const response = await fetch("https://sushiswap.levx.io/tokens.json");
         const json = await response.json();
 
-        const account = await signer.getAddress();
         const balances = await provider.send("alchemy_getTokenBalances", [
-            account,
+            address,
             json.tokens.map(token => token.address)
         ]);
         return [
             {
                 ...ETH,
-                balance: await provider.getBalance(account)
+                balance: await provider.getBalance(address)
             },
             ...json.tokens.map((token, i) => ({
                 ...token,

@@ -1,28 +1,33 @@
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, Platform } from "react-native";
+import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
 import ApproveButton from "../components/ApproveButton";
+import Border from "../components/Border";
 import Button from "../components/Button";
-import Column from "../components/Column";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
 import FetchingButton from "../components/FetchingButton";
-import Guide from "../components/Guide";
+import Heading from "../components/Heading";
+import InfoBox from "../components/InfoBox";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
+import ItemSeparator from "../components/ItemSeparator";
 import Meta from "../components/Meta";
 import Notice from "../components/Notice";
 import Text from "../components/Text";
+import Title from "../components/Title";
 import TokenInput from "../components/TokenInput";
 import TokenSelect from "../components/TokenSelect";
 import UnsupportedButton from "../components/UnsupportedButton";
 import WebFooter from "../components/web/WebFooter";
+import WebSubMenu from "../components/web/WebSubMenu";
 import { ROUTER } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import useAddLiquidityState, { AddLiquidityState } from "../hooks/useAddLiquidityState";
-import useLinker from "../hooks/useLinker";
+import useColors from "../hooks/useColors";
+import useSDK from "../hooks/useSDK";
 import MetamaskError from "../types/MetamaskError";
 import { convertAmount, convertToken, isEmptyValue, parseBalance } from "../utils";
 import Screen from "./Screen";
@@ -30,8 +35,22 @@ import Screen from "./Screen";
 const LiquidityScreen = () => {
     return (
         <Screen>
+            <WebSubMenu
+                items={[
+                    {
+                        title: "Add Liquidity",
+                        path: "/liquidity"
+                    },
+                    {
+                        title: "Remove Liquidity",
+                        path: "/liquidity/remove"
+                    }
+                ]}
+            />
             <Container>
                 <Content>
+                    <Title text={"Add Liquidity"} />
+                    <Text light={true}>Add liquidity to a pool and get LP tokens of the pair.</Text>
                     <AddLiquidity />
                     {Platform.OS === "web" && <WebFooter />}
                 </Content>
@@ -43,140 +62,174 @@ const LiquidityScreen = () => {
 const AddLiquidity = () => {
     const state = useAddLiquidityState();
     return (
-        <>
-            <Column>
-                <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
-                    🔥 Add Liquidity
-                </Text>
-            </Column>
+        <View style={{ marginTop: Spacing.large }}>
             <TokenSelect
-                title={"1. Select the 1st token you want to ADD:"}
-                hidden={false}
+                title={"1st Token"}
                 symbol={state.fromSymbol}
                 onChangeSymbol={state.setFromSymbol}
-                filterTokens={token => token.balance && !token.balance.isZero()}
+                hidden={token => token.balance.isZero()}
             />
+            <Border />
+            <ToTokenSelect state={state} />
+            <Border />
+            <FromTokenInput state={state} />
+            <ItemSeparator />
+            <ToTokenInput state={state} />
+            <ItemSeparator />
+            <PriceInfo state={state} />
+        </View>
+    );
+};
+
+const ToTokenSelect = ({ state }: { state: AddLiquidityState }) => {
+    if (!state.fromSymbol) {
+        return <Heading text={"2nd Token"} disabled={true} />;
+    }
+    return (
+        <View>
             <TokenSelect
-                title={"2. Select the 2nd token you want to ADD:"}
-                hidden={state.fromSymbol === ""}
+                title={"2nd Token"}
                 symbol={state.toSymbol}
                 onChangeSymbol={state.setToSymbol}
-                filterTokens={token => token.symbol !== state.fromSymbol && token.balance && !token.balance.isZero()}
+                hidden={token => token.symbol === state.fromSymbol || token.balance.isZero()}
             />
-            <FromTokenInput state={state} />
-            <ToTokenInput state={state} />
-            <PriceInfo state={state} />
-            <Controls state={state} />
-            <RemoveLiquidityGuide state={state} />
-        </>
+        </View>
     );
 };
 
 const FromTokenInput = ({ state }: { state: AddLiquidityState }) => {
-    const onAmountChanged = useCallback(
-        (newAmount: string) => {
-            state.setFromAmount(newAmount);
-            if (state.pair && state.fromToken) {
-                const fromPrice = state.pair.priceOf(convertToken(state.fromToken));
-                state.setToAmount(fromPrice.quote(convertAmount(state.fromToken, newAmount)).toExact());
-            }
-        },
-        [state.pair, state.fromToken]
-    );
-    if (state.loading)
-        return (
-            <Column>
-                <ActivityIndicator size={"large"} />
-            </Column>
-        );
+    if (!state.fromSymbol || !state.toSymbol) {
+        return <Heading text={"Amount of Tokens"} disabled={true} />;
+    }
+    const onAmountChanged = (newAmount: string) => {
+        state.setFromAmount(newAmount);
+        if (state.pair && state.fromToken) {
+            const fromPrice = state.pair.priceOf(convertToken(state.fromToken));
+            const toAmount = fromPrice.quote(convertAmount(state.fromToken, newAmount)).toExact();
+            state.setToAmount(isEmptyValue(toAmount) ? "" : toAmount);
+        }
+    };
     return (
         <TokenInput
-            title={"3. How many tokens do you want to supply?"}
+            title={"Amount of Tokens"}
             token={state.fromToken}
-            hidden={!state.fromToken || !state.toToken || state.loading}
             amount={state.fromAmount}
             onAmountChanged={onAmountChanged}
+            hideMaxButton={state.loading && !state.pair}
         />
     );
 };
 
 const ToTokenInput = ({ state }: { state: AddLiquidityState }) => {
-    const onAmountChanged = useCallback(
-        (newAmount: string) => {
-            state.setToAmount(newAmount);
-            if (state.pair && state.toToken) {
-                const toPrice = state.pair.priceOf(convertToken(state.toToken));
-                state.setFromAmount(toPrice.quote(convertAmount(state.toToken, newAmount)).toExact());
-            }
-        },
-        [state.pair, state.toToken]
-    );
+    if (!state.fromSymbol || !state.toSymbol) {
+        return <View />;
+    }
+    const onAmountChanged = (newAmount: string) => {
+        state.setToAmount(newAmount);
+        if (state.pair && state.toToken) {
+            const toPrice = state.pair.priceOf(convertToken(state.toToken));
+            const fromAmount = toPrice.quote(convertAmount(state.toToken, newAmount)).toExact();
+            state.setFromAmount(isEmptyValue(fromAmount) ? "" : fromAmount);
+        }
+    };
     return (
         <TokenInput
             token={state.toToken}
-            hidden={!state.fromToken || !state.toToken || state.loading}
             amount={state.toAmount}
             onAmountChanged={onAmountChanged}
+            hideMaxButton={state.loading && !state.pair}
         />
     );
 };
 
 const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
-    if (!state.fromToken || !state.toToken || state.loading) {
-        return <Column noTopMargin={true} />;
+    if (state.fromToken && state.toToken && !state.loading && !state.pair) {
+        return <FirstProviderInfo state={state} />;
+    } else {
+        return <PairPriceInfo state={state} />;
     }
-    if (!isEmptyValue(state.fromAmount) && !state.loading && !state.pair) {
-        const initialPrice = Fraction.from(
-            parseBalance(state.toAmount, state.toToken.decimals),
-            parseBalance(state.fromAmount, state.fromToken.decimals)
-        );
-        return (
-            <Column noTopMargin={true}>
-                <Notice
-                    text={
-                        "You are the first liquidity provider.\n" +
-                        "The ratio of tokens you add will set the price of this pool."
-                    }
-                />
-                {!!state.fromAmount && !!state.toAmount && (
-                    <PriceMeta price={initialPrice} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
-                )}
-            </Column>
-        );
-    }
-    const price = state.pair ? state.pair.priceOf(convertToken(state.fromToken)).toFixed(8) : "…";
+};
+
+const FirstProviderInfo = ({ state }: { state: AddLiquidityState }) => {
+    const { green } = useColors();
+    const noAmount = isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount);
+    const initialPrice = Fraction.from(
+        parseBalance(state.toAmount, state.toToken!.decimals),
+        parseBalance(state.fromAmount, state.fromToken!.decimals)
+    ).toString(8);
     return (
-        <Column noTopMargin={true}>
-            <PriceMeta price={price} fromSymbol={state.fromSymbol} toSymbol={state.toSymbol} />
-        </Column>
+        <View>
+            <Notice
+                text={
+                    "You are the first liquidity provider.\n" +
+                    "The ratio of tokens you add will set the price of this pool."
+                }
+                color={green}
+                style={{ marginTop: Spacing.small }}
+            />
+            <InfoBox style={{ marginTop: Spacing.normal }}>
+                <PriceMeta state={state} price={initialPrice} disabled={noAmount} />
+            </InfoBox>
+        </View>
     );
 };
 
-const PriceMeta = ({ price, fromSymbol, toSymbol }) => (
-    <Meta label={"Price"} text={price.toString()} suffix={toSymbol + " = 1 " + fromSymbol} />
+const PairPriceInfo = ({ state }: { state: AddLiquidityState }) => {
+    const [amount, setAmount] = useState<string>();
+    const { textDark, textLight, placeholder } = useColors();
+    const { calculateAmountOfLPTokenMinted } = useSDK();
+    useAsyncEffect(async () => {
+        if (state.pair && !isEmptyValue(state.fromAmount) && !isEmptyValue(state.toAmount)) {
+            const minted = await calculateAmountOfLPTokenMinted(
+                state.pair,
+                convertAmount(state.fromToken!, state.fromAmount),
+                convertAmount(state.toToken!, state.toAmount)
+            );
+            setAmount(minted?.toFixed(8));
+        }
+    }, [state.pair, state.fromAmount, state.toAmount]);
+    const disabled = isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount);
+    const price =
+        state.pair && state.fromToken ? state.pair.priceOf(convertToken(state.fromToken)).toFixed(8) : undefined;
+    const color = disabled ? placeholder : amount ? textDark : textLight;
+    const symbol = state.fromSymbol + "-" + state.toSymbol + " LP";
+    return (
+        <InfoBox>
+            <Text style={{ fontSize: 28, marginBottom: Spacing.normal, color }}>
+                {disabled ? "N/A" : amount ? amount + " " + symbol : "Fetching…"}
+            </Text>
+            <PriceMeta state={state} price={price} disabled={!state.fromSymbol || !state.toSymbol} />
+            <Controls state={state} />
+        </InfoBox>
+    );
+};
+
+const PriceMeta = ({ state, price, disabled }) => (
+    <Meta label={"Price"} text={price} suffix={state.toSymbol + " = 1 " + state.fromSymbol} disabled={disabled} />
 );
 
 // tslint:disable-next-line:max-func-body-length
 const Controls = ({ state }: { state: AddLiquidityState }) => {
     const [error, setError] = useState<MetamaskError>({});
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
-    if (!state.fromToken || !state.toToken || state.loading) {
-        return <Column noTopMargin={true} />;
-    }
-    const insufficientFromToken = parseBalance(state.fromAmount, state.fromToken.decimals).gt(state.fromToken.balance);
-    const insufficientToToken = parseBalance(state.toAmount, state.toToken.decimals).gt(state.toToken.balance);
     const fromApproveRequired = state.fromSymbol !== "ETH" && !state.fromTokenAllowed;
     const toApproveRequired = state.toSymbol !== "ETH" && !state.toTokenAllowed;
     const disabled =
         fromApproveRequired || toApproveRequired || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount);
     return (
-        <Column>
-            {insufficientFromToken ? (
-                <InsufficientBalanceButton symbol={state.fromSymbol} />
-            ) : insufficientToToken ? (
-                <InsufficientBalanceButton symbol={state.toSymbol} />
+        <View style={{ marginTop: Spacing.normal }}>
+            {!state.fromToken ||
+            !state.toToken ||
+            state.loading ||
+            isEmptyValue(state.fromAmount) ||
+            isEmptyValue(state.toAmount) ? (
+                <SupplyButton state={state} onError={setError} disabled={true} />
             ) : state.loading || !state.pair ? (
                 <FetchingButton />
+            ) : parseBalance(state.fromAmount, state.fromToken.decimals).gt(state.fromToken.balance) ? (
+                <InsufficientBalanceButton symbol={state.fromSymbol} />
+            ) : parseBalance(state.toAmount, state.toToken.decimals).gt(state.toToken.balance) ? (
+                <InsufficientBalanceButton symbol={state.toSymbol} />
             ) : (state.fromSymbol === "ETH" && state.toSymbol === "WETH") ||
               (state.fromSymbol === "WETH" && state.toSymbol === "ETH") ? (
                 <UnsupportedButton state={state} />
@@ -200,7 +253,7 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
                 </>
             )}
             {error.message && error.code !== 4001 && <ErrorMessage error={error} />}
-        </Column>
+        </View>
     );
 };
 
@@ -219,23 +272,10 @@ const SupplyButton = ({
     }, [state.onAdd, onError]);
     return (
         <Button
-            size={"large"}
-            title={"Supply " + state.fromSymbol + "-" + state.toSymbol}
+            title={state.fromSymbol && state.toSymbol ? "Supply " + state.fromSymbol + "-" + state.toSymbol : "Supply"}
             disabled={disabled}
             loading={state.adding}
             onPress={onPress}
-        />
-    );
-};
-
-const RemoveLiquidityGuide = ({ state }: { state: AddLiquidityState }) => {
-    const onPress = useLinker("/liquidity/remove", "RemoveLiquidity", "_self");
-    return (
-        <Guide
-            hidden={false}
-            text={"☘️ Do you want to remove existing liquidity?"}
-            buttonTitle={"Click Here!"}
-            onPressButton={onPress}
         />
     );
 };

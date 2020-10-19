@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { Pair } from "@sushiswap/sdk";
 import { EthersContext } from "../context/EthersContext";
@@ -17,6 +17,11 @@ const useLiquidityState: () => LiquidityState = () => {
     const [loading, setLoading] = useState(false);
     const [pair, setPair] = useState<Pair>();
     const { getPair } = useSDK();
+
+    useEffect(() => {
+        setLoading(true);
+        setPair(undefined);
+    }, [state.fromSymbol, state.toSymbol]);
 
     useDelayedOnBlockEffect(
         async block => {

@@ -22,7 +22,7 @@ const Input: FC<InputProps> = props => {
     const { textDark, textMedium, textLight } = useColors();
     const size = props.size || "normal";
     const color = props.color || textDark;
-    const fontSize = size === "small" ? 20 : size === "large" ? 28 : 24;
+    const fontSize = size === "small" ? 16 : size === "large" ? 24 : 20;
     const onChangeText = useCallback(
         (text: string) => {
             props.onChangeText?.(text);
@@ -52,7 +52,7 @@ const Input: FC<InputProps> = props => {
         <NativeInput
             {...props}
             inputStyle={[
-                { fontSize, fontFamily: "regular", paddingBottom: 4, color, marginTop: 0 },
+                { fontSize, fontFamily: "regular", paddingBottom: 4, color, marginTop: 0, minHeight: 32 },
                 // @ts-ignore
                 Platform.OS === "web" ? { outline: "none" } : {},
                 props.inputStyle

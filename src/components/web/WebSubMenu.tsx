@@ -49,6 +49,7 @@ const MenuItem = ({ title, path }) => {
     return (
         <Link to={path} style={{ marginLeft: Spacing.tiny, padding: Spacing.tiny, textDecoration: "none" }}>
             <Text
+                fontWeight={active ? "regular" : "light"}
                 style={{
                     fontSize: 13,
                     color: active ? background : placeholder

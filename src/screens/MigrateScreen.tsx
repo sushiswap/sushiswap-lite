@@ -11,7 +11,6 @@ import ErrorMessage from "../components/ErrorMessage";
 import ExperimentalNotice from "../components/ExperimentalNotice";
 import FetchingButton from "../components/FetchingButton";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
-import LPTokenItem from "../components/LPTokenItem";
 import LPTokenSelect from "../components/LPTokenSelect";
 import Text from "../components/Text";
 import TokenInput from "../components/TokenInput";

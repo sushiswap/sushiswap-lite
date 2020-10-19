@@ -7,6 +7,7 @@ import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useLiquidityState, { LiquidityState } from "./useLiquidityState";
 
 export interface LPTokensState extends LiquidityState {
+    updateLPTokens: () => Promise<void>;
     lastTimeRefreshed: number;
     updateLastTimeRefreshed: () => void;
     lpTokens: LPToken[];
@@ -68,6 +69,7 @@ const useLPTokensState: (mode: Mode) => LPTokensState = mode => {
 
     return {
         ...state,
+        updateLPTokens,
         loading: state.loading || loading,
         lastTimeRefreshed,
         updateLastTimeRefreshed: () => {

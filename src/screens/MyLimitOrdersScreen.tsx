@@ -108,7 +108,7 @@ const OrderList = ({ state }: { state: MyLimitOrdersState }) => {
 const EmptyList = () => {
     return (
         <View style={{ margin: Spacing.normal }}>
-            <Text light={true} style={{ textAlign: "center", width: "100%" }}>
+            <Text disabled={true} style={{ textAlign: "center", width: "100%" }}>
                 {"You don't have any limit orders placed."}
             </Text>
         </View>

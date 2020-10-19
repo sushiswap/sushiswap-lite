@@ -21,6 +21,8 @@ const Button: FC<ButtonProps> = props => {
     return (
         <NativeButton
             {...props}
+            disabled={props.loading || props.disabled}
+            onPress={props.loading ? undefined : props.onPress}
             type={type}
             buttonStyle={[
                 {

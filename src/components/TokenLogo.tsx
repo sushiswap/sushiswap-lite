@@ -1,21 +1,38 @@
 import React, { useState } from "react";
-import { Image, View } from "react-native";
+import { Image, View, ViewStyle } from "react-native";
 
 import Token from "../types/Token";
 
-const TokenLogo = (props: { token: Token; disabled?: boolean }) => {
+const TokenLogo = (props: {
+    token: Token;
+    small?: boolean;
+    replaceWETH?: boolean;
+    disabled?: boolean;
+    style?: ViewStyle;
+}) => {
     const [error, setError] = useState(false);
+    const size = props.small ? 22 : 27;
     const placeholder = require("../../assets/empty-token.png");
+    const ETH = require("../../assets/ETH.png");
+    const source = props.replaceWETH && props.token.symbol === "WETH" ? ETH : { uri: props.token.logoURI };
     return (
         <View
-            style={{ width: 27, height: 27, backgroundColor: props.disabled ? "black" : "white", borderRadius: 13.5 }}>
+            style={[
+                {
+                    width: size,
+                    height: size,
+                    backgroundColor: props.disabled ? "black" : "white",
+                    borderRadius: size / 2
+                },
+                props.style
+            ]}>
             <Image
-                source={error ? placeholder : { uri: props.token.logoURI }}
+                source={error ? placeholder : source}
                 onError={() => setError(true)}
                 style={{
                     width: "100%",
                     height: "100%",
-                    borderRadius: 12,
+                    borderRadius: size / 2,
                     opacity: props.disabled ? 0.25 : 1
                 }}
             />

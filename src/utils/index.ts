@@ -10,6 +10,7 @@ import { ChainId, CurrencyAmount, Token as SDKToken, TokenAmount, WETH } from "@
 import OrderBook from "@sushiswap/settlement/deployments/kovan/OrderBook.json";
 import Settlement from "@sushiswap/settlement/deployments/mainnet/Settlement.json";
 import { ethers } from "ethers";
+import LPTokenScanner from "../constants/abi/LPTokenScanner.json";
 import Token from "../types/Token";
 
 const CONTRACTS = {
@@ -22,7 +23,8 @@ const CONTRACTS = {
     Migrator2,
     SushiBar,
     OrderBook,
-    Settlement
+    Settlement,
+    LPTokenScanner: { abi: LPTokenScanner }
 };
 
 export const formatBalance = (value: ethers.BigNumberish, decimals = 18, maxFraction = 0) => {

@@ -109,7 +109,7 @@ const Status = () => {
                 borderColor: borderDark
             }}>
             <View style={{ backgroundColor: color, width: 6, height: 6, borderRadius: 3, marginRight: 12 }} />
-            <Text style={{ fontSize: 16, color: textLight, marginRight: 2 }}>{title}</Text>
+            <Text style={{ fontSize: 15, color: textLight, marginRight: 2 }}>{title}</Text>
         </FlexView>
     );
 };

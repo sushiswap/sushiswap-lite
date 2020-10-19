@@ -88,7 +88,7 @@ const TokenList = (props: {
 const EmptyList = () => {
     return (
         <View style={{ margin: Spacing.normal }}>
-            <Text light={true} style={{ textAlign: "center", width: "100%" }}>
+            <Text disabled={true} style={{ textAlign: "center", width: "100%" }}>
                 {"You don't have any token with balance.\nTransfer tokens to your address first."}
             </Text>
         </View>

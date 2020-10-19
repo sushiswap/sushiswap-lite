@@ -159,6 +159,9 @@ const FirstProviderInfo = ({ state }: { state: AddLiquidityState }) => {
     ).toString(8);
     return (
         <View>
+            <InfoBox style={{ marginTop: Spacing.normal }}>
+                <PriceMeta state={state} price={initialPrice} disabled={noAmount} />
+            </InfoBox>
             <Notice
                 text={
                     "You are the first liquidity provider.\n" +
@@ -167,9 +170,6 @@ const FirstProviderInfo = ({ state }: { state: AddLiquidityState }) => {
                 color={green}
                 style={{ marginTop: Spacing.small }}
             />
-            <InfoBox style={{ marginTop: Spacing.normal }}>
-                <PriceMeta state={state} price={initialPrice} disabled={noAmount} />
-            </InfoBox>
         </View>
     );
 };
@@ -192,7 +192,7 @@ const PairPriceInfo = ({ state }: { state: AddLiquidityState }) => {
     const price =
         state.pair && state.fromToken ? state.pair.priceOf(convertToken(state.fromToken)).toFixed(8) : undefined;
     const color = disabled ? placeholder : amount ? textDark : textLight;
-    const symbol = state.fromSymbol + "-" + state.toSymbol + " LP";
+    const symbol = state.fromSymbol + "-" + state.toSymbol;
     return (
         <InfoBox>
             <Text style={{ fontSize: 28, marginBottom: Spacing.normal, color }}>

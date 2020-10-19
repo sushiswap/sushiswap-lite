@@ -5,7 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 
 const useWebLinker = (path: string, route: string, target?: string) => {
     return useCallback(() => {
-        window.open(path, target);
+        window.open(path, target || "_self");
     }, [path, target]);
 };
 

@@ -1,8 +1,6 @@
 import React, { FC } from "react";
 import { Platform, SafeAreaView, ScrollView, ViewProps } from "react-native";
 
-import { HEADER_HEIGHT } from "../constants/dimension";
-
 export type ContainerProps = ViewProps;
 
 // tslint:disable-next-line:max-func-body-length
@@ -13,8 +11,7 @@ const Container: FC<ContainerProps> = props => {
                 contentContainerStyle={{ flex: 1 }}
                 style={[
                     {
-                        flex: 1,
-                        marginTop: HEADER_HEIGHT
+                        flex: 1
                     },
                     props.style
                 ]}

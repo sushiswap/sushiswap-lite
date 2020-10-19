@@ -11,8 +11,9 @@ export const Colors = {
     },
     light: {
         accent: "#291C64",
-        background: "#ffffff",
-        backgroundLight: "#f0f0f0",
+        header: "#ffffff",
+        background: "#f0f0f0",
+        backgroundLight: "#e5e5e5",
         border: "#e5e5e5",
         borderDark: "#cccccc",
         textDark: "#1d1d1f",
@@ -20,13 +21,13 @@ export const Colors = {
         textLight: "#888888",
         disabled: "#b4b4b4",
         shadow: "#444444",
-        placeholder: "#d8d8d8",
-        underlay: "#b4b4b4"
+        placeholder: "#b4b4b4"
     },
     dark: {
         accent: "#9BECEE",
+        header: "#000000",
         background: "#121212",
-        backgroundLight: "#202020",
+        backgroundLight: "#1a1a1a",
         border: "#ffffff33",
         borderDark: "#666666",
         textDark: "#d5d1cc",
@@ -34,7 +35,6 @@ export const Colors = {
         textLight: "#aaaaaa",
         disabled: "#aaaaaa80",
         shadow: "#03080c",
-        placeholder: "#666666",
-        underlay: "#aaaaaa80"
+        placeholder: "#666666"
     }
 };

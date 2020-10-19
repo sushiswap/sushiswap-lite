@@ -16,6 +16,7 @@ import Meta from "../components/Meta";
 import SelectIcon from "../components/SelectIcon";
 import Text from "../components/Text";
 import WebFooter from "../components/web/WebFooter";
+import WebSubMenu from "../components/web/WebSubMenu";
 import { Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import useColors from "../hooks/useColors";
@@ -28,6 +29,18 @@ import Screen from "./Screen";
 const MyLimitOrdersScreen = () => {
     return (
         <Screen>
+            <WebSubMenu
+                items={[
+                    {
+                        title: "Swap Tokens",
+                        path: "/"
+                    },
+                    {
+                        title: "My Orders",
+                        path: "/limit-orders"
+                    }
+                ]}
+            />
             <Container>
                 <Content>
                     <MyLimitOrders />

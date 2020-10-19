@@ -12,14 +12,12 @@ export interface ButtonProps extends NativeButtonProps {
 
 // tslint:disable-next-line:max-func-body-length
 const Button: FC<ButtonProps> = props => {
-    const { primary, borderDark, textMedium, underlay } = useColors();
+    const { primary, textMedium, placeholder, backgroundLight } = useColors();
     const type = props.type || "solid";
     const size = props.size || "normal";
     const height = props.size === "small" ? 36 : size === "normal" ? 45 : 54;
-    const fontSize = props.size === "small" ? 12 : size === "normal" ? 15 : 18;
+    const fontSize = props.size === "small" ? 13 : size === "normal" ? 15 : 18;
     const fontFamily = props.fontWeight || "regular";
-    const color = type === "solid" ? "white" : props.color || textMedium;
-    const backgroundColor = type === "solid" ? (props.disabled ? underlay : props.color || primary) : "transparent";
     return (
         <NativeButton
             {...props}
@@ -28,12 +26,20 @@ const Button: FC<ButtonProps> = props => {
                 {
                     height,
                     paddingHorizontal: Spacing.small,
-                    backgroundColor,
-                    borderColor: borderDark
+                    backgroundColor: "transparent"
                 },
                 props.buttonStyle
             ]}
-            titleStyle={[{ fontSize, fontFamily, color }, props.titleStyle]}
+            titleStyle={[
+                { fontSize, fontFamily, color: type === "solid" ? "white" : props.color || textMedium },
+                props.titleStyle
+            ]}
+            disabledTitleStyle={[{ fontSize, fontFamily, color: placeholder }, props.titleStyle]}
+            style={[{ backgroundColor: type === "solid" ? props.color || primary : "transparent" }, props.style]}
+            disabledStyle={[
+                { backgroundColor: type === "solid" ? backgroundLight : "transparent" },
+                props.disabledStyle
+            ]}
         />
     );
 };

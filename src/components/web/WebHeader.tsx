@@ -12,7 +12,7 @@ import FlexView from "../FlexView";
 import Text from "../Text";
 
 const WebHeader = () => {
-    const { background } = useColors();
+    const { header } = useColors();
     return (
         <View
             // @ts-ignore
@@ -22,8 +22,8 @@ const WebHeader = () => {
                 zIndex: 100,
                 width: "100%",
                 height: HEADER_HEIGHT,
-                paddingBottom: 8,
-                backgroundColor: background
+                paddingBottom: Spacing.small,
+                backgroundColor: header
             }}>
             <FlexView
                 style={{

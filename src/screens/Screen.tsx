@@ -8,6 +8,7 @@ import AppHeader from "../components/app/AppHeader";
 import Text from "../components/Text";
 import ConnectToWallet from "../components/web/ConnectToWallet";
 import MobileNotSupported from "../components/web/MobileNotSupported";
+import { HEADER_HEIGHT } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
 import { GlobalContext } from "../context/GlobalContext";
 
@@ -29,7 +30,10 @@ const Screen = props => {
                 </View>
             );
         return (
-            <View {...props} style={[{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0 }, props.style]} />
+            <View
+                {...props}
+                style={[{ position: "absolute", top: HEADER_HEIGHT, right: 0, bottom: 0, left: 0 }, props.style]}
+            />
         );
     } else {
         return (

@@ -12,7 +12,6 @@ import ErrorMessage from "../components/ErrorMessage";
 import Expandable from "../components/Expandable";
 import ExperimentalNotice from "../components/ExperimentalNotice";
 import FetchingButton from "../components/FetchingButton";
-import Guide from "../components/Guide";
 import Heading from "../components/Heading";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
 import { ITEM_SEPARATOR_HEIGHT } from "../components/ItemSeparator";
@@ -25,6 +24,7 @@ import TokenInput from "../components/TokenInput";
 import TokenSelect from "../components/TokenSelect";
 import UnsupportedButton from "../components/UnsupportedButton";
 import WebFooter from "../components/web/WebFooter";
+import WebSubMenu from "../components/web/WebSubMenu";
 import { ROUTER, SETTLEMENT } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
@@ -42,6 +42,18 @@ import Screen from "./Screen";
 const SwapScreen = () => {
     return (
         <Screen>
+            <WebSubMenu
+                items={[
+                    {
+                        title: "Swap Tokens",
+                        path: "/"
+                    },
+                    {
+                        title: "My Orders",
+                        path: "/limit-orders"
+                    }
+                ]}
+            />
             <Container>
                 <Content>
                     <Title text={"Swap Tokens"} />
@@ -77,7 +89,6 @@ const Swap = () => {
                 </View>
             )}
             <TradeInfo state={state} />
-            {/*<MyLimitOrdersGuide state={state} />*/}
         </>
     );
 };
@@ -467,18 +478,6 @@ const PlaceOrderButton = ({
         }
     }, [state.onCreateOrder, goToLimitOrders, onError]);
     return <Button title={"Place Limit Order"} disabled={disabled} loading={state.creatingOrder} onPress={onPress} />;
-};
-
-const MyLimitOrdersGuide = ({ state }: { state: SwapState }) => {
-    const onPress = useLinker("/#/limit-orders", "LimitOrders", "_self");
-    return (
-        <Guide
-            hidden={false}
-            text={"☘️ Do you want to scan limit orders you've placed?"}
-            buttonTitle={"Click Here!"}
-            onPressButton={onPress}
-        />
-    );
 };
 
 export default SwapScreen;

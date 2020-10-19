@@ -6,6 +6,7 @@ export const IS_HIGH_RESOLUTION = SCREEN_HEIGHT > 667;
 export const HEADER_HEIGHT = 64;
 export const HEADER_WIDTH = 980;
 export const WEB_WIDTH = 540;
+export const SUB_MENU_HEIGHT = 40;
 
 export const Spacing = IS_HIGH_RESOLUTION
     ? {

@@ -100,14 +100,11 @@ const fetchLPTokens = async (
             pages.map(page => scanner.findPairs(account, factory, page, Math.min(page + LIMIT, length.toNumber())))
         )
     ).flat();
-    const balances = await scanner.findBalances(
-        account,
-        pairs.map(pair => pair.token)
-    );
+    const balances = await provider.send("alchemy_getTokenBalances", [account, pairs.map(pair => pair.token)]);
     return await Promise.all(
         pairs.map(async (pair, index) => {
             const address = pair.token;
-            const balance = balances[index].balance;
+            const balance = ethers.BigNumber.from(balances.tokenBalances[index].tokenBalance);
             const contract = getContract("IUniswapV2Pair", address, signer);
             const erc20 = getContract("ERC20", address, signer);
             const decimals = Number(await erc20.decimals());

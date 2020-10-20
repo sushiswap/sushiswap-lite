@@ -34,7 +34,7 @@ const MigrateScreen = () => {
             <Container>
                 <Content>
                     <Title text={"Migrate"} />
-                    <Text light={true}>Migrate your UniSwap LP tokens.</Text>
+                    <Text light={true}>Migrate your Uniswap LP tokens.</Text>
                     <Migrate />
                     {Platform.OS === "web" && <WebFooter />}
                 </Content>
@@ -49,8 +49,8 @@ const Migrate = () => {
         <View style={{ marginTop: Spacing.normal }}>
             <LPTokenSelect
                 state={state}
-                title={"Your UniSwap Liquidity"}
-                emptyText={"You don't have any liquidity on UniSwap."}
+                title={"Your Uniswap Liquidity"}
+                emptyText={"You don't have any liquidity on Uniswap."}
                 Item={LPTokenItem}
             />
             <Border />

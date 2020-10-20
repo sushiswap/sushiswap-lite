@@ -16,7 +16,7 @@ export interface RemoveLiquidityState extends LPTokensState {
 // tslint:disable-next-line:max-func-body-length
 const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
     const state = useLPTokensState("my-lp-tokens");
-    const { provider, signer, getTokenAllowance } = useContext(EthersContext);
+    const { provider, signer, getTokenAllowance, updateTokens } = useContext(EthersContext);
     const { removeLiquidity, removeLiquidityETH } = useSDK();
     const [loading, setLoading] = useState(false);
     const [removing, setRemoving] = useState(false);
@@ -88,10 +88,9 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
                 const toAmount = parseBalance(state.toAmount, state.toToken!.decimals);
                 const liquidity = parseBalance(state.amount, state.selectedLPToken.decimals);
                 if (state.fromSymbol === "WETH" || state.toSymbol === "WETH") {
-                    const [token, amountToRemove, amountToRemoveETH] =
-                        state.fromSymbol === "WETH"
-                            ? [state.toToken!, toAmount, fromAmount]
-                            : [state.fromToken!, fromAmount, toAmount];
+                    const token = state.fromSymbol === "WETH" ? state.toToken! : state.fromToken!;
+                    const amountToRemove = state.fromSymbol === "WETH" ? toAmount : fromAmount;
+                    const amountToRemoveETH = state.fromSymbol === "WETH" ? fromAmount : toAmount;
                     const tx = await removeLiquidityETH(token, liquidity, amountToRemove, amountToRemoveETH, signer);
                     await tx.wait();
                 } else {
@@ -105,6 +104,7 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
                     );
                     await tx.wait();
                 }
+                await updateTokens();
                 await state.updateLPTokens();
                 state.setSelectedLPToken(undefined);
             } finally {

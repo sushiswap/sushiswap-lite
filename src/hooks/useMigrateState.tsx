@@ -45,6 +45,7 @@ const useMigrateState: () => MigrateState = () => {
                 const tx = await migrate(state.selectedLPToken, amount, signer);
                 await tx.wait();
                 await updateTokens();
+                await state.updateLPTokens();
                 state.setSelectedLPToken(undefined);
             } finally {
                 setMigrating(false);

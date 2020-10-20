@@ -134,7 +134,7 @@ const MigrateButton = ({
             onError(e);
         }
     }, []);
-    return <Button title={"Migrate"} loading={state.migrating} onPress={onPress} disabled={disabled} />;
+    return <Button title={"Migrate from Uniswap"} loading={state.migrating} onPress={onPress} disabled={disabled} />;
 };
 
 export default MigrateScreen;

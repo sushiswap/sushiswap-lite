@@ -24,6 +24,7 @@ const Button: FC<ButtonProps> = props => {
             disabled={props.loading || props.disabled}
             onPress={props.loading ? undefined : props.onPress}
             type={type}
+            loadingProps={{ color: textMedium }}
             buttonStyle={[
                 {
                     height,

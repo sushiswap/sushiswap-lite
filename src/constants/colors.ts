@@ -11,9 +11,10 @@ export const Colors = {
     },
     light: {
         accent: "#291C64",
-        header: "#ffffff",
-        background: "#f0f0f0",
-        backgroundLight: "#e5e5e5",
+        header: "#ffffffb8",
+        submenu: "#ffffffb8",
+        background: "#f8f8f8",
+        backgroundLight: "#f0f0f0",
         border: "#e5e5e5",
         borderDark: "#cccccc",
         textDark: "#1d1d1f",
@@ -26,6 +27,7 @@ export const Colors = {
     dark: {
         accent: "#9BECEE",
         header: "#000000",
+        submenu: "#121212",
         background: "#121212",
         backgroundLight: "#1a1a1a",
         border: "#ffffff33",

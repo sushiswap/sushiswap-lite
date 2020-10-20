@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import { Icon, SocialIcon as NativeSocialIcon, SocialIconProps } from "react-native-elements";
 
-import { Spacing } from "../constants/dimension";
 import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
 import useLinker from "../hooks/useLinker";
@@ -14,15 +13,16 @@ const SocialIcons = () => {
     const onPressGithub = useLinker("https://github.com/sushiswap-lite", "", "_blank");
     const onPressDiscord = useLinker("https://discord.gg/YS8xH7E", "", "_blank");
     return (
-        <FlexView style={{ width: "100%", marginTop: Spacing.large, justifyContent: "center" }}>
+        <FlexView style={{ width: "100%", justifyContent: "center" }}>
             <SocialIcon type="github-alt" onPress={onPressGithub} />
             <SocialIcon type="twitter" onPress={onPressTwitter} />
             <Icon
                 type={"material-community"}
                 name={"discord"}
                 raised={true}
-                reverse={darkMode}
-                color={darkMode ? background : "#7289da"}
+                reverse={true}
+                color={background}
+                reverseColor={darkMode ? "white" : "#7289da"}
                 style={{ backgroundColor: background }}
                 containerStyle={{
                     borderWidth: 1,
@@ -43,7 +43,7 @@ const SocialIcon = (props: SocialIconProps) => {
             light={!darkMode}
             iconColor={darkMode ? "white" : undefined}
             style={{
-                backgroundColor: darkMode ? background : "white",
+                backgroundColor: background,
                 borderWidth: 1,
                 borderColor: darkMode ? "white" : textLight
             }}

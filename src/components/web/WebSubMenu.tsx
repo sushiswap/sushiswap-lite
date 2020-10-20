@@ -51,13 +51,15 @@ export const LiquiditySubMenu = () => (
 );
 
 const WebSubMenu: FC<WebSubMenuProps> = props => {
-    const { textMedium } = useColors();
+    const { borderDark, submenu } = useColors();
     return (
         <View
             style={{
                 height: SUB_MENU_HEIGHT,
                 width: "100%",
-                backgroundColor: textMedium
+                borderBottomWidth: 1,
+                borderColor: borderDark + "40",
+                backgroundColor: submenu
             }}>
             <FlexView
                 style={{
@@ -77,7 +79,7 @@ const WebSubMenu: FC<WebSubMenuProps> = props => {
 };
 
 const MenuItem = ({ title, path }) => {
-    const { background, placeholder } = useColors();
+    const { textDark, textLight } = useColors();
     const match = useRouteMatch(path);
     const active = match?.isExact;
     return (
@@ -86,7 +88,7 @@ const MenuItem = ({ title, path }) => {
                 fontWeight={active ? "regular" : "light"}
                 style={{
                     fontSize: 13,
-                    color: active ? background : placeholder
+                    color: active ? textDark : textLight
                 }}>
                 {title}
             </Text>

@@ -21,7 +21,7 @@ const TokenLogo = (props: {
                 {
                     width: size,
                     height: size,
-                    backgroundColor: props.disabled ? "black" : "white",
+                    backgroundColor: props.disabled ? "grey" : "white",
                     borderRadius: size / 2
                 },
                 props.style
@@ -33,7 +33,7 @@ const TokenLogo = (props: {
                     width: "100%",
                     height: "100%",
                     borderRadius: size / 2,
-                    opacity: props.disabled ? 0.25 : 1
+                    opacity: props.disabled ? 0.5 : 1
                 }}
             />
         </View>

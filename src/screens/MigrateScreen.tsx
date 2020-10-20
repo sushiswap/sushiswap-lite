@@ -33,8 +33,8 @@ const MigrateScreen = () => {
             <LiquiditySubMenu />
             <Container>
                 <Content>
-                    <Title text={"Migrate"} />
-                    <Text light={true}>Migrate your Uniswap LP tokens.</Text>
+                    <Title text={"Migrate Liquidity"} />
+                    <Text light={true}>Migrate your Uniswap LP tokens to SushiSwap LP tokens.</Text>
                     <Migrate />
                     {Platform.OS === "web" && <WebFooter />}
                 </Content>
@@ -46,7 +46,7 @@ const MigrateScreen = () => {
 const Migrate = () => {
     const state = useMigrateState();
     return (
-        <View style={{ marginTop: Spacing.normal }}>
+        <View style={{ marginTop: Spacing.large }}>
             <LPTokenSelect
                 state={state}
                 title={"Your Uniswap Liquidity"}
@@ -134,7 +134,7 @@ const MigrateButton = ({
             onError(e);
         }
     }, []);
-    return <Button title={"Migrate from Uniswap"} loading={state.migrating} onPress={onPress} disabled={disabled} />;
+    return <Button title={"Migrate Liquidity"} loading={state.migrating} onPress={onPress} disabled={disabled} />;
 };
 
 export default MigrateScreen;

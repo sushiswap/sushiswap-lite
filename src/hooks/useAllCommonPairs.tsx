@@ -6,7 +6,7 @@ import { ethers } from "ethers";
 const DAI = new Token(ChainId.MAINNET, "0x6B175474E89094C44Da98b954EedeAC495271d0F", 18, "DAI", "Dai Stablecoin");
 const USDC = new Token(ChainId.MAINNET, "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", 6, "USDC", "USD//C");
 const USDT = new Token(ChainId.MAINNET, "0xdAC17F958D2ee523a2206206994597C13D831ec7", 6, "USDT", "Tether USD");
-const SUSHI = new Token(ChainId.MAINNET, "0x6B3595068778DD592e39A122f4f5a5cF09C90fE2", 18, "SUSHI", "SushiSwap");
+const SUSHI = new Token(ChainId.MAINNET, "0x6B3595068778DD592e39A122f4f5a5cF09C90fE2", 18, "SUSHI", "SushiToken");
 const YAM = new Token(ChainId.MAINNET, "0x0e2298E3B3390e3b945a5456fBf59eCc3f55DA16", 18, "YAM", "YAM");
 const AMPL = new Token(ChainId.MAINNET, "0xD46bA6D942050d489DBd938a2C909A5d5039A161", 9, "AMPL", "Ampleforth");
 

@@ -43,7 +43,7 @@ export const LiquiditySubMenu = () => (
                 path: "/liquidity/remove"
             },
             {
-                title: "Migrate",
+                title: "Migrate Liquidity",
                 path: "/liquidity/migrate"
             }
         ]}

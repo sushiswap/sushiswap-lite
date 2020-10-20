@@ -162,29 +162,29 @@ const Field = ({ label, value, disabled, minWidth }) => {
 };
 
 const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
-    const { fromToken, filledAmountIn, expiry } = useMemo(() => {
-        if (state.selectedOrder) {
-            const order = state.selectedOrder;
+    const order = state.selectedOrder;
+    const amountIn = order ? formatBalance(order.amountIn, order.fromToken.decimals) : undefined;
+    const amountOutMin = order ? formatBalance(order.amountOutMin, order.toToken.decimals) : undefined;
+    const filledAmountIn = order ? formatBalance(order.filledAmountIn!, order.fromToken.decimals) : undefined;
+    const expiry = useMemo(() => {
+        if (order) {
             const deadline = new Date(order.deadline.toNumber() * 1000);
             const now = Date.now();
             const diff = moment(deadline).diff(now);
-            return {
-                fromToken: order.fromToken,
-                filledAmountIn: formatBalance(order.filledAmountIn!, order.fromToken.decimals),
-                expiry: moment(deadline).isAfter(now) ? moment.utc(diff).format("HH[h] mm[m]") : formatDate(deadline)
-            };
-        } else {
-            return {
-                fromToken: undefined,
-                filledAmountIn: undefined,
-                expiry: undefined
-            };
+            return moment(deadline).isAfter(now) ? moment.utc(diff).format("HH[h] mm[m]") : formatDate(deadline);
         }
-    }, [state.selectedOrder]);
+    }, [order]);
     const disabled = !state.selectedOrder;
     return (
         <InfoBox>
-            <Meta label={"Amount Filled"} text={filledAmountIn} suffix={fromToken?.symbol} disabled={disabled} />
+            <Meta label={"Amount Filled"} text={filledAmountIn} suffix={order?.fromToken?.symbol} disabled={disabled} />
+            <Meta label={"Amount To Sell"} text={amountIn} suffix={order?.fromToken?.symbol} disabled={disabled} />
+            <Meta
+                label={"Desired Amount To Buy"}
+                text={amountOutMin}
+                suffix={order?.toToken?.symbol}
+                disabled={disabled}
+            />
             <Meta label={"Expiration"} text={expiry} disabled={disabled} />
             <Controls state={state} />
         </InfoBox>

@@ -1,21 +1,24 @@
 import React, { useCallback, useState } from "react";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
 import ApproveButton from "../components/ApproveButton";
+import Border from "../components/Border";
 import Button from "../components/Button";
-import Column from "../components/Column";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
 import FetchingButton from "../components/FetchingButton";
+import Heading from "../components/Heading";
+import InfoBox from "../components/InfoBox";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
-import LPTokenItem from "../components/LPTokenItem";
-import LPTokenSelect from "../components/LPTokenSelect";
+import LPTokenSelect, { LPTokenItem } from "../components/LPTokenSelect";
 import Meta from "../components/Meta";
 import Text from "../components/Text";
+import Title from "../components/Title";
 import TokenInput from "../components/TokenInput";
 import WebFooter from "../components/web/WebFooter";
+import { LiquiditySubMenu } from "../components/web/WebSubMenu";
 import { ROUTER } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import useRemoveLiquidityState, { RemoveLiquidityState } from "../hooks/useRemoveLiquidityState";
@@ -26,8 +29,11 @@ import Screen from "./Screen";
 const RemoveLiquidityScreen = () => {
     return (
         <Screen>
+            <LiquiditySubMenu />
             <Container>
                 <Content>
+                    <Title text={"Remove Liquidity"} />
+                    <Text light={true}>Scan your liquidity and remove one if needed.</Text>
                     <RemoveLiquidity />
                     {Platform.OS === "web" && <WebFooter />}
                 </Content>
@@ -39,44 +45,50 @@ const RemoveLiquidityScreen = () => {
 const RemoveLiquidity = () => {
     const state = useRemoveLiquidityState();
     return (
-        <>
-            <Column>
-                <Text h4={true} style={{ textAlign: "center", marginBottom: Spacing.normal }}>
-                    🎉 Remove Liquidity
-                </Text>
-            </Column>
+        <View style={{ marginTop: Spacing.large }}>
             <LPTokenSelect
                 state={state}
-                title={"1. Select a pool to REMOVE liquidity from:"}
+                title={"Your Liquidity"}
                 emptyText={"You don't have any liquidity."}
                 Item={LPTokenItem}
             />
-            <TokenInput
-                title={"2. How many tokens do you want to REMOVE?"}
-                token={state.selectedLPToken}
-                hidden={!state.selectedLPToken}
-                amount={state.amount}
-                onAmountChanged={state.setAmount}
-            />
+            <Border />
+            <AmountInput state={state} />
             <AmountInfo state={state} />
-            <Controls state={state} />
-        </>
+        </View>
+    );
+};
+
+const AmountInput = ({ state }: { state: RemoveLiquidityState }) => {
+    if (!state.selectedLPToken) {
+        return <Heading text={"Amount of Tokens"} disabled={true} />;
+    }
+    return (
+        <TokenInput
+            title={"Amount of Tokens"}
+            token={state.selectedLPToken}
+            amount={state.amount}
+            onAmountChanged={state.setAmount}
+        />
     );
 };
 
 const AmountInfo = ({ state }: { state: RemoveLiquidityState }) => {
-    if (!state.selectedLPToken || !state.fromToken || !state.toToken) {
-        return <Column noTopMargin={true} />;
-    }
+    const disabled = !state.selectedLPToken || !state.fromToken || !state.toToken;
     return (
-        <Column noTopMargin={true}>
+        <InfoBox>
             <Meta
-                label={"Amount of " + state.fromToken.symbol}
+                label={state.fromToken ? "Amount of " + state.fromToken.symbol : "Amount of Token 1"}
                 text={state.fromAmount}
-                suffix={state.fromToken.symbol}
+                disabled={disabled}
             />
-            <Meta label={"Amount of " + state.toToken.symbol} text={state.toAmount} suffix={state.toToken.symbol} />
-        </Column>
+            <Meta
+                label={state.toToken ? "Amount of " + state.toToken.symbol : "Amount of Token 2"}
+                text={state.toAmount}
+                disabled={disabled}
+            />
+            <Controls state={state} />
+        </InfoBox>
     );
 };
 
@@ -84,14 +96,13 @@ const AmountInfo = ({ state }: { state: RemoveLiquidityState }) => {
 const Controls = ({ state }: { state: RemoveLiquidityState }) => {
     const [error, setError] = useState<MetamaskError>({});
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
-    if (!state.selectedLPToken) {
-        return <Column noTopMargin={true} />;
-    }
     const approveRequired = !state.selectedLPTokenAllowed;
     const disabled = approveRequired || isEmptyValue(state.amount);
     return (
-        <Column>
-            {parseBalance(state.amount, state.selectedLPToken.decimals).gt(state.selectedLPToken.balance) ? (
+        <View style={{ marginTop: Spacing.normal }}>
+            {!state.selectedLPToken ? (
+                <RemoveButton state={state} onError={setError} disabled={true} />
+            ) : parseBalance(state.amount, state.selectedLPToken.decimals).gt(state.selectedLPToken.balance) ? (
                 <InsufficientBalanceButton symbol={state.selectedLPToken.symbol} />
             ) : state.loading || !state.pair ? (
                 <FetchingButton />
@@ -108,7 +119,7 @@ const Controls = ({ state }: { state: RemoveLiquidityState }) => {
                 </>
             )}
             {error.message && error.code !== 4001 && <ErrorMessage error={error} />}
-        </Column>
+        </View>
     );
 };
 
@@ -125,7 +136,7 @@ const RemoveButton = ({
         onError({});
         state.onRemove().catch(onError);
     }, [state.onRemove, onError]);
-    return <Button size={"large"} title={"Remove"} disabled={disabled} loading={state.removing} onPress={onPress} />;
+    return <Button title={"Remove Liquidity"} disabled={disabled} loading={state.removing} onPress={onPress} />;
 };
 
 export default RemoveLiquidityScreen;

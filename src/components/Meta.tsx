@@ -1,16 +1,30 @@
-import React from "react";
+import React, { FC } from "react";
 
-import { Spacing } from "../constants/dimension";
+import useColors from "../hooks/useColors";
 import FlexView from "./FlexView";
 import Text from "./Text";
 
-const Meta = ({ label, text, suffix }: { label: string; text?: string; suffix?: string }) => {
+export interface MetaProps {
+    label: string;
+    text?: string;
+    suffix?: string;
+    disabled?: boolean;
+}
+
+const Meta: FC<MetaProps> = props => {
+    const { textMedium, textLight, placeholder } = useColors();
     return (
-        <FlexView style={{ justifyContent: "space-between", marginTop: Spacing.tiny, marginHorizontal: Spacing.small }}>
-            <Text fontWeight={"bold"} style={{ fontSize: 14 }}>
-                {label}
+        <FlexView style={{ justifyContent: "space-between", marginTop: 4 }}>
+            <Text fontWeight={"bold"} style={{ fontSize: 13, color: props.disabled ? placeholder : textMedium }}>
+                {props.label}
             </Text>
-            <Text style={{ fontSize: 14 }}>{(text || "…") + (suffix ? " " + suffix : "")}</Text>
+            <Text style={{ fontSize: 13, color: props.disabled ? placeholder : props.text ? textMedium : textLight }}>
+                {props.disabled
+                    ? "N/A"
+                    : props.text
+                    ? props.text + (props.suffix ? " " + props.suffix : "")
+                    : "Fetching…"}
+            </Text>
         </FlexView>
     );
 };

@@ -13,7 +13,7 @@ const Column: FC<ColumnProps> = props => (
         {...props}
         style={[
             {
-                width: Platform.OS === "web" ? 440 : "100%",
+                width: "100%",
                 marginTop: props.noTopMargin ? 0 : Platform.OS === "web" ? Spacing.large : Spacing.normal
             },
             props.style

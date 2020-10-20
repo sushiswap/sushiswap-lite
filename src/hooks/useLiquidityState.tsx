@@ -20,15 +20,19 @@ const useLiquidityState: () => LiquidityState = () => {
 
     useDelayedOnBlockEffect(
         async block => {
+            if (!block) {
+                setLoading(true);
+                setPair(undefined);
+            }
             if (state.fromToken && state.toToken && provider) {
-                if (!block) {
-                    setLoading(true);
-                }
                 try {
                     setPair(await getPair(state.fromToken, state.toToken, provider));
+                } catch (e) {
                 } finally {
                     setLoading(false);
                 }
+            } else {
+                setLoading(false);
             }
         },
         () => "getPair(" + state.fromSymbol + "," + state.toSymbol + ")",

@@ -2,7 +2,6 @@ import React, { FC, useCallback } from "react";
 import { Platform } from "react-native";
 import { Input as NativeInput, InputProps as NativeInputProps } from "react-native-elements";
 
-import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 
 export interface Validation {
@@ -23,7 +22,7 @@ const Input: FC<InputProps> = props => {
     const { textDark, textMedium, textLight } = useColors();
     const size = props.size || "normal";
     const color = props.color || textDark;
-    const fontSize = size === "small" ? 24 : size === "large" ? 32 : 28;
+    const fontSize = size === "small" ? 16 : size === "large" ? 24 : 20;
     const onChangeText = useCallback(
         (text: string) => {
             props.onChangeText?.(text);
@@ -53,7 +52,7 @@ const Input: FC<InputProps> = props => {
         <NativeInput
             {...props}
             inputStyle={[
-                { fontSize, fontFamily: "regular", paddingBottom: 4, color, marginTop: 0 },
+                { fontSize, fontFamily: "regular", paddingBottom: 4, color, marginTop: 0, minHeight: 32 },
                 // @ts-ignore
                 Platform.OS === "web" ? { outline: "none" } : {},
                 props.inputStyle
@@ -61,7 +60,7 @@ const Input: FC<InputProps> = props => {
             labelStyle={[{ color: textMedium }, props.labelStyle]}
             placeholderTextColor={props.placeholderTextColor || textLight}
             errorStyle={props.onError ? { height: 0 } : props.errorStyle}
-            containerStyle={[{ paddingHorizontal: 0, marginTop: Spacing.tiny }, props.containerStyle]}
+            containerStyle={[{ paddingHorizontal: 0 }, props.containerStyle]}
             onChangeText={onChangeText}
         />
     );

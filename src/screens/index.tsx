@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Platform, View } from "react-native";
 import { Icon } from "react-native-elements";
-import { HashRouter as Router, Route, Switch } from "react-router-dom";
+import { HashRouter as Router, Redirect, Route, Switch } from "react-router-dom";
 
 import { DeviceType } from "expo-device";
 
@@ -9,7 +9,6 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { DefaultTheme, NavigationContainer, Theme } from "@react-navigation/native";
 import useAsyncEffect from "use-async-effect";
 import WebHeader from "../components/web/WebHeader";
-import WebStatus from "../components/web/WebStatus";
 import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
 import FarmingScreen from "./FarmingScreen";
@@ -29,15 +28,22 @@ export const Screens = () => {
 // tslint:disable-next-line:max-func-body-length
 const WebScreens = () => {
     const { deviceType } = useContext(GlobalContext);
+    const { background } = useColors();
     return (
         <Router>
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, backgroundColor: background }}>
                 <Switch>
-                    <Route path={"/limit-orders"}>
+                    <Route path={"/swap/my-orders"}>
                         <MyLimitOrdersScreen />
+                    </Route>
+                    <Route path={"/swap"}>
+                        <SwapScreen />
                     </Route>
                     <Route path={"/liquidity/remove"}>
                         <RemoveLiquidityScreen />
+                    </Route>
+                    <Route path={"/liquidity/migrate"}>
+                        <MigrateScreen />
                     </Route>
                     <Route path={"/liquidity"}>
                         <LiquidityScreen />
@@ -48,15 +54,9 @@ const WebScreens = () => {
                     <Route path={"/staking"}>
                         <StakingScreen />
                     </Route>
-                    <Route path={"/migrate"}>
-                        <MigrateScreen />
-                    </Route>
-                    <Route path={"/"}>
-                        <SwapScreen />
-                    </Route>
+                    <Redirect to={"/swap"} />
                 </Switch>
                 {deviceType !== DeviceType.PHONE && <WebHeader />}
-                {deviceType !== DeviceType.PHONE && <WebStatus />}
             </View>
         </Router>
     );
@@ -66,7 +66,7 @@ const Tab = createBottomTabNavigator();
 
 const AppScreens = () => {
     const { darkMode } = useContext(GlobalContext);
-    const { primary, secondary, background, border, textDark, disabled } = useColors();
+    const { primary, accent, background, border, textDark, disabled } = useColors();
     const theme: Theme = {
         ...DefaultTheme,
         dark: darkMode,
@@ -83,7 +83,7 @@ const AppScreens = () => {
         <NavigationContainer theme={theme}>
             <Tab.Navigator
                 tabBarOptions={{
-                    activeTintColor: darkMode ? secondary : primary,
+                    activeTintColor: accent,
                     inactiveTintColor: disabled,
                     labelStyle: { marginBottom: 4 }
                 }}>

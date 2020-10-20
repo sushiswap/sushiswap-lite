@@ -1,17 +1,20 @@
-import { useCallback } from "react";
+import { useCallback, useContext } from "react";
 
-import { CurrencyAmount, Fetcher, Percent, Router, TokenAmount, Trade, WETH } from "@sushiswap/sdk";
+import { CurrencyAmount, Fetcher, Pair, Percent, Router, TokenAmount, Trade, WETH } from "@sushiswap/sdk";
 import { ethers } from "ethers";
 import { MASTER_CHEF, MIGRATOR2, ORDER_BOOK, ROUTER, SETTLEMENT, SUSHI_BAR } from "../constants/contracts";
+import Fraction from "../constants/Fraction";
 import { ETH } from "../constants/tokens";
+import { EthersContext } from "../context/EthersContext";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
-import { convertToken, getContract } from "../utils";
+import { convertToken, getContract, pow10 } from "../utils";
 import { logTransaction } from "../utils/analytics-utils";
 import useAllCommonPairs from "./useAllCommonPairs";
 
 // tslint:disable-next-line:max-func-body-length
 const useSDK = () => {
+    const { getTotalSupply } = useContext(EthersContext);
     const { loadAllCommonPairs } = useAllCommonPairs();
     const allowedSlippage = new Percent("50", "10000"); // 0.05%
     const ttl = 60 * 20;
@@ -309,6 +312,31 @@ const useSDK = () => {
         return fromAmount.mul(2).div(1000);
     };
 
+    const calculateLimitOrderReturn = (
+        fromToken: Token,
+        toToken: Token,
+        fromAmount: ethers.BigNumber,
+        price: string
+    ) => {
+        return Fraction.parse(price).apply(
+            fromAmount
+                .sub(calculateLimitOrderFee(fromAmount))
+                .mul(pow10(toToken.decimals))
+                .div(pow10(fromToken.decimals))
+        );
+    };
+
+    const calculateAmountOfLPTokenMinted = async (pair: Pair, fromAmount: TokenAmount, toAmount: TokenAmount) => {
+        const totalSupply = await getTotalSupply(pair.liquidityToken.address);
+        if (totalSupply) {
+            return pair.getLiquidityMinted(
+                new TokenAmount(pair.liquidityToken, totalSupply.toString()),
+                fromAmount,
+                toAmount
+            );
+        }
+    };
+
     return {
         allowedSlippage,
         getTrade,
@@ -329,7 +357,9 @@ const useSDK = () => {
         leaveSushiBar,
         migrate,
         calculateSwapFee,
-        calculateLimitOrderFee
+        calculateLimitOrderFee,
+        calculateLimitOrderReturn,
+        calculateAmountOfLPTokenMinted
     };
 };
 
@@ -368,10 +398,10 @@ export class Order {
     }
 
     status(): OrderStatus {
-        return this.deadline.toNumber() * 1000 < Date.now()
-            ? "Expired"
-            : this.filledAmountIn?.eq(this.amountIn)
+        return this.filledAmountIn?.eq(this.amountIn)
             ? "Filled"
+            : this.deadline.toNumber() * 1000 < Date.now()
+            ? "Expired"
             : "Open";
     }
 

@@ -2,8 +2,7 @@
 import "./globals";
 import React from "react";
 
-import { OpenSans_300Light, OpenSans_400Regular, OpenSans_700Bold } from "@expo-google-fonts/open-sans";
-import { UnicaOne_400Regular } from "@expo-google-fonts/unica-one";
+import { OpenSans_300Light, OpenSans_400Regular, OpenSans_600SemiBold } from "@expo-google-fonts/open-sans";
 import { AppLoading } from "expo";
 import { useFonts } from "expo-font";
 
@@ -17,10 +16,9 @@ if (__DEV__) {
 
 const App = () => {
     const [fontsLoaded] = useFonts({
-        title: UnicaOne_400Regular,
         light: OpenSans_300Light,
         regular: OpenSans_400Regular,
-        bold: OpenSans_700Bold
+        bold: OpenSans_600SemiBold
     });
     if (!fontsLoaded) {
         return <AppLoading />;

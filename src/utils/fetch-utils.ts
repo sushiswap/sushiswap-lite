@@ -7,20 +7,19 @@ import LPToken from "../types/LPToken";
 import Token from "../types/Token";
 import { getContract } from "./index";
 
-export const fetchTokens = async (provider?: ethers.providers.JsonRpcProvider, signer?: ethers.Signer) => {
-    if (provider && signer) {
+export const fetchTokens = async (address: string, provider?: ethers.providers.JsonRpcProvider) => {
+    if (provider) {
         const response = await fetch("https://sushiswap.levx.io/tokens.json");
         const json = await response.json();
 
-        const account = await signer.getAddress();
         const balances = await provider.send("alchemy_getTokenBalances", [
-            account,
+            address,
             json.tokens.map(token => token.address)
         ]);
         return [
             {
                 ...ETH,
-                balance: await provider.getBalance(account)
+                balance: await provider.getBalance(address)
             },
             ...json.tokens.map((token, i) => ({
                 ...token,
@@ -68,30 +67,7 @@ export const fetchMyLPTokens = async (
     signer?: ethers.Signer
 ) => {
     if (provider && signer) {
-        const factory = getContract("IUniswapV2Factory", SUSHISWAP_FACTORY, signer);
-        const length = await factory.allPairsLength();
-        const pairs = await Promise.all(
-            Array.from({ length }).map((_, i) => {
-                return factory.allPairs(i);
-            })
-        );
-        const balances = await provider.send("alchemy_getTokenBalances", [await signer.getAddress(), pairs]);
-        const result = await Promise.all(
-            pairs.map(async (address, i) => {
-                const balance = ethers.BigNumber.from(balances.tokenBalances[i].tokenBalance);
-                if (balance.isZero()) {
-                    return null;
-                }
-                const pair = getContract("IUniswapV2Pair", address, signer);
-                const erc20 = getContract("ERC20", address, signer);
-                const decimals = Number(await erc20.decimals());
-                const totalSupply = await erc20.totalSupply();
-                const tokenA = await findOrFetchToken(provider, await pair.token0(), tokens);
-                const tokenB = await findOrFetchToken(provider, await pair.token1(), tokens);
-                return { address, decimals, balance, totalSupply, tokenA, tokenB } as LPToken;
-            })
-        );
-        return result.filter(token => !!token) as LPToken[];
+        return await fetchLPTokens(SUSHISWAP_FACTORY, tokens, provider, signer);
     }
 };
 
@@ -100,32 +76,46 @@ export const fetchMyUniswapLPTokens = async (
     provider?: ethers.providers.JsonRpcProvider,
     signer?: ethers.Signer
 ) => {
-    if (provider && signer && tokens) {
-        const factory = getContract("IUniswapV2Factory", UNISWAP_FACTORY, signer);
-        const length = await factory.allPairsLength();
-        const abi = require("../constants/abi/LPTokenScanner.json");
-        const scanner = ethers.ContractFactory.getContract(LP_TOKEN_SCANNER, abi, signer);
-        const account = await signer.getAddress();
-        let pairs: any[] = [];
-        for (let i = 0; i < length; i += 5000) {
-            pairs = pairs.concat(
-                await scanner.findPairs(account, UNISWAP_FACTORY, i, Math.min(i + 5000, length.toNumber()))
-            );
-        }
-        const balances = await provider.send("alchemy_getTokenBalances", [account, pairs.map(pair => pair.token)]);
-        const result = await Promise.all(
-            pairs.map(async (pair, i) => {
-                const balance = ethers.BigNumber.from(balances.tokenBalances[i].tokenBalance);
-                const erc20 = getContract("ERC20", pair.token, signer);
-                const decimals = Number(await erc20.decimals());
-                const totalSupply = await erc20.totalSupply();
-                const tokenA = await findOrFetchToken(provider, await pair.token0, tokens);
-                const tokenB = await findOrFetchToken(provider, await pair.token1, tokens);
-                return { address: pair.token, decimals, balance, totalSupply, tokenA, tokenB } as LPToken;
-            })
-        );
-        return result.filter(token => !!token) as LPToken[];
+    if (provider && signer) {
+        return await fetchLPTokens(UNISWAP_FACTORY, tokens, provider, signer);
     }
+};
+
+const LIMIT = 2000;
+
+const fetchLPTokens = async (
+    factory: string,
+    tokens: Token[],
+    provider: ethers.providers.JsonRpcProvider,
+    signer: ethers.Signer
+) => {
+    const factoryContract = getContract("IUniswapV2Factory", factory, signer);
+    const length = await factoryContract.allPairsLength();
+    const scanner = getContract("LPTokenScanner", LP_TOKEN_SCANNER, signer);
+    const account = await signer.getAddress();
+    const pages: number[] = [];
+    for (let i = 0; i < length; i += LIMIT) pages.push(i);
+    const pairs = (
+        await Promise.all(
+            pages.map(page => scanner.findPairs(account, factory, page, Math.min(page + LIMIT, length.toNumber())))
+        )
+    ).flat();
+    const balances = await provider.send("alchemy_getTokenBalances", [account, pairs.map(pair => pair.token)]);
+    return await Promise.all(
+        pairs.map(async (pair, index) => {
+            const address = pair.token;
+            const balance = ethers.BigNumber.from(balances.tokenBalances[index].tokenBalance);
+            const contract = getContract("IUniswapV2Pair", address, signer);
+            const erc20 = getContract("ERC20", address, signer);
+            const decimals = Number(await erc20.decimals());
+            const totalSupply = await erc20.totalSupply();
+            const tokenA = await findOrFetchToken(provider, await contract.token0(), tokens);
+            const tokenB = await findOrFetchToken(provider, await contract.token1(), tokens);
+            const name = tokenA.symbol + "-" + tokenB.symbol + " LP Token";
+            const symbol = tokenA.symbol + "-" + tokenB.symbol;
+            return { address, decimals, name, symbol, balance, totalSupply, tokenA, tokenB } as LPToken;
+        })
+    );
 };
 
 export const findOrFetchToken = async (

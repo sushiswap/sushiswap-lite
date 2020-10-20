@@ -10,29 +10,33 @@ export const Colors = {
         facebook: "#3B5998"
     },
     light: {
-        background: "#ffffff",
-        backgroundHovered: "#f0f0f0",
+        accent: "#291C64",
+        header: "#ffffffb8",
+        submenu: "#ffffffb8",
+        background: "#f8f8f8",
+        backgroundLight: "#f0f0f0",
         border: "#e5e5e5",
         borderDark: "#cccccc",
-        textDark: "#000000",
-        textMedium: "#121212",
+        textDark: "#1d1d1f",
+        textMedium: "#222222",
         textLight: "#888888",
         disabled: "#b4b4b4",
         shadow: "#444444",
-        placeholder: "#d8d8d8",
-        underlay: "#b4b4b4"
+        placeholder: "#b4b4b4"
     },
     dark: {
+        accent: "#9BECEE",
+        header: "#000000",
+        submenu: "#121212",
         background: "#121212",
-        backgroundHovered: "#202020",
+        backgroundLight: "#1a1a1a",
         border: "#ffffff33",
         borderDark: "#666666",
-        textDark: "#ffffff",
-        textMedium: "#ededed",
+        textDark: "#d5d1cc",
+        textMedium: "#cccccc",
         textLight: "#aaaaaa",
         disabled: "#aaaaaa80",
         shadow: "#03080c",
-        placeholder: "#666666",
-        underlay: "#aaaaaa80"
+        placeholder: "#666666"
     }
 };

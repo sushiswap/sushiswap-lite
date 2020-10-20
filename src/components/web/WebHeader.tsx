@@ -1,17 +1,18 @@
 import React, { useCallback, useContext } from "react";
-import { Image, View } from "react-native";
+import { View } from "react-native";
 import { Link, useRouteMatch } from "react-router-dom";
 
 import Switch from "expo-dark-mode-switch";
 
-import { HEADER_HEIGHT, Spacing } from "../../constants/dimension";
+import { HEADER_HEIGHT, HEADER_WIDTH, Spacing } from "../../constants/dimension";
+import { EthersContext } from "../../context/EthersContext";
 import { GlobalContext } from "../../context/GlobalContext";
 import useColors from "../../hooks/useColors";
 import FlexView from "../FlexView";
 import Text from "../Text";
 
 const WebHeader = () => {
-    const { background } = useColors();
+    const { header } = useColors();
     return (
         <View
             // @ts-ignore
@@ -21,16 +22,18 @@ const WebHeader = () => {
                 zIndex: 100,
                 width: "100%",
                 height: HEADER_HEIGHT,
-                paddingBottom: 16,
-                backgroundColor: background
+                paddingBottom: Spacing.small,
+                backgroundColor: header
             }}>
             <FlexView
                 style={{
                     flex: 1,
+                    width: HEADER_WIDTH,
+                    alignSelf: "center",
                     justifyContent: "space-between",
                     alignItems: "flex-end",
                     paddingTop: Spacing.small,
-                    paddingHorizontal: Spacing.content
+                    paddingHorizontal: Spacing.normal
                 }}>
                 <Title />
                 <Menu />
@@ -41,20 +44,13 @@ const WebHeader = () => {
 
 export const Title = () => {
     const { darkMode } = useContext(GlobalContext);
-    const { primary, white } = useColors();
+    const { textDark, white } = useColors();
+    const color = darkMode ? white : textDark;
     return (
         <View style={{ alignSelf: "center", alignItems: "center" }}>
             <Link to={"/"} style={{ textDecoration: "none" }}>
-                <Text style={{ fontFamily: "title", fontSize: 40, color: darkMode ? white : primary }}>SushiSwap</Text>
+                <Text style={{ fontSize: 28, color }}>SushiSwap</Text>
             </Link>
-            <Image
-                source={
-                    darkMode
-                        ? require("../../../assets/levx-typography-dark.png")
-                        : require("../../../assets/levx-typography.png")
-                }
-                style={{ width: 76, height: 13 }}
-            />
         </View>
     );
 };
@@ -66,37 +62,54 @@ const Menu = () => {
                 height: "100%",
                 alignItems: "flex-end"
             }}>
-            <MenuItem title={"SWAP"} path={"/"} />
-            <MenuItem title={"LIQUIDITY"} path={"/liquidity"} />
-            {/*<MenuItem title={"FARMING"} path={"/farming"} />*/}
-            {/*<MenuItem title={"STAKE/UNSTAKE"} path={"/staking"} />*/}
-            <MenuItem title={"MIGRATE"} path={"/migrate"} />
+            <MenuItem title={"Swap"} path={"/swap"} />
+            <MenuItem title={"Liquidity"} path={"/liquidity"} />
+            {/*<MenuItem title={"Farming"} path={"/farming"} />*/}
+            {/*<MenuItem title={"Stake/Unstake"} path={"/staking"} />*/}
+            <Status />
             <DarkModeSwitch />
         </FlexView>
     );
 };
 
 const MenuItem = ({ title, path }) => {
-    const { textDark } = useColors();
+    const { textDark, textLight } = useColors();
     const match = useRouteMatch(path);
+    const active = match?.path?.startsWith(path);
     return (
-        <Link to={path} style={{ marginLeft: Spacing.small, marginBottom: 4, textDecoration: "none" }}>
+        <Link to={path} style={{ marginLeft: Spacing.tiny, textDecoration: "none" }}>
             <View>
-                <Text style={{ fontFamily: "regular", fontSize: 20, color: textDark, padding: 4 }}>{title}</Text>
-                {match?.isExact && (
-                    <View
-                        style={{
-                            position: "absolute",
-                            height: 2,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            backgroundColor: textDark
-                        }}
-                    />
-                )}
+                <Text style={{ fontFamily: "regular", fontSize: 18, color: active ? textDark : textLight, padding: 4 }}>
+                    {title}
+                </Text>
             </View>
         </Link>
+    );
+};
+
+const Status = () => {
+    const { textLight, green, borderDark } = useColors();
+    const { chainId, address, ensName } = useContext(EthersContext);
+    const connected = chainId === 1 && address;
+    const title = connected
+        ? ensName || address!.substring(0, 6) + "..." + address!.substring(address!.length - 4, address!.length)
+        : "Not connected";
+    const color = connected ? green : textLight;
+    return (
+        <FlexView
+            style={{
+                height: 28,
+                justifyContent: "center",
+                alignItems: "center",
+                marginLeft: Spacing.small,
+                paddingHorizontal: Spacing.small,
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: borderDark
+            }}>
+            <View style={{ backgroundColor: color, width: 6, height: 6, borderRadius: 3, marginRight: 12 }} />
+            <Text style={{ fontSize: 15, color: textLight, marginRight: 2 }}>{title}</Text>
+        </FlexView>
     );
 };
 
@@ -109,14 +122,14 @@ const DarkModeSwitch = () => {
         [setDarkMode]
     );
     return (
-        <View style={{ marginLeft: Spacing.small, marginBottom: 4 }}>
+        <View style={{ marginLeft: Spacing.tiny, marginRight: -8, marginBottom: -3 }}>
             <Switch
                 value={darkMode}
                 onChange={onChange}
                 style={{
                     transform: [
                         {
-                            scale: 0.7
+                            scale: 0.75
                         }
                     ]
                 }}

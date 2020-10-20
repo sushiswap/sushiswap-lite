@@ -1,14 +1,12 @@
-import React, { useContext } from "react";
+import React from "react";
 import { CheckBox as NativeCheckBox, CheckBoxProps } from "react-native-elements";
 
 import { Spacing } from "../constants/dimension";
-import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
 
 // tslint:disable-next-line:max-func-body-length
 const CheckBox = (props: CheckBoxProps) => {
-    const { darkMode } = useContext(GlobalContext);
-    const { primary, secondary, textLight } = useColors();
+    const { accent, textLight } = useColors();
     const iconRight = props.iconRight === undefined ? true : props.iconRight;
     return (
         <NativeCheckBox
@@ -38,7 +36,7 @@ const CheckBox = (props: CheckBoxProps) => {
             iconType={"material-community"}
             checkedIcon={"radiobox-marked"}
             uncheckedIcon={"radiobox-blank"}
-            checkedColor={darkMode ? secondary : primary}
+            checkedColor={accent}
         />
     );
 };

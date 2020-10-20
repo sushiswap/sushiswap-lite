@@ -1,16 +1,21 @@
 import React, { FC, useCallback } from "react";
-import { ActivityIndicator, FlatList, View } from "react-native";
+import { FlatList, View, ViewStyle } from "react-native";
 
 import { ethers } from "ethers";
 import { Spacing } from "../constants/dimension";
+import useColors from "../hooks/useColors";
 import { LPTokensState } from "../hooks/useLPTokensState";
 import LPToken from "../types/LPToken";
-import { pow10 } from "../utils";
-import Border from "./Border";
+import { formatBalance, pow10 } from "../utils";
 import CheckBox from "./CheckBox";
-import Column from "./Column";
+import Expandable from "./Expandable";
 import FlexView from "./FlexView";
+import { ITEM_SEPARATOR_HEIGHT } from "./ItemSeparator";
+import Loading from "./Loading";
+import Selectable from "./Selectable";
 import Text from "./Text";
+import TokenLogo from "./TokenLogo";
+import TokenSymbol from "./TokenSymbol";
 
 export type LPTokenSelectFilter = "balance" | "amountDeposited" | "";
 
@@ -22,6 +27,7 @@ export interface LPTokenSelectProps {
     filter?: LPTokenSelectFilter;
     onFilterChanged?: (filter: LPTokenSelectFilter) => void;
     Item: FC<LPTokenItemProps>;
+    style?: ViewStyle;
 }
 
 export interface LPTokenItemProps {
@@ -32,29 +38,19 @@ export interface LPTokenItemProps {
 }
 
 const LPTokenSelect: FC<LPTokenSelectProps> = props => {
-    const onUnselectToken = useCallback(() => {
-        props.state.setSelectedLPToken(undefined);
-    }, [props.state.setSelectedLPToken]);
+    const onUnselectToken = () => props.state.setSelectedLPToken();
     return (
-        <Column>
-            <Text
-                fontWeight={"bold"}
-                medium={true}
-                style={{ marginBottom: props.showFilter ? Spacing.tiny : Spacing.normal, fontSize: 20 }}>
-                {props.title}
-            </Text>
-            {props.showFilter && <Filter filter={props.filter} onFilterChanged={props.onFilterChanged} />}
-            {props.state.selectedLPToken ? (
-                <props.Item
-                    token={props.state.selectedLPToken}
-                    selected={true}
-                    filter={""}
-                    onSelectToken={onUnselectToken}
-                />
-            ) : (
+        <View style={props.style}>
+            <Expandable
+                title={props.title}
+                expanded={!props.state.selectedLPToken}
+                onExpand={() => props.state.setSelectedLPToken()}>
                 <LPTokenList state={props.state} filter={props.filter} emptyText={props.emptyText} Item={props.Item} />
+            </Expandable>
+            {props.state.selectedLPToken && (
+                <LPTokenItem token={props.state.selectedLPToken} selected={true} onSelectToken={onUnselectToken} />
             )}
-        </Column>
+        </View>
     );
 };
 
@@ -111,26 +107,46 @@ const LPTokenList = ({
         data = data.filter(token => token.balance.gt(0));
     }
     return state.loading ? (
-        <ActivityIndicator size={"large"} style={{ marginTop: Spacing.large }} />
+        <Loading />
     ) : data.length === 0 ? (
         <EmptyList text={emptyText} />
     ) : (
-        <FlatList
-            keyExtractor={item => JSON.stringify(item)}
-            data={data}
-            renderItem={renderItem}
-            ItemSeparatorComponent={Border}
-        />
+        <FlatList keyExtractor={item => JSON.stringify(item)} data={data} renderItem={renderItem} />
     );
 };
 
 const EmptyList = ({ text }: { text: string }) => {
     return (
         <View style={{ margin: Spacing.normal }}>
-            <Text light={true} style={{ textAlign: "center", width: "100%" }}>
+            <Text disabled={true} style={{ textAlign: "center", width: "100%" }}>
                 {text}
             </Text>
         </View>
+    );
+};
+
+export const LPTokenItem: FC<LPTokenItemProps> = props => {
+    const { textMedium, textLight } = useColors();
+    const balance = formatBalance(props.token.balance, props.token.decimals, 8);
+    const onPress = useCallback(() => {
+        props.onSelectToken(props.token);
+    }, [props.onSelectToken, props.token]);
+    return (
+        <Selectable selected={props.selected} onPress={onPress} style={{ marginBottom: ITEM_SEPARATOR_HEIGHT }}>
+            <FlexView style={{ alignItems: "center" }}>
+                <TokenLogo token={props.token.tokenA} small={true} replaceWETH={true} />
+                <TokenLogo token={props.token.tokenB} small={true} replaceWETH={true} style={{ marginLeft: 4 }} />
+                <TokenSymbol token={props.token} />
+                <View style={{ flex: 1, marginLeft: Spacing.tiny }}>
+                    {/*<Text note={true} style={{ textAlign: "right", color: textLight }}>*/}
+                    {/*    My Balance*/}
+                    {/*</Text>*/}
+                    <Text caption={true} light={true} style={{ textAlign: "right", color: textMedium }}>
+                        {balance}
+                    </Text>
+                </View>
+            </FlexView>
+        </Selectable>
     );
 };
 

@@ -8,7 +8,6 @@ import FlexView from "./FlexView";
 import Text from "./Text";
 
 const OR = () => {
-    const { background } = useColors();
     return (
         <Column>
             <FlexView
@@ -24,7 +23,6 @@ const OR = () => {
                     style={{
                         paddingHorizontal: Spacing.small,
                         paddingBottom: Spacing.tiny,
-                        backgroundColor: background,
                         fontSize: 26
                     }}>
                     or

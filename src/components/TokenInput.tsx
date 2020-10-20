@@ -1,29 +1,30 @@
-import React, { FC, useCallback, useContext } from "react";
+import React, { FC, useCallback } from "react";
 import { Platform, View } from "react-native";
 
 import { ethers } from "ethers";
 import { Spacing } from "../constants/dimension";
-import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
+import useStyles from "../hooks/useStyles";
 import Token from "../types/Token";
 import { formatBalance, parseBalance, pow10 } from "../utils";
 import Button from "./Button";
-import Column from "./Column";
+import Heading from "./Heading";
 import Input from "./Input";
-import Subtitle from "./Subtitle";
 
 export interface TokenInputProps {
     title?: string;
     token?: Token;
-    hidden: boolean;
     amount: string;
     onAmountChanged: (amount: string) => void;
     label?: string;
+    hideMaxButton?: boolean;
     maxButtonText?: string;
+    autoFocus?: boolean;
 }
 
 // tslint:disable-next-line:max-func-body-length
 const TokenInput: FC<TokenInputProps> = props => {
+    const { border } = useStyles();
     const onChangeText = useCallback(
         (text: string) => {
             if (props.token && props.onAmountChanged) {
@@ -39,16 +40,27 @@ const TokenInput: FC<TokenInputProps> = props => {
         },
         [props.token, props.onAmountChanged]
     );
-    if (props.hidden) {
-        return <Column noTopMargin={true} />;
-    }
-    const label = props.label || props.token?.symbol;
     return (
-        <Column noTopMargin={!props.title}>
-            {props.title && <Subtitle text={props.title} />}
-            <View style={{ marginHorizontal: Spacing.small }}>
-                <Input label={label} value={props.amount} onChangeText={onChangeText} placeholder={"0.0"} />
-                {props.token?.balance?.gt(0) && (
+        <View>
+            {props.title && <Heading text={props.title} />}
+            <View>
+                <Input
+                    label={props.label}
+                    value={props.amount}
+                    onChangeText={onChangeText}
+                    placeholder={"0.0"}
+                    autoFocus={props.autoFocus || false}
+                    inputStyle={{ marginHorizontal: 4 }}
+                    inputContainerStyle={{ borderBottomWidth: 0 }}
+                    labelStyle={{ fontFamily: "light", height: props.label ? "auto" : 0 }}
+                    containerStyle={{
+                        ...border(),
+                        paddingHorizontal: Spacing.tiny,
+                        paddingTop: 12,
+                        paddingBottom: 0
+                    }}
+                />
+                {props.token?.balance?.gt(0) && !props.hideMaxButton && (
                     <MaxButton
                         token={props.token}
                         maxButtonText={props.maxButtonText}
@@ -56,13 +68,12 @@ const TokenInput: FC<TokenInputProps> = props => {
                     />
                 )}
             </View>
-        </Column>
+        </View>
     );
 };
 
 const MaxButton = (props: { token: Token; updateAmount; maxButtonText?: string }) => {
-    const { darkMode } = useContext(GlobalContext);
-    const { primary, secondary } = useColors();
+    const { accent } = useColors();
     const onPressMax = useCallback(() => {
         if (props.token) {
             let balance = props.token.balance;
@@ -75,14 +86,15 @@ const MaxButton = (props: { token: Token; updateAmount; maxButtonText?: string }
         }
     }, [props.token, props.updateAmount]);
     return (
-        <View style={{ position: "absolute", right: 0, bottom: Platform.OS === "web" ? 12 : 28 }}>
+        <View style={{ position: "absolute", right: 12, bottom: Platform.OS === "web" ? 10 : 20 }}>
             <Button
                 type={"clear"}
-                color={darkMode ? secondary : primary}
+                size={"small"}
+                color={accent}
                 title={props.maxButtonText || "MAX"}
                 fontWeight={"bold"}
                 onPress={onPressMax}
-                buttonStyle={{ paddingHorizontal: 0 }}
+                buttonStyle={{ paddingHorizontal: 4 }}
             />
         </View>
     );

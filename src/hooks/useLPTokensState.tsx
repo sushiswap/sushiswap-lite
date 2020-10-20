@@ -7,6 +7,7 @@ import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useLiquidityState, { LiquidityState } from "./useLiquidityState";
 
 export interface LPTokensState extends LiquidityState {
+    updateLPTokens: () => Promise<void>;
     lastTimeRefreshed: number;
     updateLastTimeRefreshed: () => void;
     lpTokens: LPToken[];
@@ -54,7 +55,7 @@ const useLPTokensState: (mode: Mode) => LPTokensState = mode => {
 
     useDelayedOnBlockEffect(
         async block => {
-            if (provider && signer && (mode === "pools" || tokens.length > 0)) {
+            if (address && (mode === "pools" || tokens.length > 0)) {
                 if (!block) {
                     setLoading(true);
                 }
@@ -62,12 +63,13 @@ const useLPTokensState: (mode: Mode) => LPTokensState = mode => {
             }
         },
         () => "updateLPTokens()",
-        [provider, signer, tokens.length, address, lastTimeRefreshed],
+        [tokens.length, address, lastTimeRefreshed],
         0
     );
 
     return {
         ...state,
+        updateLPTokens,
         loading: state.loading || loading,
         lastTimeRefreshed,
         updateLastTimeRefreshed: () => {

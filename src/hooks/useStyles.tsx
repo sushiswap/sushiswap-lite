@@ -1,18 +1,16 @@
-import { useCallback, useContext } from "react";
+import { useCallback } from "react";
 import { ViewStyle } from "react-native";
 
 import { Spacing } from "../constants/dimension";
-import { GlobalContext } from "../context/GlobalContext";
 import useColors from "./useColors";
 
 const useStyles = () => {
-    const { shadow: shadowColor, primary, secondary } = useColors();
-    const { darkMode } = useContext(GlobalContext);
+    const { shadow: shadowColor, borderDark } = useColors();
     const border = useCallback(
-        (color?: string) => ({
-            borderColor: color || (darkMode ? secondary : primary),
+        (attrs?: { color?: string; radius?: number }) => ({
+            borderColor: attrs?.color || borderDark,
             borderWidth: 1,
-            borderRadius: 4,
+            borderRadius: attrs?.radius || 8,
             padding: Spacing.small
         }),
         []

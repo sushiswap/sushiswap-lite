@@ -1,16 +1,26 @@
 import React from "react";
-import { View } from "react-native";
+import { View, ViewStyle } from "react-native";
 
 import { Spacing } from "../constants/dimension";
 import useStyles from "../hooks/useStyles";
+import Button from "./Button";
 import Text from "./Text";
 
-const Notice = (props: { text: string; color?: string; buttonText?: string; onPressButton?: () => void }) => {
+export interface NoticeProps {
+    text: string;
+    clear?: boolean;
+    color?: string;
+    buttonText?: string;
+    onPressButton?: () => void;
+    style?: ViewStyle;
+}
+
+const Notice = (props: NoticeProps) => {
     const { border } = useStyles();
-    const borderStyle = border(props.color);
+    const borderStyle = border({ color: props.color });
     const color = props.color || borderStyle.borderColor;
     return (
-        <View style={borderStyle}>
+        <View style={[props.clear ? { paddingHorizontal: Spacing.tiny } : borderStyle, props.style]}>
             <Text
                 note={true}
                 style={{
@@ -19,13 +29,15 @@ const Notice = (props: { text: string; color?: string; buttonText?: string; onPr
                 {props.text}
             </Text>
             {props.buttonText && props.onPressButton && (
-                <Text
-                    note={true}
+                <Button
+                    title={props.buttonText}
+                    type={"clear"}
+                    size={"small"}
                     onPress={props.onPressButton}
-                    fontWeight={"bold"}
-                    style={{ color, alignSelf: "flex-end", marginTop: Spacing.tiny }}>
-                    {props.buttonText}
-                </Text>
+                    titleStyle={{ color }}
+                    buttonStyle={{ paddingHorizontal: 0, paddingVertical: 0 }}
+                    style={{ alignSelf: "flex-end", marginTop: Spacing.tiny }}
+                />
             )}
         </View>
     );

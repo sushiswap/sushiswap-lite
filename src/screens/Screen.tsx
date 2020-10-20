@@ -8,14 +8,13 @@ import AppHeader from "../components/app/AppHeader";
 import Text from "../components/Text";
 import ConnectToWallet from "../components/web/ConnectToWallet";
 import MobileNotSupported from "../components/web/MobileNotSupported";
+import { HEADER_HEIGHT } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
 import { GlobalContext } from "../context/GlobalContext";
-import useColors from "../hooks/useColors";
 
 const Screen = props => {
     const { deviceType } = useContext(GlobalContext);
     const { address, chainId } = useContext(EthersContext);
-    const { background } = useColors();
     if (!deviceType) {
         return <AppLoading />;
     }
@@ -24,13 +23,18 @@ const Screen = props => {
         if (!address) return <ConnectToWallet />;
         if (chainId !== 1)
             return (
-                <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: background }}>
+                <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
                     <Text light={true} style={{ textAlign: "center" }}>
                         {"Please switch network to\n'Ethereum Mainnet'"}
                     </Text>
                 </View>
             );
-        return <View {...props} style={[{ flex: 1 }, props.style]} />;
+        return (
+            <View
+                {...props}
+                style={[{ position: "absolute", top: HEADER_HEIGHT, right: 0, bottom: 0, left: 0 }, props.style]}
+            />
+        );
     } else {
         return (
             <View style={{ width: "100%", height: "100%" }}>

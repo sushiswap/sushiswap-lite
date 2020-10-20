@@ -22,6 +22,7 @@ export const EthersContext = React.createContext({
     kovanSigner: undefined as ethers.Signer | undefined,
     chainId: 0,
     address: null as string | null,
+    ensName: null as string | null,
     addOnBlockListener: (_name: string, _listener: OnBlockListener) => {},
     removeOnBlockListener: (_name: string) => {},
     tokens: [ETH] as Token[],
@@ -31,6 +32,9 @@ export const EthersContext = React.createContext({
         return {} as ethers.providers.TransactionResponse | undefined;
     },
     getTokenAllowance: async (_token: string, _spender: string) => {
+        return ethers.constants.Zero as ethers.BigNumber | undefined;
+    },
+    getTotalSupply: async (_token: string) => {
         return ethers.constants.Zero as ethers.BigNumber | undefined;
     }
 });
@@ -43,7 +47,8 @@ export const EthersContextProvider = ({ children }) => {
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
     const [kovanSigner, setKovanSigner] = useState<ethers.Signer>();
     const [chainId, setChainId] = useState<number>(1);
-    const [address, setAddress] = useState<string | null>(ethers.constants.AddressZero);
+    const [address, setAddress] = useState<string | null>(null);
+    const [ensName, setENSName] = useState<string | null>(null);
     const [onBlockListeners, setOnBlockListeners] = useState<{ [name: string]: OnBlockListener }>({});
     const [tokens, setTokens] = useState<Token[]>([]);
     const [loadingTokens, setLoadingTokens] = useState(true);
@@ -91,6 +96,13 @@ export const EthersContextProvider = ({ children }) => {
         }
     }, [window.ethereum, signer]);
 
+    useAsyncEffect(async () => {
+        if (signer && address) {
+            const ens = await signer.provider.lookupAddress(address);
+            setENSName(ens);
+        }
+    }, [signer, address]);
+
     // Set provider and signer for mobile app
     // useEffect(() => {
     //     if (mnemonic) {
@@ -102,22 +114,24 @@ export const EthersContextProvider = ({ children }) => {
     // }, [mnemonic]);
 
     const updateTokens = async () => {
-        try {
-            const data = await fetchTokens(provider, signer);
-            if (data) {
-                await setTokens(data);
+        if (address) {
+            try {
+                const data = await fetchTokens(address, provider);
+                if (data) {
+                    await setTokens(data);
+                }
+            } finally {
+                setLoadingTokens(false);
             }
-        } finally {
-            setLoadingTokens(false);
         }
     };
 
     useAsyncEffect(async () => {
-        if (provider && signer) {
+        if (provider) {
             setLoadingTokens(true);
             await updateTokens();
         }
-    }, [provider, signer, address]);
+    }, [provider, address]);
 
     const approveToken = useCallback(
         async (token: string, spender: string, amount?: ethers.BigNumber) => {
@@ -136,17 +150,27 @@ export const EthersContextProvider = ({ children }) => {
 
     const getTokenAllowance = useCallback(
         async (token: string, spender: string) => {
-            if (provider && signer) {
+            if (provider && address) {
                 return await provider.send("alchemy_getTokenAllowance", [
                     {
                         contract: token,
-                        owner: await signer.getAddress(),
+                        owner: address,
                         spender
                     }
                 ]);
             }
         },
-        [provider, signer]
+        [provider, address]
+    );
+
+    const getTotalSupply = useCallback(
+        async (token: string) => {
+            if (signer) {
+                const erc20 = getContract("ERC20", token, signer);
+                return await erc20.totalSupply();
+            }
+        },
+        [signer]
     );
 
     const addOnBlockListener = useCallback(
@@ -167,7 +191,7 @@ export const EthersContextProvider = ({ children }) => {
     );
 
     useEffect(() => {
-        if (provider && signer && chainId === 1) {
+        if (provider && chainId === 1) {
             const onBlock = async (block: number) => {
                 for (const listener of Object.entries(onBlockListeners)) {
                     await listener[1]?.(block);
@@ -178,7 +202,7 @@ export const EthersContextProvider = ({ children }) => {
                 provider.off("block", onBlock);
             };
         }
-    }, [provider, signer, kovanProvider, kovanSigner, chainId, onBlockListeners]);
+    }, [provider, chainId, onBlockListeners]);
 
     return (
         <EthersContext.Provider
@@ -189,11 +213,13 @@ export const EthersContextProvider = ({ children }) => {
                 kovanSigner,
                 chainId,
                 address,
+                ensName,
                 tokens,
                 updateTokens,
                 loadingTokens,
                 approveToken,
                 getTokenAllowance,
+                getTotalSupply,
                 addOnBlockListener,
                 removeOnBlockListener
             }}>

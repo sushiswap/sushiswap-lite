@@ -62,11 +62,10 @@ const Menu = () => {
                 height: "100%",
                 alignItems: "flex-end"
             }}>
-            <MenuItem title={"Swap"} path={"/"} />
+            <MenuItem title={"Swap"} path={"/swap"} />
             <MenuItem title={"Liquidity"} path={"/liquidity"} />
             {/*<MenuItem title={"Farming"} path={"/farming"} />*/}
             {/*<MenuItem title={"Stake/Unstake"} path={"/staking"} />*/}
-            <MenuItem title={"Migrate"} path={"/migrate"} />
             <Status />
             <DarkModeSwitch />
         </FlexView>
@@ -76,7 +75,7 @@ const Menu = () => {
 const MenuItem = ({ title, path }) => {
     const { textDark, textLight } = useColors();
     const match = useRouteMatch(path);
-    const active = match?.isExact;
+    const active = match?.path?.startsWith(path);
     return (
         <Link to={path} style={{ marginLeft: Spacing.tiny, textDecoration: "none" }}>
             <View>

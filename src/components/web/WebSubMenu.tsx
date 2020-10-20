@@ -16,6 +16,40 @@ export interface WebSubMenuProps {
     items: WebSubMenuItem[];
 }
 
+export const SwapSubMenu = () => (
+    <WebSubMenu
+        items={[
+            {
+                title: "Swap Tokens",
+                path: "/swap"
+            },
+            {
+                title: "My Orders",
+                path: "/swap/my-orders"
+            }
+        ]}
+    />
+);
+
+export const LiquiditySubMenu = () => (
+    <WebSubMenu
+        items={[
+            {
+                title: "Add Liquidity",
+                path: "/liquidity"
+            },
+            {
+                title: "Remove Liquidity",
+                path: "/liquidity/remove"
+            },
+            {
+                title: "Migrate",
+                path: "/liquidity/migrate"
+            }
+        ]}
+    />
+);
+
 const WebSubMenu: FC<WebSubMenuProps> = props => {
     const { textMedium } = useColors();
     return (

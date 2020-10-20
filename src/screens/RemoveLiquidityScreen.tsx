@@ -18,7 +18,7 @@ import Text from "../components/Text";
 import Title from "../components/Title";
 import TokenInput from "../components/TokenInput";
 import WebFooter from "../components/web/WebFooter";
-import WebSubMenu from "../components/web/WebSubMenu";
+import { LiquiditySubMenu } from "../components/web/WebSubMenu";
 import { ROUTER } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import useRemoveLiquidityState, { RemoveLiquidityState } from "../hooks/useRemoveLiquidityState";
@@ -29,18 +29,7 @@ import Screen from "./Screen";
 const RemoveLiquidityScreen = () => {
     return (
         <Screen>
-            <WebSubMenu
-                items={[
-                    {
-                        title: "Add Liquidity",
-                        path: "/liquidity"
-                    },
-                    {
-                        title: "Remove Liquidity",
-                        path: "/liquidity/remove"
-                    }
-                ]}
-            />
+            <LiquiditySubMenu />
             <Container>
                 <Content>
                     <Title text={"Remove Liquidity"} />
@@ -59,14 +48,13 @@ const RemoveLiquidity = () => {
         <View style={{ marginTop: Spacing.large }}>
             <LPTokenSelect
                 state={state}
-                title={"Pools"}
+                title={"Your Liquidity"}
                 emptyText={"You don't have any liquidity."}
                 Item={LPTokenItem}
             />
             <Border />
             <AmountInput state={state} />
             <AmountInfo state={state} />
-            {/*<Controls state={state} />*/}
         </View>
     );
 };

@@ -20,7 +20,7 @@ import TokenAmount from "../components/TokenAmount";
 import TokenLogo from "../components/TokenLogo";
 import TokenSymbol from "../components/TokenSymbol";
 import WebFooter from "../components/web/WebFooter";
-import WebSubMenu from "../components/web/WebSubMenu";
+import { SwapSubMenu } from "../components/web/WebSubMenu";
 import { Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import useColors from "../hooks/useColors";
@@ -33,18 +33,7 @@ import Screen from "./Screen";
 const MyLimitOrdersScreen = () => {
     return (
         <Screen>
-            <WebSubMenu
-                items={[
-                    {
-                        title: "Swap Tokens",
-                        path: "/"
-                    },
-                    {
-                        title: "My Orders",
-                        path: "/my-orders"
-                    }
-                ]}
-            />
+            <SwapSubMenu />
             <Container>
                 <Content>
                     <Title text={"My Orders"} />

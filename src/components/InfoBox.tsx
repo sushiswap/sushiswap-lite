@@ -15,7 +15,7 @@ const InfoBox = (props: PropsWithChildren<ViewProps>) => {
                 {
                     ...border({ color: backgroundLight }),
                     backgroundColor: backgroundLight,
-                    marginTop: Spacing.large,
+                    marginTop: Spacing.normal + Spacing.small,
                     padding: Spacing.small + Spacing.tiny
                 },
                 props.style

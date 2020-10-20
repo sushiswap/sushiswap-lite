@@ -25,7 +25,7 @@ import TokenInput from "../components/TokenInput";
 import TokenSelect from "../components/TokenSelect";
 import UnsupportedButton from "../components/UnsupportedButton";
 import WebFooter from "../components/web/WebFooter";
-import WebSubMenu from "../components/web/WebSubMenu";
+import { SwapSubMenu } from "../components/web/WebSubMenu";
 import { ROUTER, SETTLEMENT } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
@@ -42,18 +42,7 @@ import Screen from "./Screen";
 const SwapScreen = () => {
     return (
         <Screen>
-            <WebSubMenu
-                items={[
-                    {
-                        title: "Swap Tokens",
-                        path: "/"
-                    },
-                    {
-                        title: "My Orders",
-                        path: "/my-orders"
-                    }
-                ]}
-            />
+            <SwapSubMenu />
             <Container>
                 <Content>
                     <Title text={"Swap Tokens"} />

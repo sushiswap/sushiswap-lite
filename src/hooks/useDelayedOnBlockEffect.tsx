@@ -11,15 +11,16 @@ const useDelayedOnBlockEffect = (
 ) => {
     const { addOnBlockListener, removeOnBlockListener } = useContext(EthersContext);
     const eventName = getEventName();
-    useAsyncEffect<number>(
+    useAsyncEffect<number[]>(
         () => {
-            const handle = setTimeout(effect, initialTimeout);
-            addOnBlockListener(eventName, effect);
-            return handle;
+            return [
+                setTimeout(effect, initialTimeout),
+                setTimeout(() => addOnBlockListener(eventName, effect), initialTimeout)
+            ];
         },
-        handle => {
-            if (handle) {
-                clearTimeout(handle);
+        handles => {
+            if (handles) {
+                handles.forEach(handle => clearTimeout(handle));
                 removeOnBlockListener(eventName);
             }
         },

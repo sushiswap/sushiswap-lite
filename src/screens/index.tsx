@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Platform, View } from "react-native";
 import { Icon } from "react-native-elements";
-import { HashRouter as Router, Route, Switch } from "react-router-dom";
+import { HashRouter as Router, Redirect, Route, Switch } from "react-router-dom";
 
 import { DeviceType } from "expo-device";
 
@@ -33,11 +33,17 @@ const WebScreens = () => {
         <Router>
             <View style={{ flex: 1, backgroundColor: background }}>
                 <Switch>
-                    <Route path={"/my-orders"}>
+                    <Route path={"/swap/my-orders"}>
                         <MyLimitOrdersScreen />
+                    </Route>
+                    <Route path={"/swap"}>
+                        <SwapScreen />
                     </Route>
                     <Route path={"/liquidity/remove"}>
                         <RemoveLiquidityScreen />
+                    </Route>
+                    <Route path={"/liquidity/migrate"}>
+                        <MigrateScreen />
                     </Route>
                     <Route path={"/liquidity"}>
                         <LiquidityScreen />
@@ -48,12 +54,7 @@ const WebScreens = () => {
                     <Route path={"/staking"}>
                         <StakingScreen />
                     </Route>
-                    <Route path={"/migrate"}>
-                        <MigrateScreen />
-                    </Route>
-                    <Route path={"/"}>
-                        <SwapScreen />
-                    </Route>
+                    <Redirect to={"/swap"} />
                 </Switch>
                 {deviceType !== DeviceType.PHONE && <WebHeader />}
             </View>

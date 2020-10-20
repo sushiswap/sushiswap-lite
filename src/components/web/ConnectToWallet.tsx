@@ -25,7 +25,7 @@ const ConnectWallet = () => {
                 }
                 style={{ width: 223, height: 183, marginBottom: Spacing.huge }}
             />
-            <Button type={"outline"} size={"large"} onPress={onPress} title={title} containerStyle={{ width: 440 }} />
+            <Button size={"large"} color={"#e2761b"} onPress={onPress} title={title} containerStyle={{ width: 440 }} />
         </View>
     );
 };

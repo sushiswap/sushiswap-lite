@@ -81,6 +81,8 @@ export const fetchMyUniswapLPTokens = async (
     }
 };
 
+const LIMIT = 2000;
+
 const fetchLPTokens = async (
     factory: string,
     tokens: Token[],
@@ -91,15 +93,18 @@ const fetchLPTokens = async (
     const length = await factoryContract.allPairsLength();
     const scanner = getContract("LPTokenScanner", LP_TOKEN_SCANNER, signer);
     const account = await signer.getAddress();
-    let pairs: any[] = [];
-    for (let i = 0; i < length; i += 5000) {
-        pairs = pairs.concat(await scanner.findPairs(account, factory, i, Math.min(i + 5000, length.toNumber())));
-    }
+    const pages: number[] = [];
+    for (let i = 0; i < length; i += LIMIT) pages.push(i);
+    const pairs = (
+        await Promise.all(
+            pages.map(page => scanner.findPairs(account, factory, page, Math.min(page + LIMIT, length.toNumber())))
+        )
+    ).flat();
     const balances = await scanner.findBalances(
         account,
         pairs.map(pair => pair.token)
     );
-    const result = await Promise.all(
+    return await Promise.all(
         pairs.map(async (pair, index) => {
             const address = pair.token;
             const balance = balances[index].balance;
@@ -114,7 +119,6 @@ const fetchLPTokens = async (
             return { address, decimals, name, symbol, balance, totalSupply, tokenA, tokenB } as LPToken;
         })
     );
-    return result.filter(token => !!token) as LPToken[];
 };
 
 export const findOrFetchToken = async (

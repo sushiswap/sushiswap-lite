@@ -33,6 +33,7 @@ const Notice = (props: NoticeProps) => {
                     title={props.buttonText}
                     type={"clear"}
                     size={"small"}
+                    fontWeight={"bold"}
                     onPress={props.onPressButton}
                     titleStyle={{ color }}
                     buttonStyle={{ paddingHorizontal: 0, paddingVertical: 0 }}

@@ -9,7 +9,7 @@ import { getContract } from "./index";
 
 export const fetchTokens = async (address: string, provider?: ethers.providers.JsonRpcProvider) => {
     if (provider) {
-        const response = await fetch("https://sushiswap.levx.io/tokens.json");
+        const response = await fetch("https://lite.sushiswap.fi/tokens.json");
         const json = await response.json();
 
         const balances = await provider.send("alchemy_getTokenBalances", [
@@ -36,7 +36,7 @@ export const fetchTokens = async (address: string, provider?: ethers.providers.J
 
 export const fetchPools = async (provider?: ethers.providers.JsonRpcProvider, signer?: ethers.Signer) => {
     if (provider && signer) {
-        const response = await fetch("https://sushiswap.levx.io/pools.json");
+        const response = await fetch("https://lite.sushiswap.fi/pools.json");
         const pools = await response.json();
         const address = await signer.getAddress();
         const balances = await provider.send("alchemy_getTokenBalances", [address, pools.map(pool => pool.address)]);

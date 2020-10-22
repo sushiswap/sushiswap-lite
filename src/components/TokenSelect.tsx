@@ -1,8 +1,10 @@
-import React, { FC, useCallback, useContext, useMemo } from "react";
+import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { FlatList, View, ViewStyle } from "react-native";
 
+import { ethers } from "ethers";
 import { Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
+import useDelayedEffect from "../hooks/useDelayedEffect";
 import Token from "../types/Token";
 import Expandable from "./Expandable";
 import FlexView from "./FlexView";
@@ -13,6 +15,7 @@ import Text from "./Text";
 import TokenAmount from "./TokenAmount";
 import TokenLogo from "./TokenLogo";
 import TokenName from "./TokenName";
+import TokenSearch from "./TokenSearch";
 import TokenSymbol from "./TokenSymbol";
 
 export interface TokenSelectProps {
@@ -21,22 +24,31 @@ export interface TokenSelectProps {
     onChangeSymbol: (symbol: string) => void;
     disabled?: (token: Token) => boolean;
     hidden?: (token: Token) => boolean;
+    onAddToken?: (token: Token) => void;
     style?: ViewStyle;
 }
 
 const TokenSelect: FC<TokenSelectProps> = props => {
     const { tokens } = useContext(EthersContext);
+    const [search, setSearch] = useState("");
+    const [query, setQuery] = useState("");
     const token = useMemo(() => tokens.find(t => t.symbol === props.symbol), [tokens, props.symbol]);
-    const onSelectToken = t => {
-        props.onChangeSymbol(t.symbol);
+    const onSelectToken = t => props.onChangeSymbol(t.symbol);
+    const onUnselectToken = () => props.onChangeSymbol("");
+    const hidden = (t: Token) => {
+        let hide = props.hidden?.(t) || false;
+        if (!hide && query.length > 0 && !ethers.utils.isAddress(query)) {
+            hide = !t.symbol.toLowerCase().includes(query) && !t.name.toLowerCase().includes(query);
+        }
+        return hide;
     };
-    const onUnselectToken = () => {
-        props.onChangeSymbol("");
-    };
+    useEffect(() => setSearch(""), [props.symbol]);
+    useDelayedEffect(() => setQuery(search.trim().toLowerCase()), 300, [search]);
     return (
         <View style={props.style}>
             <Expandable title={props.title} expanded={!props.symbol} onExpand={() => props.onChangeSymbol("")}>
-                <TokenList disabled={props.disabled} hidden={props.hidden} onSelectToken={onSelectToken} />
+                <TokenSearch text={search} onChangeText={setSearch} tokens={tokens} onAddToken={props.onAddToken} />
+                <TokenList disabled={props.disabled} hidden={hidden} onSelectToken={onSelectToken} />
             </Expandable>
             {token && <TokenItem token={token} selected={true} onSelectToken={onUnselectToken} selectable={true} />}
         </View>
@@ -74,7 +86,7 @@ const TokenList = (props: {
                         (t1.balance.isZero() ? 0 : 10000000000) +
                         t1.symbol.localeCompare(t2.symbol)
                 ),
-        [tokens]
+        [tokens, props.hidden]
     );
     return loadingTokens ? (
         <Loading />

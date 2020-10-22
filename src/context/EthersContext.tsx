@@ -26,12 +26,16 @@ export const EthersContext = React.createContext({
     addOnBlockListener: (_name: string, _listener: OnBlockListener) => {},
     removeOnBlockListener: (_name: string) => {},
     tokens: [ETH] as Token[],
+    setTokens: (_tokens: Token[]) => {},
     updateTokens: async () => {},
     loadingTokens: false,
     approveToken: async (_token: string, _spender: string, _amount?: ethers.BigNumber) => {
         return {} as ethers.providers.TransactionResponse | undefined;
     },
     getTokenAllowance: async (_token: string, _spender: string) => {
+        return ethers.constants.Zero as ethers.BigNumber | undefined;
+    },
+    getTokenBalance: async (_token: string, _who: string) => {
         return ethers.constants.Zero as ethers.BigNumber | undefined;
     },
     getTotalSupply: async (_token: string) => {
@@ -163,6 +167,16 @@ export const EthersContextProvider = ({ children }) => {
         [provider, address]
     );
 
+    const getTokenBalance = useCallback(
+        async (token: string, who: string) => {
+            if (provider && signer) {
+                const erc20 = getContract("ERC20", token, signer);
+                return await erc20.balanceOf(who);
+            }
+        },
+        [provider, signer]
+    );
+
     const getTotalSupply = useCallback(
         async (token: string) => {
             if (signer) {
@@ -215,10 +229,12 @@ export const EthersContextProvider = ({ children }) => {
                 address,
                 ensName,
                 tokens,
+                setTokens,
                 updateTokens,
                 loadingTokens,
                 approveToken,
                 getTokenAllowance,
+                getTokenBalance,
                 getTotalSupply,
                 addOnBlockListener,
                 removeOnBlockListener

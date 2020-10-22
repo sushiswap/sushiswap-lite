@@ -101,7 +101,7 @@ const EmptyList = () => {
     return (
         <View style={{ margin: Spacing.normal }}>
             <Text disabled={true} style={{ textAlign: "center", width: "100%" }}>
-                {"You don't have any token with balance.\nTransfer tokens to your address first."}
+                {"You don't have any matching tokens."}
             </Text>
         </View>
     );

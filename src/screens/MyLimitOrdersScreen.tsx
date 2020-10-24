@@ -134,11 +134,14 @@ const Token = ({ token, amount, disabled, buy }) => {
     const { green, red, disabled: colorDisabled } = useColors();
     return (
         <FlexView style={{ alignItems: "center" }}>
-            <TokenLogo token={token} disabled={disabled} />
-            <Text style={{ color: disabled ? colorDisabled : buy ? green : red, marginLeft: Spacing.tiny, width: 40 }}>
-                {buy ? "BUY" : "SELL"}
+            <TokenLogo small={true} token={token} disabled={disabled} />
+            <Text
+                fontWeight={"bold"}
+                note={true}
+                style={{ color: disabled ? colorDisabled : buy ? green : red, marginLeft: Spacing.tiny }}>
+                {buy ? "﹢" : "﹣"}
             </Text>
-            <TokenAmount token={token} amount={amount} disabled={disabled} />
+            <TokenAmount token={token} amount={amount} disabled={disabled} style={{ marginLeft: 4 }} />
             <TokenSymbol token={token} disabled={disabled} />
         </FlexView>
     );

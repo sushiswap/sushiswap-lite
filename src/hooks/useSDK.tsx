@@ -81,8 +81,8 @@ const useSDK = () => {
             const args = await order.toArgs();
 
             const orderBook = getContract("OrderBook", ORDER_BOOK, kovanSigner);
-            const gasLimit = await orderBook.estimateGas.createOrder(...args);
-            const tx = await orderBook.createOrder(...args, {
+            const gasLimit = await orderBook.estimateGas.createOrder(args);
+            const tx = await orderBook.createOrder(args, {
                 gasLimit: gasLimit.mul(120).div(100)
             });
             return await logTransaction(tx, "OrderBook.createOrder()", ...args.map(arg => arg.toString()));
@@ -90,18 +90,14 @@ const useSDK = () => {
         []
     );
 
-    const cancelOrder = useCallback(async (hash: string, signer: ethers.Signer, kovanSigner: ethers.Signer) => {
-        const orderBook = getContract("OrderBook", ORDER_BOOK, kovanSigner);
-        const callHash = await orderBook.cancelOrderCallHash(hash);
-        const signature = await signer.signMessage(ethers.utils.arrayify(callHash));
-        const { v, r, s } = ethers.utils.splitSignature(signature);
-        const args = [hash, v, r, s];
-
-        const gasLimit = await orderBook.estimateGas.cancelOrder(...args);
-        const tx = await orderBook.cancelOrder(...args, {
+    const cancelOrder = useCallback(async (order: Order, signer: ethers.Signer) => {
+        const settlement = getContract("Settlement", SETTLEMENT, signer);
+        const args = await order.toArgs();
+        const gasLimit = await settlement.estimateGas.cancelOrder(args);
+        const tx = await settlement.cancelOrder(args, {
             gasLimit: gasLimit.mul(120).div(100)
         });
-        return await logTransaction(tx, "OrderBook.cancelOrder()", ...args.map(arg => arg.toString()));
+        return await logTransaction(tx, "Settlement.cancelOrder()", ...args.map(arg => arg.toString()));
     }, []);
 
     const wrapETH = useCallback(async (amount: ethers.BigNumber, signer: ethers.Signer) => {
@@ -318,12 +314,9 @@ const useSDK = () => {
         fromAmount: ethers.BigNumber,
         price: string
     ) => {
-        return Fraction.parse(price).apply(
-            fromAmount
-                .sub(calculateLimitOrderFee(fromAmount))
-                .mul(pow10(toToken.decimals))
-                .div(pow10(fromToken.decimals))
-        );
+        const limitOrderFeeDeducted = fromAmount.sub(calculateLimitOrderFee(fromAmount));
+        const swapFeeDeducted = limitOrderFeeDeducted.sub(calculateSwapFee(limitOrderFeeDeducted));
+        return Fraction.parse(price).apply(swapFeeDeducted.mul(pow10(toToken.decimals)).div(pow10(fromToken.decimals)));
     };
 
     const calculateAmountOfLPTokenMinted = async (pair: Pair, fromAmount: TokenAmount, toAmount: TokenAmount) => {
@@ -377,6 +370,9 @@ export class Order {
     amountOutMin: ethers.BigNumber;
     recipient: string;
     deadline: ethers.BigNumber;
+    v?: number;
+    r?: string;
+    s?: string;
     filledAmountIn?: ethers.BigNumber;
 
     constructor(
@@ -386,7 +382,11 @@ export class Order {
         amountIn: ethers.BigNumber,
         amountOutMin: ethers.BigNumber,
         recipient: string,
-        deadline = ethers.BigNumber.from(Math.floor(Date.now() / 1000 + 24 * 3600))
+        deadline = ethers.BigNumber.from(Math.floor(Date.now() / 1000 + 24 * 3600)),
+        v?: number,
+        r?: string,
+        s?: string,
+        filledAmountIn?: ethers.BigNumber
     ) {
         this.maker = maker;
         this.fromToken = fromToken;
@@ -395,6 +395,10 @@ export class Order {
         this.amountOutMin = amountOutMin;
         this.recipient = recipient;
         this.deadline = deadline;
+        this.v = v;
+        this.r = r;
+        this.s = s;
+        this.filledAmountIn = filledAmountIn;
     }
 
     status(): OrderStatus {
@@ -407,7 +411,7 @@ export class Order {
 
     async hash() {
         const settlement = await getContract("Settlement", SETTLEMENT, this.maker);
-        return await settlement.hash(
+        return await settlement.hashOfOrder(
             await this.maker.getAddress(),
             this.fromToken.address,
             this.toToken.address,
@@ -425,7 +429,7 @@ export class Order {
     }
 
     async toArgs() {
-        const { v, r, s } = await this.sign();
+        const { v, r, s } = this.v && this.r && this.s ? { v: this.v, r: this.r, s: this.s } : await this.sign();
         return [
             await this.maker.getAddress(),
             this.fromToken.address,

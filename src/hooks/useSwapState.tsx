@@ -7,6 +7,7 @@ import useAsyncEffect from "use-async-effect";
 import Fraction from "../constants/Fraction";
 import { EthersContext } from "../context/EthersContext";
 import { formatBalance, isEmptyValue, parseBalance, pow10 } from "../utils";
+import useDelayedEffect from "./useDelayedEffect";
 import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useSDK from "./useSDK";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";
@@ -83,12 +84,16 @@ const useSwapState: () => SwapState = () => {
         }
     }, [provider, state.fromToken]);
 
-    useEffect(() => {
-        if (isEmptyValue(state.fromAmount)) {
-            setLimitOrderPrice("");
-            setTrade(undefined);
-        }
-    }, [state.fromAmount]);
+    useDelayedEffect(
+        () => {
+            if (isEmptyValue(state.fromAmount)) {
+                setLimitOrderPrice("");
+                setTrade(undefined);
+            }
+        },
+        300,
+        [state.fromAmount]
+    );
 
     useDelayedOnBlockEffect(
         async block => {
@@ -140,8 +145,7 @@ const useSwapState: () => SwapState = () => {
                         parseBalance(state.fromAmount, state.fromToken.decimals),
                         limitOrderPrice
                     ),
-                    state.toToken.decimals,
-                    8
+                    state.toToken.decimals
                 )
             );
         }

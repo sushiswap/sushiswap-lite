@@ -195,7 +195,8 @@ const AmountNotice = ({ state }: { state: SwapState }) => {
     if (
         state.priceInETH === undefined ||
         isEmptyValue(state.fromAmount) ||
-        (state.priceInETH && parseBalance(state.fromAmount, state.fromToken!.decimals).lte(state.priceInETH.mul(10)))
+        !state.fromToken ||
+        (state.priceInETH && parseBalance(state.fromAmount, state.fromToken.decimals).lte(state.priceInETH.mul(10)))
     ) {
         return <View />;
     }
@@ -474,7 +475,7 @@ const PlaceOrderButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
-    const goToLimitOrders = useLinker("/my-orders", "LimitOrders");
+    const goToLimitOrders = useLinker("/swap/my-orders", "LimitOrders");
     const onPress = useCallback(async () => {
         onError({});
         try {

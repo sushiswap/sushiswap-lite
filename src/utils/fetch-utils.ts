@@ -1,8 +1,9 @@
 import { FACTORY_ADDRESS as SUSHISWAP_FACTORY } from "@sushiswap/sdk";
 import { FACTORY_ADDRESS as UNISWAP_FACTORY } from "@uniswap/sdk";
 import { ethers } from "ethers";
-import { LP_TOKEN_SCANNER, MASTER_CHEF } from "../constants/contracts";
+import { LP_TOKEN_SCANNER, MASTER_CHEF, ORDER_BOOK, SETTLEMENT } from "../constants/contracts";
 import { ETH } from "../constants/tokens";
+import { Order, OrderStatus } from "../hooks/useSDK";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
 import { getContract } from "./index";
@@ -81,7 +82,7 @@ export const fetchMyUniswapLPTokens = async (
     }
 };
 
-const LIMIT = 2000;
+const LP_TOKENS_LIMIT = 2000;
 
 const fetchLPTokens = async (
     factory: string,
@@ -94,10 +95,12 @@ const fetchLPTokens = async (
     const scanner = getContract("LPTokenScanner", LP_TOKEN_SCANNER, signer);
     const account = await signer.getAddress();
     const pages: number[] = [];
-    for (let i = 0; i < length; i += LIMIT) pages.push(i);
+    for (let i = 0; i < length; i += LP_TOKENS_LIMIT) pages.push(i);
     const pairs = (
         await Promise.all(
-            pages.map(page => scanner.findPairs(account, factory, page, Math.min(page + LIMIT, length.toNumber())))
+            pages.map(page =>
+                scanner.findPairs(account, factory, page, Math.min(page + LP_TOKENS_LIMIT, length.toNumber()))
+            )
         )
     ).flat();
     const balances = await provider.send("alchemy_getTokenBalances", [account, pairs.map(pair => pair.token)]);
@@ -137,4 +140,60 @@ export const findOrFetchToken = async (
         logoURI: meta.logo,
         balance: ethers.constants.Zero
     } as Token;
+};
+
+const LIMIT_ORDERS_LIMIT = 20;
+
+export const fetchMyLimitOrders = async (
+    signer: ethers.Signer,
+    kovanSigner: ethers.Signer,
+    provider: ethers.providers.JsonRpcProvider,
+    tokens?: Token[],
+    canceledHashes?: string[]
+) => {
+    const orderBook = getContract("OrderBook", ORDER_BOOK, kovanSigner);
+    const settlement = await getContract("Settlement", SETTLEMENT, signer);
+    const maker = await signer.getAddress();
+    const length = await orderBook.numberOfHashesOfMaker(maker);
+    const pages: number[] = [];
+    for (let i = 0; i * LIMIT_ORDERS_LIMIT < length; i++) pages.push(i);
+    const hashes = (await Promise.all(pages.map(page => orderBook.hashesOfMaker(maker, page, LIMIT_ORDERS_LIMIT))))
+        .flat()
+        .filter(hash => hash !== ethers.constants.HashZero)
+        .filter(hash => (canceledHashes ? !canceledHashes.includes(hash) : true));
+    const myOrders = await Promise.all(
+        hashes.map(async hash => {
+            const args = await orderBook.orderOfHash(hash);
+            return new Order(
+                signer,
+                await findOrFetchToken(provider, args.fromToken, tokens),
+                await findOrFetchToken(provider, args.toToken, tokens),
+                args.amountIn,
+                args.amountOutMin,
+                args.recipient,
+                args.deadline,
+                args.v,
+                args.r,
+                args.s,
+                await settlement.filledAmountInOfHash(hash)
+            );
+        })
+    );
+    return myOrders.sort(compareOrders) as Order[];
+};
+
+const compareOrders = (o0, o1) => {
+    const status = (s: OrderStatus) => (s === "Open" ? 0 : s === "Filled" ? 1 : 2);
+    const compared = status(o0.status()) - status(o1.status());
+    return compared === 0 ? o0.deadline.toNumber() - o1.deadline.toNumber() : compared;
+};
+
+export const fetchMyCanceledLimitOrderHashes = async (signer: ethers.Signer) => {
+    const settlement = await getContract("Settlement", SETTLEMENT, signer);
+    const length = await settlement.numberOfCanceledHashesOfMaker(await signer.getAddress());
+    const pages: number[] = [];
+    for (let i = 0; i * LIMIT_ORDERS_LIMIT < length; i++) pages.push(i);
+    return (await Promise.all(pages.map(page => settlement.allCanceledHashes(page, LIMIT_ORDERS_LIMIT))))
+        .flat()
+        .filter(hash => hash !== ethers.constants.HashZero);
 };

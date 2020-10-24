@@ -100,6 +100,12 @@ const useSDK = () => {
         return await logTransaction(tx, "Settlement.cancelOrder()", ...args.map(arg => arg.toString()));
     }, []);
 
+    const queryOrderFilledEvents = useCallback(async (hash: string, signer: ethers.Signer) => {
+        const settlement = getContract("Settlement", SETTLEMENT, signer);
+        const filter = settlement.filters.OrderFilled(hash);
+        return await settlement.queryFilter(filter);
+    }, []);
+
     const wrapETH = useCallback(async (amount: ethers.BigNumber, signer: ethers.Signer) => {
         const weth = getContract("IWETH", WETH[1].address, signer);
         const gasLimit = await weth.estimateGas.deposit({
@@ -336,6 +342,7 @@ const useSDK = () => {
         swap,
         createOrder,
         cancelOrder,
+        queryOrderFilledEvents,
         wrapETH,
         unwrapETH,
         getPair,

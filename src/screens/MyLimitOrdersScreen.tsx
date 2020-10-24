@@ -27,7 +27,7 @@ import useColors from "../hooks/useColors";
 import useMyLimitOrdersState, { MyLimitOrdersState } from "../hooks/useMyLimitOrdersState";
 import { Order } from "../hooks/useSDK";
 import MetamaskError from "../types/MetamaskError";
-import { formatBalance, formatDate } from "../utils";
+import { formatBalance } from "../utils";
 import Screen from "./Screen";
 
 const MyLimitOrdersScreen = () => {
@@ -171,7 +171,7 @@ const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
             const deadline = new Date(order.deadline.toNumber() * 1000);
             const now = Date.now();
             const diff = moment(deadline).diff(now);
-            return moment(deadline).isAfter(now) ? moment.utc(diff).format("HH[h] mm[m]") : formatDate(deadline);
+            return moment(deadline).isAfter(now) ? moment.utc(diff).format("HH[h] mm[m]") : null;
         }
     }, [order]);
     const disabled = !state.selectedOrder;
@@ -179,15 +179,25 @@ const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
         <InfoBox>
             <Meta label={"Amount Filled"} text={filledAmountIn} suffix={order?.fromToken?.symbol} disabled={disabled} />
             <Meta label={"Amount To Sell"} text={amountIn} suffix={order?.fromToken?.symbol} disabled={disabled} />
-            <Meta
-                label={"Desired Amount To Buy"}
-                text={amountOutMin}
-                suffix={order?.toToken?.symbol}
-                disabled={disabled}
-            />
-            <Meta label={"Expiration"} text={expiry} disabled={disabled} />
+            <Meta label={"Amount To Buy"} text={amountOutMin} suffix={order?.toToken?.symbol} disabled={disabled} />
+            {expiry && <Meta label={"Expiration"} text={expiry} disabled={disabled} />}
+            <FilledEvents state={state} />
             <Controls state={state} />
         </InfoBox>
+    );
+};
+
+const FilledEvents = ({ state }: { state: MyLimitOrdersState }) => {
+    const prefix = "https://etherscan.io/tx/";
+    return (
+        <View>
+            {state.filledEvents &&
+                state.filledEvents.map((event, i) => {
+                    const hash = event.transactionHash;
+                    const tx = hash.substring(0, 10) + "..." + hash.substring(hash.length - 8);
+                    return <Meta key={i} label={"Filled TX #" + i} text={tx} url={prefix + hash} />;
+                })}
+        </View>
     );
 };
 

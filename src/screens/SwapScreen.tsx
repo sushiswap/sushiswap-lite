@@ -45,7 +45,7 @@ const SwapScreen = () => {
             <SwapSubMenu />
             <Container>
                 <Content>
-                    <Title text={"Swap Tokens"} />
+                    <Title text={"New Order"} />
                     <Text light={true}>Swap now or place a limit order with a desired price.</Text>
                     <Swap />
                     {Platform.OS === "web" && <WebFooter />}

@@ -1,10 +1,13 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 
 import { Trade } from "@sushiswap/sdk";
+import { Fetcher, Token, WETH } from "@uniswap/sdk";
+import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import Fraction from "../constants/Fraction";
 import { EthersContext } from "../context/EthersContext";
 import { formatBalance, isEmptyValue, parseBalance, pow10 } from "../utils";
+import useDelayedEffect from "./useDelayedEffect";
 import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useSDK from "./useSDK";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";
@@ -14,6 +17,7 @@ export type OrderType = "market" | "limit";
 export interface SwapState extends TokenPairState {
     orderType?: OrderType;
     setOrderType: (orderType?: OrderType) => void;
+    priceInETH?: ethers.BigNumber | null;
     trade?: Trade;
     unsupported: boolean;
     limitOrderUnsupported: boolean;
@@ -32,7 +36,7 @@ export interface SwapState extends TokenPairState {
 // tslint:disable-next-line:max-func-body-length
 const useSwapState: () => SwapState = () => {
     const state = useTokenPairState();
-    const { signer, kovanSigner, updateTokens } = useContext(EthersContext);
+    const { provider, signer, kovanSigner, updateTokens } = useContext(EthersContext);
     const {
         getTrade,
         swap,
@@ -43,6 +47,7 @@ const useSwapState: () => SwapState = () => {
     } = useSDK();
     const [loading, setLoading] = useState(true);
     const [orderType, setOrderType] = useState<OrderType>();
+    const [priceInETH, setPriceInETH] = useState<ethers.BigNumber | null>();
     const [trade, setTrade] = useState<Trade>();
     const [unsupported, setUnsupported] = useState(false);
     const [swapFee, setSwapFee] = useState("");
@@ -60,12 +65,35 @@ const useSwapState: () => SwapState = () => {
         setLimitOrderPrice("");
     }, [orderType]);
 
-    useEffect(() => {
-        if (isEmptyValue(state.fromAmount)) {
-            setLimitOrderPrice("");
-            setTrade(undefined);
+    useAsyncEffect(async () => {
+        setPriceInETH(undefined);
+        if (provider && state.fromToken) {
+            if (state.fromToken.symbol === "WETH") {
+                setPriceInETH(ethers.constants.WeiPerEther);
+            } else {
+                const { chainId } = await provider.getNetwork();
+                try {
+                    const fromToken = new Token(chainId, state.fromToken.address, state.fromToken.decimals);
+                    const toToken = WETH[chainId];
+                    const pair = await Fetcher.fetchPairData(fromToken, toToken);
+                    setPriceInETH(parseBalance(pair.priceOf(toToken).toFixed(), fromToken.decimals));
+                } catch (e) {
+                    setPriceInETH(null);
+                }
+            }
         }
-    }, [state.fromAmount]);
+    }, [provider, state.fromToken]);
+
+    useDelayedEffect(
+        () => {
+            if (isEmptyValue(state.fromAmount)) {
+                setLimitOrderPrice("");
+                setTrade(undefined);
+            }
+        },
+        300,
+        [state.fromAmount]
+    );
 
     useDelayedOnBlockEffect(
         async block => {
@@ -117,8 +145,7 @@ const useSwapState: () => SwapState = () => {
                         parseBalance(state.fromAmount, state.fromToken.decimals),
                         limitOrderPrice
                     ),
-                    state.toToken.decimals,
-                    8
+                    state.toToken.decimals
                 )
             );
         }
@@ -176,6 +203,7 @@ const useSwapState: () => SwapState = () => {
         loading: loading || state.loading,
         orderType,
         setOrderType,
+        priceInETH,
         trade,
         unsupported,
         swapFee,

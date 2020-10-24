@@ -36,7 +36,7 @@ import useLinker from "../hooks/useLinker";
 import useSwapState, { OrderType, SwapState } from "../hooks/useSwapState";
 import MetamaskError from "../types/MetamaskError";
 import Token from "../types/Token";
-import { isEmptyValue, parseBalance } from "../utils";
+import { formatBalance, isEmptyValue, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const SwapScreen = () => {
@@ -68,13 +68,9 @@ const Swap = () => {
             <AmountInput state={state} />
             {state.orderType === "limit" && (
                 <View>
+                    <AmountNotice state={state} />
                     <Border />
                     <PriceInput state={state} />
-                    <ExperimentalNotice
-                        contractURL={
-                            "https://github.com/sushiswap/sushiswap-settlement/blob/master/contracts/Settlement.sol"
-                        }
-                    />
                 </View>
             )}
             <TradeInfo state={state} />
@@ -90,6 +86,13 @@ const OrderTypeSelect = ({ state }: { state: SwapState }) => {
                 <OrderTypeItem state={state} orderType={"limit"} />
             </Expandable>
             {state.orderType && <OrderTypeItem state={state} orderType={state.orderType} selectable={true} />}
+            {state.orderType === "limit" && (
+                <ExperimentalNotice
+                    contractURL={
+                        "https://github.com/sushiswap/sushiswap-settlement/blob/master/contracts/Settlement.sol"
+                    }
+                />
+            )}
         </View>
     );
 };
@@ -183,6 +186,33 @@ const AmountInput = ({ state }: { state: SwapState }) => {
                 amount={state.fromAmount}
                 onAmountChanged={state.setFromAmount}
                 autoFocus={true}
+            />
+        </View>
+    );
+};
+
+const AmountNotice = ({ state }: { state: SwapState }) => {
+    if (
+        state.priceInETH === undefined ||
+        isEmptyValue(state.fromAmount) ||
+        !state.fromToken ||
+        (state.priceInETH && parseBalance(state.fromAmount, state.fromToken.decimals).lte(state.priceInETH.mul(10)))
+    ) {
+        return <View />;
+    }
+    return (
+        <View style={{ marginTop: Spacing.small }}>
+            <Notice
+                text={
+                    state.priceInETH === null
+                        ? "This token is not supported in beta."
+                        : "Maximum allowed amount in beta is " +
+                          formatBalance(state.priceInETH.mul(10), state.fromToken!.decimals) +
+                          " " +
+                          state.fromSymbol +
+                          " (≈ 10 ETH)."
+                }
+                color={"red"}
             />
         </View>
     );
@@ -399,6 +429,8 @@ const LimitOrderControls = ({ state }: { state: SwapState }) => {
         !state.fromToken ||
         !state.toToken ||
         isEmptyValue(state.fromAmount) ||
+        !state.priceInETH ||
+        parseBalance(state.fromAmount, state.fromToken!.decimals).gt(state.priceInETH.mul(10)) ||
         !state.trade ||
         isEmptyValue(state.limitOrderPrice);
     return (
@@ -443,7 +475,7 @@ const PlaceOrderButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
-    const goToLimitOrders = useLinker("/my-orders", "LimitOrders");
+    const goToLimitOrders = useLinker("/swap/my-orders", "LimitOrders");
     const onPress = useCallback(async () => {
         onError({});
         try {

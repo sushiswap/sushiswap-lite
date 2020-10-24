@@ -85,12 +85,12 @@ const OrderList = ({ state }: { state: MyLimitOrdersState }) => {
         },
         [state.setSelectedOrder]
     );
-    return state.loading || !state.orders ? (
+    return state.loading || !state.myOrders ? (
         <Loading />
-    ) : state.orders.length === 0 ? (
+    ) : state.myOrders.length === 0 ? (
         <EmptyList />
     ) : (
-        <FlatList keyExtractor={item => JSON.stringify(item)} data={state.orders} renderItem={renderItem} />
+        <FlatList keyExtractor={item => JSON.stringify(item)} data={state.myOrders} renderItem={renderItem} />
     );
 };
 

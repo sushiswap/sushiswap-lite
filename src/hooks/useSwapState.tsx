@@ -159,6 +159,7 @@ const useSwapState: () => SwapState = () => {
                 if (result) {
                     await result.tx.wait();
                     await updateTokens();
+                    setTrade(undefined);
                     setOrderType(undefined);
                 }
             } finally {
@@ -191,6 +192,7 @@ const useSwapState: () => SwapState = () => {
                     kovanSigner
                 );
                 await tx.wait();
+                setTrade(undefined);
                 setOrderType(undefined);
             } finally {
                 setCreatingOrder(false);

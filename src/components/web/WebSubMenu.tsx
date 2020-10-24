@@ -20,7 +20,7 @@ export const SwapSubMenu = () => (
     <WebSubMenu
         items={[
             {
-                title: "Swap Tokens",
+                title: "New Order",
                 path: "/swap"
             },
             {

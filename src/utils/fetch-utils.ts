@@ -159,8 +159,7 @@ export const fetchMyLimitOrders = async (
     for (let i = 0; i * LIMIT_ORDERS_LIMIT < length; i++) pages.push(i);
     const hashes = (await Promise.all(pages.map(page => orderBook.hashesOfMaker(maker, page, LIMIT_ORDERS_LIMIT))))
         .flat()
-        .filter(hash => hash !== ethers.constants.HashZero)
-        .filter(hash => (canceledHashes ? !canceledHashes.includes(hash) : true));
+        .filter(hash => hash !== ethers.constants.HashZero);
     const myOrders = await Promise.all(
         hashes.map(async hash => {
             const args = await orderBook.orderOfHash(hash);
@@ -175,7 +174,8 @@ export const fetchMyLimitOrders = async (
                 args.v,
                 args.r,
                 args.s,
-                await settlement.filledAmountInOfHash(hash)
+                await settlement.filledAmountInOfHash(hash),
+                canceledHashes && canceledHashes.includes(hash)
             );
         })
     );

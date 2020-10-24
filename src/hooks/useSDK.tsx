@@ -367,7 +367,7 @@ const minAmount = (amount: ethers.BigNumber, percent: Percent) => {
     return amount.sub(amount.mul(percent.numerator.toString()).div(percent.denominator.toString()));
 };
 
-export type OrderStatus = "Open" | "Expired" | "Filled";
+export type OrderStatus = "Open" | "Expired" | "Filled" | "Canceled";
 
 export class Order {
     maker: ethers.Signer;
@@ -381,6 +381,7 @@ export class Order {
     r?: string;
     s?: string;
     filledAmountIn?: ethers.BigNumber;
+    canceled?: boolean;
 
     constructor(
         maker: ethers.Signer,
@@ -393,7 +394,8 @@ export class Order {
         v?: number,
         r?: string,
         s?: string,
-        filledAmountIn?: ethers.BigNumber
+        filledAmountIn?: ethers.BigNumber,
+        canceled?: boolean
     ) {
         this.maker = maker;
         this.fromToken = fromToken;
@@ -406,10 +408,13 @@ export class Order {
         this.r = r;
         this.s = s;
         this.filledAmountIn = filledAmountIn;
+        this.canceled = canceled;
     }
 
     status(): OrderStatus {
-        return this.filledAmountIn?.eq(this.amountIn)
+        return this.canceled
+            ? "Canceled"
+            : this.filledAmountIn?.eq(this.amountIn)
             ? "Filled"
             : this.deadline.toNumber() * 1000 < Date.now()
             ? "Expired"

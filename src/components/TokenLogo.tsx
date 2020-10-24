@@ -21,7 +21,7 @@ const TokenLogo = (props: {
                 {
                     width: size,
                     height: size,
-                    backgroundColor: props.disabled ? "grey" : "white",
+                    backgroundColor: props.disabled ? "black" : "white",
                     borderRadius: size / 2
                 },
                 props.style

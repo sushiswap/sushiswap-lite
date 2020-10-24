@@ -123,8 +123,12 @@ const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (ord
                     <View style={{ height: Spacing.tiny }} />
                     <Token token={toToken} amount={amountOutMin} disabled={disabled} buy={true} />
                 </View>
-                <Field label={"Price"} value={price.toString(8)} disabled={disabled} minWidth={0} />
-                <Field label={"Status"} value={status} disabled={disabled} minWidth={64} />
+                <Field
+                    label={"Price"}
+                    value={props.order.canceled ? "Canceled" : price.toString(8)}
+                    disabled={disabled}
+                    minWidth={0}
+                />
             </FlexView>
         </Selectable>
     );
@@ -180,6 +184,7 @@ const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
     const disabled = !state.selectedOrder;
     return (
         <InfoBox>
+            <Meta label={"Status"} text={order?.status()} disabled={disabled} />
             <Meta label={"Amount Filled"} text={filledAmountIn} suffix={order?.fromToken?.symbol} disabled={disabled} />
             <Meta label={"Amount To Sell"} text={amountIn} suffix={order?.fromToken?.symbol} disabled={disabled} />
             <Meta label={"Amount To Buy"} text={amountOutMin} suffix={order?.toToken?.symbol} disabled={disabled} />

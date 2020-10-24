@@ -185,7 +185,7 @@ export const fetchMyLimitOrders = async (
 const compareOrders = (o0, o1) => {
     const status = (s: OrderStatus) => (s === "Open" ? 0 : s === "Filled" ? 1 : 2);
     const compared = status(o0.status()) - status(o1.status());
-    return compared === 0 ? o0.deadline.toNumber() - o1.deadline.toNumber() : compared;
+    return compared === 0 ? o1.deadline.toNumber() - o0.deadline.toNumber() : compared;
 };
 
 export const fetchMyCanceledLimitOrderHashes = async (signer: ethers.Signer) => {

@@ -53,11 +53,11 @@ const Migrate = () => {
                 emptyText={"You don't have any liquidity on Uniswap."}
                 Item={LPTokenItem}
             />
-            <Border />
-            <AmountInput state={state} />
             <ExperimentalNotice
                 contractURL={"https://github.com/sushiswap/sushiswap/blob/master/contracts/Migrator2.sol"}
             />
+            <Border />
+            <AmountInput state={state} />
             <AmountInfo state={state} />
         </View>
     );

@@ -8,9 +8,11 @@ import Notice from "./Notice";
 const ExperimentalNotice = (props: { contractURL: string }) => {
     const onPressContract = useLinker(props.contractURL, "", "_blank");
     return (
-        <View style={{ marginTop: Spacing.normal }}>
+        <View style={{ marginVertical: Spacing.tiny }}>
             <Notice
-                text={"This feature is in beta. Read the contract yourself and use it with caution."}
+                text={
+                    "This feature is in beta and contracts are unaudited. Read the contract yourself and use it at your own risk."
+                }
                 color={"orange"}
                 buttonText={"View Contract"}
                 onPressButton={onPressContract}

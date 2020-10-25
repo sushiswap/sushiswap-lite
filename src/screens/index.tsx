@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { lazy, Suspense, useContext } from "react";
 import { Platform, View } from "react-native";
 import { Icon } from "react-native-elements";
 import { HashRouter as Router, Redirect, Route, Switch } from "react-router-dom";
@@ -11,13 +11,14 @@ import useAsyncEffect from "use-async-effect";
 import WebHeader from "../components/web/WebHeader";
 import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
-import FarmingScreen from "./FarmingScreen";
-import LiquidityScreen from "./LiquidityScreen";
-import MigrateScreen from "./MigrateScreen";
-import MyLimitOrdersScreen from "./MyLimitOrdersScreen";
-import RemoveLiquidityScreen from "./RemoveLiquidityScreen";
-import StakingScreen from "./StakingScreen";
-import SwapScreen from "./SwapScreen";
+import EmptyScreen from "./EmptyScreen";
+const FarmingScreen = lazy(() => import("./FarmingScreen"));
+const LiquidityScreen = lazy(() => import("./LiquidityScreen"));
+const MigrateScreen = lazy(() => import("./MigrateScreen"));
+const MyLimitOrdersScreen = lazy(() => import("./MyLimitOrdersScreen"));
+const RemoveLiquidityScreen = lazy(() => import("./RemoveLiquidityScreen"));
+const StakingScreen = lazy(() => import("./StakingScreen"));
+const SwapScreen = lazy(() => import("./SwapScreen"));
 
 export const Screens = () => {
     const { load } = useContext(GlobalContext);
@@ -31,33 +32,35 @@ const WebScreens = () => {
     const { background } = useColors();
     return (
         <Router>
-            <View style={{ flex: 1, backgroundColor: background }}>
-                <Switch>
-                    <Route path={"/swap/my-orders"}>
-                        <MyLimitOrdersScreen />
-                    </Route>
-                    <Route path={"/swap"}>
-                        <SwapScreen />
-                    </Route>
-                    <Route path={"/liquidity/remove"}>
-                        <RemoveLiquidityScreen />
-                    </Route>
-                    <Route path={"/liquidity/migrate"}>
-                        <MigrateScreen />
-                    </Route>
-                    <Route path={"/liquidity"}>
-                        <LiquidityScreen />
-                    </Route>
-                    <Route path={"/farming"}>
-                        <FarmingScreen />
-                    </Route>
-                    <Route path={"/staking"}>
-                        <StakingScreen />
-                    </Route>
-                    <Redirect to={"/swap"} />
-                </Switch>
-                {deviceType !== DeviceType.PHONE && <WebHeader />}
-            </View>
+            <Suspense fallback={<EmptyScreen />}>
+                <View style={{ flex: 1, backgroundColor: background }}>
+                    <Switch>
+                        <Route path={"/swap/my-orders"}>
+                            <MyLimitOrdersScreen />
+                        </Route>
+                        <Route path={"/swap"}>
+                            <SwapScreen />
+                        </Route>
+                        <Route path={"/liquidity/remove"}>
+                            <RemoveLiquidityScreen />
+                        </Route>
+                        <Route path={"/liquidity/migrate"}>
+                            <MigrateScreen />
+                        </Route>
+                        <Route path={"/liquidity"}>
+                            <LiquidityScreen />
+                        </Route>
+                        <Route path={"/farming"}>
+                            <FarmingScreen />
+                        </Route>
+                        <Route path={"/staking"}>
+                            <StakingScreen />
+                        </Route>
+                        <Redirect to={"/swap"} />
+                    </Switch>
+                    {deviceType !== DeviceType.PHONE && <WebHeader />}
+                </View>
+            </Suspense>
         </Router>
     );
 };

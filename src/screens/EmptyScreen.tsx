@@ -3,7 +3,7 @@ import { View } from "react-native";
 
 import Container from "../components/Container";
 import Content from "../components/Content";
-import Loading from "../components/Loading";
+import Title from "../components/Title";
 import WebHeader from "../components/web/WebHeader";
 import WebSubMenu from "../components/web/WebSubMenu";
 import useColors from "../hooks/useColors";
@@ -17,7 +17,7 @@ const EmptyScreen = () => {
                 <WebSubMenu items={[]} />
                 <Container>
                     <Content>
-                        <Loading />
+                        <Title text={"Loading..."} />
                     </Content>
                 </Container>
             </Screen>

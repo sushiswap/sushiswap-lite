@@ -2016,10 +2016,10 @@
     tiny-warning "^1.0.3"
     toformat "^2.0.0"
 
-"@sushiswap/settlement@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@sushiswap/settlement/-/settlement-0.5.0.tgz#46a614d5ffe1aba4b1537e3f025a776cef8d748d"
-  integrity sha512-FYtLXqqj9QIxfKm+E6zKMORYZFI62hEixB76TOBpWVniQujxbzkgovf6fCrMGnrX/KEqgCfIE2eDFqld/IeXsA==
+"@sushiswap/settlement@^0.7.0":
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/@sushiswap/settlement/-/settlement-0.7.1.tgz#074b921dc7cf8368738c51d6942ff3ba0c9c3fd9"
+  integrity sha512-pxmSr+BRObrfMknzhc0G7YOzKoqV0aKBxg9JGkg8U4zsS1XGs6bwL7RnhVSSF0NiO5EFIEVberENtttTdWIcDQ==
   dependencies:
     "@sushiswap/core" "^1.2.1"
 

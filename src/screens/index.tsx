@@ -17,7 +17,7 @@ const LiquidityScreen = lazy(() => import("./LiquidityScreen"));
 const MigrateScreen = lazy(() => import("./MigrateScreen"));
 const MyLimitOrdersScreen = lazy(() => import("./MyLimitOrdersScreen"));
 const RemoveLiquidityScreen = lazy(() => import("./RemoveLiquidityScreen"));
-const StakingScreen = lazy(() => import("./StakingScreen"));
+// const StakingScreen = lazy(() => import("./StakingScreen"));
 const SwapScreen = lazy(() => import("./SwapScreen"));
 
 export const Screens = () => {
@@ -50,12 +50,12 @@ const WebScreens = () => {
                         <Route path={"/liquidity"}>
                             <LiquidityScreen />
                         </Route>
-                        <Route path={"/farming"}>
-                            <FarmingScreen />
-                        </Route>
-                        <Route path={"/staking"}>
-                            <StakingScreen />
-                        </Route>
+                        {/*<Route path={"/farming"}>*/}
+                        {/*    <FarmingScreen />*/}
+                        {/*</Route>*/}
+                        {/*<Route path={"/staking"}>*/}
+                        {/*    <StakingScreen />*/}
+                        {/*</Route>*/}
                         <Redirect to={"/swap"} />
                     </Switch>
                     {deviceType !== DeviceType.PHONE && <WebHeader />}

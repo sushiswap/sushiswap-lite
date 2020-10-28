@@ -94,7 +94,7 @@ const WebSubMenu: FC<WebSubMenuProps> = props => {
 };
 
 const MenuItem = ({ title, path }) => {
-    const { textDark, textLight } = useColors();
+    const { accent, textLight } = useColors();
     const match = useRouteMatch(path);
     const active = match?.isExact;
     return (
@@ -103,7 +103,7 @@ const MenuItem = ({ title, path }) => {
                 fontWeight={active ? "regular" : "light"}
                 style={{
                     fontSize: 13,
-                    color: active ? textDark : textLight
+                    color: active ? accent : textLight
                 }}>
                 {title}
             </Text>

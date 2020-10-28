@@ -79,7 +79,7 @@ const MenuItem = ({ title, path }) => {
     return (
         <Link to={path} style={{ marginLeft: Spacing.tiny, textDecoration: "none" }}>
             <View>
-                <Text style={{ fontFamily: "regular", fontSize: 18, color: active ? textDark : textLight, padding: 4 }}>
+                <Text style={{ fontFamily: "regular", fontSize: 18, color: active ? textDark : textLight, padding: 3 }}>
                     {title}
                 </Text>
             </View>

@@ -118,7 +118,7 @@ export const EthersContextProvider = ({ children }) => {
     // }, [mnemonic]);
 
     const updateTokens = async () => {
-        if (address) {
+        if (address && provider) {
             try {
                 const data = await fetchTokens(address, provider);
                 if (data) {

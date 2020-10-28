@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
@@ -8,11 +8,10 @@ import Token from "../types/Token";
 import { getContract, parseBalance } from "../utils";
 import useSDK from "./useSDK";
 
-export type Action = "enter" | "leave";
+export type StakeAction = "sushi-balance" | "stake";
+export type UnstakeAction = "xsushi-balance" | "unstake";
 
 export interface StakingState {
-    action?: Action;
-    setAction: (action?: Action) => void;
     sushi?: Token;
     xSushi?: Token;
     sushiStaked?: ethers.BigNumber;
@@ -35,7 +34,6 @@ export interface StakingState {
 const useStakingState: () => StakingState = () => {
     const { provider, signer, address, getTokenAllowance, tokens, updateTokens } = useContext(EthersContext);
     const { enterSushiBar, leaveSushiBar } = useSDK();
-    const [action, setAction] = useState<Action>();
     const [sushiStaked, setSushiStaked] = useState<ethers.BigNumber>();
     const [sushiSupply, setSushiSupply] = useState<ethers.BigNumber>();
     const [xSushiSupply, setXSushiSupply] = useState<ethers.BigNumber>();
@@ -46,12 +44,12 @@ const useStakingState: () => StakingState = () => {
     const [entering, setEntering] = useState(false);
     const [leaving, setLeaving] = useState(false);
 
-    const sushi = tokens.find(token => token.symbol === "SUSHI");
-    const xSushi = tokens.find(token => token.symbol === "xSUSHI");
+    const sushi = useMemo(() => tokens.find(token => token.symbol === "SUSHI"), [tokens]);
+    const xSushi = useMemo(() => tokens.find(token => token.symbol === "xSUSHI"), [tokens]);
 
     useEffect(() => {
         setAmount("");
-    }, [address, action]);
+    }, [address]);
 
     useAsyncEffect(async () => {
         if (sushi && xSushi && provider && signer) {
@@ -79,10 +77,11 @@ const useStakingState: () => StakingState = () => {
     }, [sushi, xSushi, provider, signer]);
 
     const onEnter = useCallback(async () => {
-        if (amount && signer) {
+        if (amount && sushi && signer) {
             setEntering(true);
             try {
-                const tx = await enterSushiBar(parseBalance(amount), signer);
+                const parsed = parseBalance(amount, sushi.decimals);
+                const tx = await enterSushiBar(parsed, signer);
                 if (tx) {
                     await tx.wait();
                     await updateTokens();
@@ -92,13 +91,14 @@ const useStakingState: () => StakingState = () => {
                 setEntering(false);
             }
         }
-    }, [amount, signer]);
+    }, [amount, sushi, signer]);
 
     const onLeave = useCallback(async () => {
-        if (amount && signer) {
+        if (amount && xSushi && signer) {
             setLeaving(true);
             try {
-                const tx = await leaveSushiBar(parseBalance(amount), signer);
+                const parsed = parseBalance(amount, xSushi.decimals);
+                const tx = await leaveSushiBar(parsed, signer);
                 if (tx) {
                     await tx.wait();
                     await updateTokens();
@@ -108,11 +108,9 @@ const useStakingState: () => StakingState = () => {
                 setLeaving(false);
             }
         }
-    }, [amount, signer]);
+    }, [amount, xSushi, signer]);
 
     return {
-        action,
-        setAction,
         sushi,
         xSushi,
         sushiStaked,

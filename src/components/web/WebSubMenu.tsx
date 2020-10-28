@@ -50,6 +50,21 @@ export const LiquiditySubMenu = () => (
     />
 );
 
+export const StakingSubMenu = () => (
+    <WebSubMenu
+        items={[
+            {
+                title: "Stake",
+                path: "/staking"
+            },
+            {
+                title: "Unstake",
+                path: "/staking/unstake"
+            }
+        ]}
+    />
+);
+
 const WebSubMenu: FC<WebSubMenuProps> = props => {
     const { borderDark, submenu } = useColors();
     return (

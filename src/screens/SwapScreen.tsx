@@ -437,6 +437,8 @@ const LimitOrderControls = ({ state }: { state: SwapState }) => {
         <View style={{ marginTop: Spacing.normal }}>
             {disabled ? (
                 <PlaceOrderButton state={state} onError={setError} disabled={true} />
+            ) : parseBalance(state.fromAmount, state.fromToken!.decimals).gt(state.fromToken!.balance) ? (
+                <InsufficientBalanceButton symbol={state.fromSymbol} />
             ) : !Fraction.parse(state.limitOrderPrice).gt(
                   Fraction.parse(state.trade!.executionPrice.toFixed(state.toToken!.decimals))
               ) ? (

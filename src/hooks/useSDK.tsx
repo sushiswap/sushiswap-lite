@@ -92,9 +92,9 @@ const useSDK = () => {
 
     const cancelOrder = useCallback(async (order: Order, signer: ethers.Signer) => {
         const settlement = getContract("Settlement", SETTLEMENT, signer);
-        const args = await order.toArgs();
-        const gasLimit = await settlement.estimateGas.cancelOrder(args);
-        const tx = await settlement.cancelOrder(args, {
+        const args = (await order.toArgs()).slice(0, 7);
+        const gasLimit = await settlement.estimateGas.cancelOrder(...args);
+        const tx = await settlement.cancelOrder(...args, {
             gasLimit: gasLimit.mul(120).div(100)
         });
         return await logTransaction(tx, "Settlement.cancelOrder()", ...args.map(arg => arg.toString()));

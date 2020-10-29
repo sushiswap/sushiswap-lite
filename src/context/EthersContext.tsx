@@ -118,9 +118,9 @@ export const EthersContextProvider = ({ children }) => {
     // }, [mnemonic]);
 
     const updateTokens = async () => {
-        if (address && provider) {
+        if (address && provider && signer) {
             try {
-                const data = await fetchTokens(address, provider);
+                const data = await fetchTokens(address, provider, signer);
                 if (data) {
                     await setTokens(data);
                 }
@@ -131,11 +131,11 @@ export const EthersContextProvider = ({ children }) => {
     };
 
     useAsyncEffect(async () => {
-        if (provider) {
+        if (provider && signer) {
             setLoadingTokens(true);
             await updateTokens();
         }
-    }, [provider, address]);
+    }, [provider, signer, address]);
 
     const approveToken = useCallback(
         async (token: string, spender: string, amount?: ethers.BigNumber) => {

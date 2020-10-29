@@ -8,82 +8,78 @@ import LPToken from "../types/LPToken";
 import Token from "../types/Token";
 import { getContract } from "./index";
 
-export const fetchTokens = async (address: string, provider?: ethers.providers.JsonRpcProvider) => {
-    if (provider) {
-        const response = await fetch("https://lite.sushiswap.fi/tokens.json");
-        const json = await response.json();
+export const fetchTokens = async (address: string, provider: ethers.providers.BaseProvider, signer: ethers.Signer) => {
+    const response = await fetch("https://lite.sushiswap.fi/tokens.json");
+    const json = await response.json();
 
-        const balances = await provider.send("alchemy_getTokenBalances", [
-            address,
-            json.tokens.map(token => token.address)
-        ]);
-        return [
-            {
-                ...ETH,
-                balance: await provider.getBalance(address)
-            },
-            ...json.tokens.map((token, i) => ({
-                ...token,
-                balance: ethers.BigNumber.from(balances.tokenBalances[i].tokenBalance || 0)
-            }))
-        ].sort((t1, t2) => {
-            return t2.balance
-                .sub(t1.balance)
-                .div(ethers.BigNumber.from(10).pow(10))
-                .toNumber();
-        });
-    }
+    const balances = await fetchTokenBalances(
+        json.tokens.map(token => token.address),
+        signer
+    );
+    return [
+        {
+            ...ETH,
+            balance: await provider.getBalance(address)
+        },
+        ...json.tokens.map((token, i) => ({
+            ...token,
+            balance: ethers.BigNumber.from(balances[i] || 0)
+        }))
+    ].sort((t1, t2) => {
+        return t2.balance
+            .sub(t1.balance)
+            .div(ethers.BigNumber.from(10).pow(10))
+            .toNumber();
+    });
 };
 
-export const fetchPools = async (provider?: ethers.providers.JsonRpcProvider, signer?: ethers.Signer) => {
-    if (provider && signer) {
-        const response = await fetch("https://lite.sushiswap.fi/pools.json");
-        const pools = await response.json();
-        const address = await signer.getAddress();
-        const balances = await provider.send("alchemy_getTokenBalances", [address, pools.map(pool => pool.address)]);
-        return (await Promise.all(
-            pools.map(async (pool, i) => {
-                const poolToken = getContract("ERC20", pool.address, signer);
-                const totalDeposited = await poolToken.balanceOf(MASTER_CHEF);
-                const masterChef = getContract("MasterChef", MASTER_CHEF, signer);
-                const { amount: amountDeposited } = await masterChef.userInfo(i, address);
-                const pendingSushi = await masterChef.pendingSushi(i, address);
-                return {
-                    ...pool,
-                    id: i,
-                    symbol: pool.tokenA.symbol + "-" + pool.tokenB.symbol + " LP",
-                    balance: ethers.BigNumber.from(balances.tokenBalances[i].tokenBalance || 0),
-                    totalDeposited,
-                    amountDeposited,
-                    pendingSushi
-                };
-            })
-        )) as LPToken[];
-    }
+export const fetchPools = async (provider: ethers.providers.JsonRpcProvider, signer: ethers.Signer) => {
+    const response = await fetch("https://lite.sushiswap.fi/pools.json");
+    const pools = await response.json();
+    const address = await signer.getAddress();
+    const balances = await fetchTokenBalances(
+        pools.map(pool => pool.address),
+        signer
+    );
+    return (await Promise.all(
+        pools.map(async (pool, i) => {
+            const poolToken = getContract("ERC20", pool.address, signer);
+            const totalDeposited = await poolToken.balanceOf(MASTER_CHEF);
+            const masterChef = getContract("MasterChef", MASTER_CHEF, signer);
+            const { amount: amountDeposited } = await masterChef.userInfo(i, address);
+            const pendingSushi = await masterChef.pendingSushi(i, address);
+            return {
+                ...pool,
+                id: i,
+                symbol: pool.tokenA.symbol + "-" + pool.tokenB.symbol + " LP",
+                balance: ethers.BigNumber.from(balances[i] || 0),
+                totalDeposited,
+                amountDeposited,
+                pendingSushi
+            };
+        })
+    )) as LPToken[];
 };
 
 export const fetchMyLPTokens = async (
     tokens: Token[],
-    provider?: ethers.providers.JsonRpcProvider,
-    signer?: ethers.Signer
+    provider: ethers.providers.JsonRpcProvider,
+    signer: ethers.Signer
 ) => {
-    if (provider && signer) {
-        return await fetchLPTokens(SUSHISWAP_FACTORY, tokens, provider, signer);
-    }
+    return await fetchLPTokens(SUSHISWAP_FACTORY, tokens, provider, signer);
 };
 
 export const fetchMyUniswapLPTokens = async (
     tokens: Token[],
-    provider?: ethers.providers.JsonRpcProvider,
-    signer?: ethers.Signer
+    provider: ethers.providers.JsonRpcProvider,
+    signer: ethers.Signer
 ) => {
-    if (provider && signer) {
-        return await fetchLPTokens(UNISWAP_FACTORY, tokens, provider, signer);
-    }
+    return await fetchLPTokens(UNISWAP_FACTORY, tokens, provider, signer);
 };
 
 const LP_TOKENS_LIMIT = 2000;
 
+// tslint:disable-next-line:max-func-body-length
 const fetchLPTokens = async (
     factory: string,
     tokens: Token[],
@@ -103,11 +99,14 @@ const fetchLPTokens = async (
             )
         )
     ).flat();
-    const balances = await provider.send("alchemy_getTokenBalances", [account, pairs.map(pair => pair.token)]);
+    const balances = await fetchTokenBalances(
+        pairs.map(pair => pair.token),
+        signer
+    );
     return await Promise.all(
         pairs.map(async (pair, index) => {
             const address = pair.token;
-            const balance = ethers.BigNumber.from(balances.tokenBalances[index].tokenBalance);
+            const balance = ethers.BigNumber.from(balances[index]);
             const contract = getContract("IUniswapV2Pair", address, signer);
             const erc20 = getContract("ERC20", address, signer);
             const decimals = Number(await erc20.decimals());
@@ -140,6 +139,16 @@ export const findOrFetchToken = async (
         logoURI: meta.logo,
         balance: ethers.constants.Zero
     } as Token;
+};
+
+const fetchTokenBalances = async (addresses: string[], signer: ethers.Signer) => {
+    const account = await signer.getAddress();
+    return await Promise.all(
+        addresses.map(async address => {
+            const erc20 = getContract("ERC20", address, signer);
+            return erc20.balanceOf(account);
+        })
+    );
 };
 
 const LIMIT_ORDERS_LIMIT = 20;

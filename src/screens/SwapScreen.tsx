@@ -256,9 +256,8 @@ const LimitOrderUnsupportedNotice = () => {
 
 const TradeInfo = ({ state }: { state: SwapState }) => {
     if (
-        !isEmptyValue(state.fromAmount) &&
-        ((state.fromSymbol === "ETH" && state.toSymbol === "WETH") ||
-            (state.fromSymbol === "WETH" && state.toSymbol === "ETH"))
+        (state.fromSymbol === "ETH" && state.toSymbol === "WETH") ||
+        (state.fromSymbol === "WETH" && state.toSymbol === "ETH")
     ) {
         return <WrapInfo state={state} />;
     }
@@ -279,12 +278,14 @@ const TradeInfo = ({ state }: { state: SwapState }) => {
 };
 
 const WrapInfo = ({ state }: { state: SwapState }) => {
+    const disabled = isEmptyValue(state.fromAmount);
     return (
-        <View>
-            <Text style={{ fontSize: 30, textAlign: "center" }}>
-                {state.fromAmount} {state.toSymbol}
+        <InfoBox>
+            <Text style={{ fontSize: 28, marginBottom: Spacing.normal }} disabled={disabled}>
+                {disabled ? "N/A" : state.fromAmount + " " + state.toSymbol}
             </Text>
-        </View>
+            <SwapControls state={state} />
+        </InfoBox>
     );
 };
 

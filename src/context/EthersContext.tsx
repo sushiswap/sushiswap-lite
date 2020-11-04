@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import * as Analytics from "expo-firebase-analytics";
 
 import { EventType, Listener } from "@ethersproject/abstract-provider";
+import AsyncStorage from "@react-native-community/async-storage";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import { ETH } from "../constants/tokens";
@@ -26,9 +27,11 @@ export const EthersContext = React.createContext({
     addOnBlockListener: (_name: string, _listener: OnBlockListener) => {},
     removeOnBlockListener: (_name: string) => {},
     tokens: [ETH] as Token[],
-    setTokens: (_tokens: Token[]) => {},
     updateTokens: async () => {},
     loadingTokens: false,
+    customTokens: [ETH] as Token[],
+    addCustomToken: (_token: Token) => {},
+    removeCustomToken: (_token: Token) => {},
     approveToken: async (_token: string, _spender: string, _amount?: ethers.BigNumber) => {
         return {} as ethers.providers.TransactionResponse | undefined;
     },
@@ -55,6 +58,7 @@ export const EthersContextProvider = ({ children }) => {
     const [ensName, setENSName] = useState<string | null>(null);
     const [onBlockListeners, setOnBlockListeners] = useState<{ [name: string]: OnBlockListener }>({});
     const [tokens, setTokens] = useState<Token[]>([]);
+    const [customTokens, setCustomTokens] = useState<Token[]>([]);
     const [loadingTokens, setLoadingTokens] = useState(true);
 
     useEffect(() => {
@@ -118,9 +122,9 @@ export const EthersContextProvider = ({ children }) => {
     // }, [mnemonic]);
 
     const updateTokens = async () => {
-        if (address && provider && signer) {
+        if (address && provider && signer && customTokens) {
             try {
-                const data = await fetchTokens(address, provider, signer);
+                const data = await fetchTokens(address, provider, signer, customTokens);
                 if (data) {
                     await setTokens(data);
                 }
@@ -131,11 +135,40 @@ export const EthersContextProvider = ({ children }) => {
     };
 
     useAsyncEffect(async () => {
-        if (provider && signer) {
+        setCustomTokens(JSON.parse((await AsyncStorage.getItem("custom_tokens")) || "[]"));
+    }, []);
+
+    useAsyncEffect(async () => {
+        if (address && provider && signer && customTokens) {
             setLoadingTokens(true);
             await updateTokens();
         }
-    }, [provider, signer, address]);
+    }, [provider, signer, address, customTokens]);
+
+    const addCustomToken = useCallback(
+        async (token: Token) => {
+            if (
+                customTokens.findIndex(t => t.address === token.address) === -1 &&
+                tokens.findIndex(t => t.address === token.address) === -1
+            ) {
+                const custom = [...customTokens, token];
+                setCustomTokens(custom);
+                await AsyncStorage.setItem("custom_tokens", JSON.stringify(custom));
+            }
+        },
+        [tokens, customTokens]
+    );
+
+    const removeCustomToken = useCallback(
+        async (token: Token) => {
+            if (customTokens.findIndex(t => t.address === token.address) !== -1) {
+                const custom = customTokens.filter(t => t.address !== token.address);
+                setCustomTokens(custom);
+                await AsyncStorage.setItem("custom_tokens", JSON.stringify(custom));
+            }
+        },
+        [customTokens]
+    );
 
     const approveToken = useCallback(
         async (token: string, spender: string, amount?: ethers.BigNumber) => {
@@ -229,9 +262,11 @@ export const EthersContextProvider = ({ children }) => {
                 address,
                 ensName,
                 tokens,
-                setTokens,
                 updateTokens,
                 loadingTokens,
+                customTokens,
+                addCustomToken,
+                removeCustomToken,
                 approveToken,
                 getTokenAllowance,
                 getTokenBalance,

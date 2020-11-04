@@ -129,24 +129,21 @@ const OrderTypeItem = ({
 };
 
 const FromTokenSelect = ({ state }: { state: SwapState }) => {
-    const { tokens, setTokens } = useContext(EthersContext);
+    const { tokens, customTokens } = useContext(EthersContext);
     if (!state.orderType) {
         return <Heading text={"Token To Sell"} disabled={true} />;
     }
     const ETH = tokens ? tokens.find(token => token.symbol === "ETH") : null;
-    const onAddToken = (token: Token) => {
-        if (tokens.findIndex(t => t.address === token.address) === -1) {
-            setTokens([...tokens, token]);
-        }
-    };
     return (
         <View>
             <TokenSelect
                 title={"Token To Sell"}
                 symbol={state.fromSymbol}
                 onChangeSymbol={state.setFromSymbol}
-                hidden={token => token.balance.isZero() || (state.orderType === "limit" && token.symbol === "ETH")}
-                onAddToken={onAddToken}
+                hidden={token =>
+                    (!customTokens.find(t => t.address === token.address) && token.balance.isZero()) ||
+                    (state.orderType === "limit" && token.symbol === "ETH")
+                }
             />
             {state.orderType === "limit" && !state.fromSymbol && ETH && !ETH.balance.isZero() && (
                 <LimitOrderUnsupportedNotice />

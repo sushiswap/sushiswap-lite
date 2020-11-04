@@ -100,7 +100,7 @@ const Controls = ({ state }: { state: RemoveLiquidityState }) => {
     const disabled = approveRequired || isEmptyValue(state.amount);
     return (
         <View style={{ marginTop: Spacing.normal }}>
-            {!state.selectedLPToken ? (
+            {!state.selectedLPToken || isEmptyValue(state.amount) ? (
                 <RemoveButton state={state} onError={setError} disabled={true} />
             ) : parseBalance(state.amount, state.selectedLPToken.decimals).gt(state.selectedLPToken.balance) ? (
                 <InsufficientBalanceButton symbol={state.selectedLPToken.symbol} />

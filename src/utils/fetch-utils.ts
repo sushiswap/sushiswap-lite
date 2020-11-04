@@ -8,12 +8,18 @@ import LPToken from "../types/LPToken";
 import Token from "../types/Token";
 import { getContract } from "./index";
 
-export const fetchTokens = async (address: string, provider: ethers.providers.BaseProvider, signer: ethers.Signer) => {
+export const fetchTokens = async (
+    address: string,
+    provider: ethers.providers.BaseProvider,
+    signer: ethers.Signer,
+    customTokens?: Token[]
+) => {
     const response = await fetch("https://lite.sushiswap.fi/tokens.json");
     const json = await response.json();
+    const tokens = [...json.tokens, ...(customTokens || [])];
 
     const balances = await fetchTokenBalances(
-        json.tokens.map(token => token.address),
+        tokens.map(token => token.address),
         signer
     );
     return [
@@ -21,7 +27,7 @@ export const fetchTokens = async (address: string, provider: ethers.providers.Ba
             ...ETH,
             balance: await provider.getBalance(address)
         },
-        ...json.tokens.map((token, i) => ({
+        ...tokens.map((token, i) => ({
             ...token,
             balance: ethers.BigNumber.from(balances[i] || 0)
         }))
@@ -134,6 +140,7 @@ export const findOrFetchToken = async (
     const meta = await provider.send("alchemy_getTokenMetadata", [address]);
     return {
         address,
+        name: meta.name,
         symbol: meta.symbol,
         decimals: meta.decimals,
         logoURI: meta.logo,

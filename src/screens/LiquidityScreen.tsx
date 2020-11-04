@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
@@ -25,8 +25,10 @@ import { LiquiditySubMenu } from "../components/web/WebSubMenu";
 import { ROUTER } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
+import { EthersContext } from "../context/EthersContext";
 import useAddLiquidityState, { AddLiquidityState } from "../hooks/useAddLiquidityState";
 import useColors from "../hooks/useColors";
+import useLinker from "../hooks/useLinker";
 import useSDK from "../hooks/useSDK";
 import MetamaskError from "../types/MetamaskError";
 import { convertAmount, convertToken, isEmptyValue, parseBalance } from "../utils";
@@ -52,12 +54,7 @@ const AddLiquidity = () => {
     const state = useAddLiquidityState();
     return (
         <View style={{ marginTop: Spacing.large }}>
-            <TokenSelect
-                title={"1st Token"}
-                symbol={state.fromSymbol}
-                onChangeSymbol={state.setFromSymbol}
-                hidden={token => token.balance.isZero()}
-            />
+            <FromTokenSelect state={state} />
             <Border />
             <ToTokenSelect state={state} />
             <Border />
@@ -70,7 +67,20 @@ const AddLiquidity = () => {
     );
 };
 
+const FromTokenSelect = ({ state }: { state: AddLiquidityState }) => {
+    const { customTokens } = useContext(EthersContext);
+    return (
+        <TokenSelect
+            title={"1st Token"}
+            symbol={state.fromSymbol}
+            onChangeSymbol={state.setFromSymbol}
+            hidden={token => !customTokens.find(t => t.address === token.address) && token.balance.isZero()}
+        />
+    );
+};
+
 const ToTokenSelect = ({ state }: { state: AddLiquidityState }) => {
+    const { customTokens } = useContext(EthersContext);
     if (!state.fromSymbol) {
         return <Heading text={"2nd Token"} disabled={true} />;
     }
@@ -80,7 +90,10 @@ const ToTokenSelect = ({ state }: { state: AddLiquidityState }) => {
                 title={"2nd Token"}
                 symbol={state.toSymbol}
                 onChangeSymbol={state.setToSymbol}
-                hidden={token => token.symbol === state.fromSymbol || token.balance.isZero()}
+                hidden={token =>
+                    token.symbol === state.fromSymbol ||
+                    (!customTokens.find(t => t.address === token.address) && token.balance.isZero())
+                }
             />
         </View>
     );
@@ -255,9 +268,15 @@ const SupplyButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
-    const onPress = useCallback(() => {
+    const goToRemoveLiquidity = useLinker("/liquidity/remove", "RemoveLiquidity");
+    const onPress = useCallback(async () => {
         onError({});
-        state.onAdd().catch(onError);
+        try {
+            await state.onAdd();
+            goToRemoveLiquidity();
+        } catch (e) {
+            onError(e);
+        }
     }, [state.onAdd, onError]);
     return (
         <Button

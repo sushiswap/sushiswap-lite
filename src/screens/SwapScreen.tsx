@@ -129,24 +129,21 @@ const OrderTypeItem = ({
 };
 
 const FromTokenSelect = ({ state }: { state: SwapState }) => {
-    const { tokens, setTokens } = useContext(EthersContext);
+    const { tokens, customTokens } = useContext(EthersContext);
     if (!state.orderType) {
         return <Heading text={"Token To Sell"} disabled={true} />;
     }
     const ETH = tokens ? tokens.find(token => token.symbol === "ETH") : null;
-    const onAddToken = (token: Token) => {
-        if (tokens.findIndex(t => t.address === token.address) === -1) {
-            setTokens([...tokens, token]);
-        }
-    };
     return (
         <View>
             <TokenSelect
                 title={"Token To Sell"}
                 symbol={state.fromSymbol}
                 onChangeSymbol={state.setFromSymbol}
-                hidden={token => token.balance.isZero() || (state.orderType === "limit" && token.symbol === "ETH")}
-                onAddToken={onAddToken}
+                hidden={token =>
+                    (!customTokens.find(t => t.address === token.address) && token.balance.isZero()) ||
+                    (state.orderType === "limit" && token.symbol === "ETH")
+                }
             />
             {state.orderType === "limit" && !state.fromSymbol && ETH && !ETH.balance.isZero() && (
                 <LimitOrderUnsupportedNotice />
@@ -256,9 +253,8 @@ const LimitOrderUnsupportedNotice = () => {
 
 const TradeInfo = ({ state }: { state: SwapState }) => {
     if (
-        !isEmptyValue(state.fromAmount) &&
-        ((state.fromSymbol === "ETH" && state.toSymbol === "WETH") ||
-            (state.fromSymbol === "WETH" && state.toSymbol === "ETH"))
+        (state.fromSymbol === "ETH" && state.toSymbol === "WETH") ||
+        (state.fromSymbol === "WETH" && state.toSymbol === "ETH")
     ) {
         return <WrapInfo state={state} />;
     }
@@ -279,12 +275,14 @@ const TradeInfo = ({ state }: { state: SwapState }) => {
 };
 
 const WrapInfo = ({ state }: { state: SwapState }) => {
+    const disabled = isEmptyValue(state.fromAmount);
     return (
-        <View>
-            <Text style={{ fontSize: 30, textAlign: "center" }}>
-                {state.fromAmount} {state.toSymbol}
+        <InfoBox>
+            <Text style={{ fontSize: 28, marginBottom: Spacing.normal }} disabled={disabled}>
+                {disabled ? "N/A" : state.fromAmount + " " + state.toSymbol}
             </Text>
-        </View>
+            <SwapControls state={state} />
+        </InfoBox>
     );
 };
 

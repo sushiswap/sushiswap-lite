@@ -24,17 +24,21 @@ export interface TokenSelectProps {
     onChangeSymbol: (symbol: string) => void;
     disabled?: (token: Token) => boolean;
     hidden?: (token: Token) => boolean;
-    onAddToken?: (token: Token) => void;
     style?: ViewStyle;
 }
 
 const TokenSelect: FC<TokenSelectProps> = props => {
-    const { tokens } = useContext(EthersContext);
+    const { tokens, addCustomToken } = useContext(EthersContext);
     const [search, setSearch] = useState("");
     const [query, setQuery] = useState("");
     const token = useMemo(() => tokens.find(t => t.symbol === props.symbol), [tokens, props.symbol]);
     const onSelectToken = t => props.onChangeSymbol(t.symbol);
     const onUnselectToken = () => props.onChangeSymbol("");
+    const onAddToken = async (t: Token) => {
+        await addCustomToken(t);
+        setSearch("");
+        setQuery("");
+    };
     const hidden = (t: Token) => {
         let hide = props.hidden?.(t) || false;
         if (!hide && query.length > 0 && !ethers.utils.isAddress(query)) {
@@ -47,7 +51,7 @@ const TokenSelect: FC<TokenSelectProps> = props => {
     return (
         <View style={props.style}>
             <Expandable title={props.title} expanded={!props.symbol} onExpand={() => props.onChangeSymbol("")}>
-                <TokenSearch text={search} onChangeText={setSearch} tokens={tokens} onAddToken={props.onAddToken} />
+                <TokenSearch text={search} onChangeText={setSearch} tokens={tokens} onAddToken={onAddToken} />
                 <TokenList disabled={props.disabled} hidden={hidden} onSelectToken={onSelectToken} />
             </Expandable>
             {token && <TokenItem token={token} selected={true} onSelectToken={onUnselectToken} selectable={true} />}

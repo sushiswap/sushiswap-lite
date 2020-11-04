@@ -56,8 +56,8 @@ const TokenInput: FC<TokenInputProps> = props => {
                     containerStyle={{
                         ...border(),
                         paddingHorizontal: Spacing.tiny,
-                        paddingTop: 12,
-                        paddingBottom: 0
+                        paddingTop: 15,
+                        paddingBottom: 2
                     }}
                 />
                 {props.token?.balance?.gt(0) && !props.hideMaxButton && (
@@ -86,12 +86,12 @@ const MaxButton = (props: { token: Token; updateAmount; maxButtonText?: string }
         }
     }, [props.token, props.updateAmount]);
     return (
-        <View style={{ position: "absolute", right: 12, bottom: Platform.OS === "web" ? 10 : 20 }}>
+        <View style={{ position: "absolute", right: 12, bottom: Platform.OS === "web" ? 12 : 24 }}>
             <Button
                 type={"clear"}
                 size={"small"}
                 color={accent}
-                title={props.maxButtonText || "MAX"}
+                title={props.maxButtonText || "MAX " + props.token.symbol}
                 fontWeight={"bold"}
                 onPress={onPressMax}
                 buttonStyle={{ paddingHorizontal: 4 }}

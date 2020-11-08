@@ -4,6 +4,7 @@ import { Trade } from "@sushiswap/sdk";
 import { Fetcher, Token, WETH } from "@uniswap/sdk";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
+import { IS_DESKTOP } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import { EthersContext } from "../context/EthersContext";
 import { formatBalance, isEmptyValue, parseBalance, pow10 } from "../utils";
@@ -145,7 +146,8 @@ const useSwapState: () => SwapState = () => {
                         parseBalance(state.fromAmount, state.fromToken.decimals),
                         limitOrderPrice
                     ),
-                    state.toToken.decimals
+                    state.toToken.decimals,
+                    IS_DESKTOP ? 18 : 8
                 )
             );
         }

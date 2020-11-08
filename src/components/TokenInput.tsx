@@ -2,7 +2,7 @@ import React, { FC, useCallback } from "react";
 import { Platform, View } from "react-native";
 
 import { ethers } from "ethers";
-import { Spacing } from "../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 import useStyles from "../hooks/useStyles";
 import Token from "../types/Token";
@@ -91,7 +91,7 @@ const MaxButton = (props: { token: Token; updateAmount; maxButtonText?: string }
                 type={"clear"}
                 size={"small"}
                 color={accent}
-                title={props.maxButtonText || "MAX " + props.token.symbol}
+                title={props.maxButtonText || (IS_DESKTOP ? "MAX " + props.token.symbol : "MAX")}
                 fontWeight={"bold"}
                 onPress={onPressMax}
                 buttonStyle={{ paddingHorizontal: 4 }}

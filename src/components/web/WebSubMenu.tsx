@@ -2,7 +2,7 @@ import React, { FC } from "react";
 import { View } from "react-native";
 import { Link, useRouteMatch } from "react-router-dom";
 
-import { HEADER_WIDTH, Spacing, SUB_MENU_HEIGHT } from "../../constants/dimension";
+import { HEADER_WIDTH, IS_DESKTOP, Spacing, SUB_MENU_HEIGHT } from "../../constants/dimension";
 import useColors from "../../hooks/useColors";
 import FlexView from "../FlexView";
 import Text from "../Text";
@@ -78,7 +78,7 @@ const WebSubMenu: FC<WebSubMenuProps> = props => {
             }}>
             <FlexView
                 style={{
-                    width: HEADER_WIDTH,
+                    width: IS_DESKTOP ? HEADER_WIDTH : "100%",
                     marginTop: 2,
                     paddingHorizontal: Spacing.normal,
                     alignSelf: "center",
@@ -98,7 +98,14 @@ const MenuItem = ({ title, path }) => {
     const match = useRouteMatch(path);
     const active = match?.isExact;
     return (
-        <Link to={path} style={{ marginLeft: Spacing.tiny, padding: Spacing.tiny, textDecoration: "none" }}>
+        <Link
+            to={path}
+            style={{
+                marginLeft: Spacing.small,
+                paddingTop: Spacing.tiny,
+                paddingBottom: Spacing.tiny,
+                textDecoration: "none"
+            }}>
             <Text
                 fontWeight={active ? "regular" : "light"}
                 style={{

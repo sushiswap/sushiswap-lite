@@ -1,7 +1,7 @@
 import React from "react";
 import { View, ViewProps } from "react-native";
 
-import { Spacing, WEB_WIDTH } from "../constants/dimension";
+import { DESKTOP_CONTENT_WIDTH, IS_DESKTOP, Spacing } from "../constants/dimension";
 
 const Content: React.FunctionComponent<ViewProps> = props => {
     return (
@@ -9,7 +9,7 @@ const Content: React.FunctionComponent<ViewProps> = props => {
             {...props}
             style={[
                 {
-                    width: WEB_WIDTH,
+                    width: IS_DESKTOP ? DESKTOP_CONTENT_WIDTH : "100%",
                     marginLeft: "auto",
                     marginRight: "auto",
                     paddingHorizontal: Spacing.normal,

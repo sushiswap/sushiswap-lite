@@ -3,7 +3,7 @@ import { Image, View } from "react-native";
 
 import * as Linking from "expo-linking";
 
-import { Spacing } from "../../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../../constants/dimension";
 import { GlobalContext } from "../../context/GlobalContext";
 import Button from "../Button";
 
@@ -25,7 +25,14 @@ const ConnectWallet = () => {
                 }
                 style={{ width: 223, height: 183, marginBottom: Spacing.huge }}
             />
-            <Button size={"large"} color={"#e2761b"} onPress={onPress} title={title} containerStyle={{ width: 440 }} />
+            <Button
+                size={"large"}
+                color={"#e2761b"}
+                onPress={onPress}
+                title={title}
+                containerStyle={{ width: IS_DESKTOP ? 440 : "100%" }}
+                style={{ marginHorizontal: Spacing.normal }}
+            />
         </View>
     );
 };

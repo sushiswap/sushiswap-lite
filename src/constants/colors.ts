@@ -22,7 +22,8 @@ export const Colors = {
         textLight: "#888888",
         disabled: "#b4b4b4",
         shadow: "#444444",
-        placeholder: "#b4b4b4"
+        placeholder: "#b4b4b4",
+        overlay: "#ffffffc0"
     },
     dark: {
         accent: "#9BECEE",
@@ -37,6 +38,7 @@ export const Colors = {
         textLight: "#aaaaaa",
         disabled: "#aaaaaa80",
         shadow: "#03080c",
-        placeholder: "#666666"
+        placeholder: "#666666",
+        overlay: "#000000c0"
     }
 };

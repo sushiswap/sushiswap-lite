@@ -15,7 +15,7 @@ import Title from "../components/Title";
 import TokenInput from "../components/TokenInput";
 import WebFooter from "../components/web/WebFooter";
 import { StakingSubMenu } from "../components/web/WebSubMenu";
-import { Spacing } from "../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import useStakingState, { StakingState } from "../hooks/useStakingState";
 import MetamaskError from "../types/MetamaskError";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
@@ -56,7 +56,9 @@ const XSushiBalance = ({ state }: { state: StakingState }) => {
         <View>
             <Heading text={"Your xSUSHI"} />
             <Text disabled={!state.xSushi} style={{ fontSize: 28, marginBottom: Spacing.normal }}>
-                {!state.xSushi ? "Fetching..." : formatBalance(state.xSushi.balance, state.xSushi.decimals)}
+                {!state.xSushi
+                    ? "Fetching..."
+                    : formatBalance(state.xSushi.balance, state.xSushi.decimals, IS_DESKTOP ? 18 : 8)}
             </Text>
         </View>
     );
@@ -84,7 +86,7 @@ const UnstakeInfo = ({ state }: { state: StakingState }) => {
               .div(state.xSushiSupply!);
     return (
         <InfoBox>
-            <Text disabled={disabled} style={{ fontSize: 28, marginBottom: Spacing.normal }}>
+            <Text disabled={disabled} style={{ fontSize: 28 }}>
                 {!sushiAmount ? "N/A" : formatBalance(sushiAmount, state.sushi!.decimals, 8) + " SUSHI"}
             </Text>
             <Controls state={state} />

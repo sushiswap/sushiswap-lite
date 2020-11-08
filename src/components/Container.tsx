@@ -3,10 +3,9 @@ import { Platform, SafeAreaView, ScrollView, ViewProps } from "react-native";
 
 export type ContainerProps = ViewProps;
 
-// tslint:disable-next-line:max-func-body-length
 const Container: FC<ContainerProps> = props => {
-    const Universal = Platform.select({
-        web: () => (
+    return Platform.select({
+        web: (
             <ScrollView
                 contentContainerStyle={{ flex: 1 }}
                 style={[
@@ -18,13 +17,12 @@ const Container: FC<ContainerProps> = props => {
                 {...props}
             />
         ),
-        default: () => (
+        default: (
             <SafeAreaView style={{ flex: 1 }}>
                 <ScrollView {...props} />
             </SafeAreaView>
         )
     });
-    return <Universal />;
 };
 
 export default Container;

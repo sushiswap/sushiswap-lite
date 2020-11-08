@@ -113,8 +113,8 @@ const OrderTypeItem = ({
     const onPress = () => state.setOrderType(state.orderType === orderType ? undefined : orderType);
     return (
         <Selectable
+            containerStyle={{ marginBottom: ITEM_SEPARATOR_HEIGHT }}
             style={{
-                marginBottom: ITEM_SEPARATOR_HEIGHT,
                 paddingHorizontal: Spacing.small + Spacing.tiny
             }}
             selected={selected}

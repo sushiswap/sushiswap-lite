@@ -114,7 +114,7 @@ const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (ord
         <Selectable
             selected={props.selected}
             onPress={onPress}
-            style={{
+            containerStyle={{
                 marginBottom: ITEM_SEPARATOR_HEIGHT
             }}>
             <FlexView style={{ alignItems: "center" }}>

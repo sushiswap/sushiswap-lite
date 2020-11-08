@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Spacing } from "../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import Token from "../types/Token";
 import Text from "./Text";
 
@@ -11,7 +11,7 @@ const TokenName = (props: { token: Token; disabled?: boolean }) => (
         ellipsizeMode={"tail"}
         style={{ marginLeft: Spacing.small, width: 180 }}
         disabled={props.disabled}>
-        {props.token.name}
+        {IS_DESKTOP ? props.token.name : props.token.symbol}
     </Text>
 );
 

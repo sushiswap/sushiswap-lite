@@ -27,7 +27,7 @@ export interface TokenSearchProps {
 // tslint:disable-next-line:max-func-body-length
 const TokenSearch: FC<TokenSearchProps> = props => {
     const { border } = useStyles();
-    const { provider, signer, getTokenBalance, tokens } = useContext(EthersContext);
+    const { provider, signer, tokens } = useContext(EthersContext);
     const [tokenToAdd, setTokenToAdd] = useState<Token>();
     const [loading, setLoading] = useState(false);
     const duplicate = !!tokenToAdd && tokens.findIndex(t => t.address === tokenToAdd.address) !== -1;
@@ -46,11 +46,7 @@ const TokenSearch: FC<TokenSearchProps> = props => {
                 try {
                     const token = await findOrFetchToken(provider, address);
                     if (token.name && token.symbol && token.decimals) {
-                        const balance = await getTokenBalance(address, await signer.getAddress());
-                        setTokenToAdd({
-                            ...token,
-                            balance
-                        } as Token);
+                        setTokenToAdd(token as Token);
                     }
                 } finally {
                     setLoading(false);
@@ -66,7 +62,7 @@ const TokenSearch: FC<TokenSearchProps> = props => {
                 <Input
                     value={props.text}
                     onChangeText={props.onChangeText}
-                    placeholder={"Search for a token… (name, symbol or address)"}
+                    placeholder={"Token name, symbol or address"}
                     autoFocus={true}
                     inputStyle={{ marginHorizontal: Spacing.tiny, fontSize: props.text ? 20 : 16 }}
                     inputContainerStyle={{ borderBottomWidth: 0, marginRight: loading ? 32 : 0 }}

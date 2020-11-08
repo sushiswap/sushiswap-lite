@@ -14,6 +14,7 @@ import Heading from "../components/Heading";
 import InfoBox from "../components/InfoBox";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
 import LPTokenSelect, { LPTokenItem } from "../components/LPTokenSelect";
+import Meta from "../components/Meta";
 import Text from "../components/Text";
 import Title from "../components/Title";
 import TokenInput from "../components/TokenInput";
@@ -21,7 +22,6 @@ import WebFooter from "../components/web/WebFooter";
 import { LiquiditySubMenu } from "../components/web/WebSubMenu";
 import { MIGRATOR2 } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
-import useColors from "../hooks/useColors";
 import useMigrateState, { MigrateState } from "../hooks/useMigrateState";
 import MetamaskError from "../types/MetamaskError";
 import { isEmptyValue, parseBalance } from "../utils";
@@ -78,12 +78,10 @@ const AmountInput = ({ state }: { state: MigrateState }) => {
 };
 
 const AmountInfo = ({ state }: { state: MigrateState }) => {
-    const { textDark, textLight, placeholder } = useColors();
     const disabled = !state.selectedLPToken || isEmptyValue(state.amount);
-    const color = disabled ? placeholder : state.amount ? textDark : textLight;
     return (
         <InfoBox>
-            <Text style={{ fontSize: 28, color }}>{disabled ? "N/A" : state.amount + " SLP"}</Text>
+            <Meta label={state.selectedLPToken?.symbol || "SushiSwap LP"} text={state.amount} disabled={disabled} />
             <Controls state={state} />
         </InfoBox>
     );

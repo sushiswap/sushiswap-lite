@@ -18,7 +18,7 @@ import TokenInput from "../components/TokenInput";
 import WebFooter from "../components/web/WebFooter";
 import { StakingSubMenu } from "../components/web/WebSubMenu";
 import { SUSHI_BAR } from "../constants/contracts";
-import { Spacing } from "../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import useStakingState, { StakingState } from "../hooks/useStakingState";
 import MetamaskError from "../types/MetamaskError";
@@ -60,7 +60,9 @@ const SushiBalance = ({ state }: { state: StakingState }) => {
         <View>
             <Heading text={"Your SUSHI"} />
             <Text disabled={!state.sushi} style={{ fontSize: 28, marginBottom: Spacing.normal }}>
-                {!state.sushi ? "Fetching..." : formatBalance(state.sushi.balance, state.sushi.decimals)}
+                {!state.sushi
+                    ? "Fetching..."
+                    : formatBalance(state.sushi.balance, state.sushi.decimals, IS_DESKTOP ? 18 : 8)}
             </Text>
         </View>
     );
@@ -102,13 +104,8 @@ const StakeInfo = ({ state }: { state: StakingState }) => {
             <Text disabled={disabled} style={{ fontSize: 28, marginBottom: Spacing.normal }}>
                 {!xSushiAmount ? "N/A" : formatBalance(xSushiAmount, state.xSushi!.decimals, 8) + " xSUSHI"}
             </Text>
-            <Meta label={"Total xSUSHI Supply"} text={xSushiTotal} disabled={disabled} />
-            <Meta
-                label={"Your xSUSHI Balance"}
-                text={xSushiBalance ? formatBalance(xSushiBalance, state.xSushi!.decimals) : undefined}
-                disabled={disabled}
-            />
-            <Meta label={"Your xSUSHI Share"} text={share} suffix={"%"} disabled={disabled} />
+            <Meta label={"xSUSHI Share"} text={share} suffix={"%"} disabled={disabled} />
+            <Meta label={"Total xSUSHI"} text={xSushiTotal} disabled={disabled} />
             <Controls state={state} />
         </InfoBox>
     );

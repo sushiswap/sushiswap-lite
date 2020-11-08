@@ -1,17 +1,18 @@
-import React, { lazy, Suspense, useContext } from "react";
+import React, { lazy, Suspense, useContext, useState } from "react";
 import { Platform, View } from "react-native";
 import { Icon } from "react-native-elements";
 import { HashRouter as Router, Redirect, Route, Switch } from "react-router-dom";
 
-import { DeviceType } from "expo-device";
-
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { DefaultTheme, NavigationContainer, Theme } from "@react-navigation/native";
 import useAsyncEffect from "use-async-effect";
+import MobileWebMenu from "../components/web/MobileWebMenu";
 import WebHeader from "../components/web/WebHeader";
+import { IS_DESKTOP } from "../constants/dimension";
 import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
 import EmptyScreen from "./EmptyScreen";
+
 const FarmingScreen = lazy(() => import("./FarmingScreen"));
 const LiquidityScreen = lazy(() => import("./LiquidityScreen"));
 const MigrateScreen = lazy(() => import("./MigrateScreen"));
@@ -29,7 +30,7 @@ export const Screens = () => {
 
 // tslint:disable-next-line:max-func-body-length
 const WebScreens = () => {
-    const { deviceType } = useContext(GlobalContext);
+    const [menuExpanded, setMenuExpanded] = useState(false);
     const { background } = useColors();
     return (
         <Router>
@@ -62,7 +63,8 @@ const WebScreens = () => {
                         </Route>
                         <Redirect to={"/swap"} />
                     </Switch>
-                    {deviceType !== DeviceType.PHONE && <WebHeader />}
+                    <WebHeader onExpandMenu={() => setMenuExpanded(true)} />
+                    {!IS_DESKTOP && <MobileWebMenu expanded={menuExpanded} onCollapse={() => setMenuExpanded(false)} />}
                 </View>
             </Suspense>
         </Router>

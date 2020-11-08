@@ -145,7 +145,7 @@ const Token = ({ token, amount, disabled, buy }) => {
                 style={{ color: disabled ? colorDisabled : buy ? green : red, marginLeft: Spacing.tiny }}>
                 {buy ? "﹢" : "﹣"}
             </Text>
-            <TokenAmount token={token} amount={amount} disabled={disabled} style={{ marginLeft: 4 }} />
+            <TokenAmount token={token} amount={amount} disabled={disabled} />
             <TokenSymbol token={token} disabled={disabled} />
         </FlexView>
     );

@@ -27,7 +27,7 @@ import UnsupportedButton from "../components/UnsupportedButton";
 import WebFooter from "../components/web/WebFooter";
 import { SwapSubMenu } from "../components/web/WebSubMenu";
 import { ROUTER, SETTLEMENT } from "../constants/contracts";
-import { Spacing } from "../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import { EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
@@ -109,9 +109,7 @@ const OrderTypeItem = ({
     const selected = state.orderType === orderType;
     const type = orderType === "market" ? "Market Order" : "Limit Order";
     const desc =
-        orderType === "market"
-            ? "Settle an order immediately"
-            : "Place an order with a desired price waiting to be settled";
+        orderType === "market" ? "Settle an order immediately" : "Place an order with a desired price to be settled";
     const onPress = () => state.setOrderType(state.orderType === orderType ? undefined : orderType);
     return (
         <Selectable
@@ -288,8 +286,8 @@ const WrapInfo = ({ state }: { state: SwapState }) => {
 
 const SwapInfo = ({ state, disabled }: { state: SwapState; disabled: boolean }) => {
     const { textDark, textLight, placeholder } = useColors();
-    const amount = state.trade?.outputAmount?.toFixed(8);
-    const price = state.trade?.executionPrice?.toFixed(8);
+    const amount = state.trade?.outputAmount?.toFixed(IS_DESKTOP ? 18 : 8);
+    const price = state.trade?.executionPrice?.toFixed(IS_DESKTOP ? 18 : 8);
     const impact = state.trade?.priceImpact?.toFixed(2);
     return (
         <View>

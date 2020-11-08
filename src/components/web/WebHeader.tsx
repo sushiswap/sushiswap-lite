@@ -1,17 +1,21 @@
-import React, { useCallback, useContext } from "react";
+import React, { FC, useContext } from "react";
 import { View } from "react-native";
+import { Icon } from "react-native-elements";
 import { Link, useRouteMatch } from "react-router-dom";
 
-import Switch from "expo-dark-mode-switch";
-
-import { HEADER_HEIGHT, HEADER_WIDTH, Spacing } from "../../constants/dimension";
+import { HEADER_HEIGHT, HEADER_WIDTH, IS_DESKTOP, Spacing } from "../../constants/dimension";
 import { EthersContext } from "../../context/EthersContext";
 import { GlobalContext } from "../../context/GlobalContext";
 import useColors from "../../hooks/useColors";
+import DarkModeSwitch from "../DarkModeSwitch";
 import FlexView from "../FlexView";
 import Text from "../Text";
 
-const WebHeader = () => {
+export interface WebHeaderProps {
+    onExpandMenu?: () => void;
+}
+
+const WebHeader: FC<WebHeaderProps> = props => {
     const { header } = useColors();
     return (
         <View
@@ -28,7 +32,7 @@ const WebHeader = () => {
             <FlexView
                 style={{
                     flex: 1,
-                    width: HEADER_WIDTH,
+                    width: IS_DESKTOP ? HEADER_WIDTH : "100%",
                     alignSelf: "center",
                     justifyContent: "space-between",
                     alignItems: "flex-end",
@@ -36,7 +40,7 @@ const WebHeader = () => {
                     paddingHorizontal: Spacing.normal
                 }}>
                 <Title />
-                <Menu />
+                {IS_DESKTOP ? <Menu /> : <MenuIcon onExpand={props.onExpandMenu} />}
             </FlexView>
         </View>
     );
@@ -67,7 +71,7 @@ const Menu = () => {
             {/*<MenuItem title={"Farming"} path={"/farming"} />*/}
             <MenuItem title={"Staking"} path={"/staking"} />
             <Status />
-            <DarkModeSwitch />
+            <DarkModeSwitch style={{ marginLeft: Spacing.tiny, marginRight: -8, marginBottom: -3 }} />
         </FlexView>
     );
 };
@@ -78,13 +82,16 @@ const MenuItem = ({ title, path }) => {
     const active = match?.path?.startsWith(path);
     return (
         <Link to={path} style={{ marginLeft: Spacing.tiny, textDecoration: "none" }}>
-            <View>
-                <Text style={{ fontFamily: "regular", fontSize: 18, color: active ? textDark : textLight, padding: 3 }}>
-                    {title}
-                </Text>
-            </View>
+            <Text style={{ fontFamily: "regular", fontSize: 18, color: active ? textDark : textLight, padding: 3 }}>
+                {title}
+            </Text>
         </Link>
     );
+};
+
+const MenuIcon = ({ onExpand }) => {
+    const { textDark } = useColors();
+    return <Icon type={"material-community"} name={"menu"} size={28} color={textDark} onPress={onExpand} />;
 };
 
 const Status = () => {
@@ -110,31 +117,6 @@ const Status = () => {
             <View style={{ backgroundColor: color, width: 6, height: 6, borderRadius: 3, marginRight: 12 }} />
             <Text style={{ fontSize: 15, color: textLight, marginRight: 2 }}>{title}</Text>
         </FlexView>
-    );
-};
-
-const DarkModeSwitch = () => {
-    const { darkMode, setDarkMode } = useContext(GlobalContext);
-    const onChange = useCallback(
-        async dark => {
-            await setDarkMode(dark);
-        },
-        [setDarkMode]
-    );
-    return (
-        <View style={{ marginLeft: Spacing.tiny, marginRight: -8, marginBottom: -3 }}>
-            <Switch
-                value={darkMode}
-                onChange={onChange}
-                style={{
-                    transform: [
-                        {
-                            scale: 0.75
-                        }
-                    ]
-                }}
-            />
-        </View>
     );
 };
 

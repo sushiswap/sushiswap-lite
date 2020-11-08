@@ -15,7 +15,6 @@ import Loading from "./Loading";
 import Selectable from "./Selectable";
 import Text from "./Text";
 import TokenLogo from "./TokenLogo";
-import TokenSymbol from "./TokenSymbol";
 
 export type LPTokenSelectFilter = "balance" | "amountDeposited" | "";
 
@@ -126,7 +125,7 @@ const EmptyList = ({ text }: { text: string }) => {
 };
 
 export const LPTokenItem: FC<LPTokenItemProps> = props => {
-    const { textMedium, textLight } = useColors();
+    const { textMedium } = useColors();
     const balance = formatBalance(props.token.balance, props.token.decimals, 8);
     const onPress = useCallback(() => {
         props.onSelectToken(props.token);
@@ -136,7 +135,9 @@ export const LPTokenItem: FC<LPTokenItemProps> = props => {
             <FlexView style={{ alignItems: "center" }}>
                 <TokenLogo token={props.token.tokenA} small={true} replaceWETH={true} />
                 <TokenLogo token={props.token.tokenB} small={true} replaceWETH={true} style={{ marginLeft: 4 }} />
-                <TokenSymbol token={props.token} />
+                <Text medium={true} caption={true} style={{ marginLeft: Spacing.tiny }}>
+                    {props.token.tokenA.symbol}-{props.token.tokenB.symbol}
+                </Text>
                 <View style={{ flex: 1, marginLeft: Spacing.tiny }}>
                     {/*<Text note={true} style={{ textAlign: "right", color: textLight }}>*/}
                     {/*    My Balance*/}

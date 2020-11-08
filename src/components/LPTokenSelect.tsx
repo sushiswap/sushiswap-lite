@@ -131,7 +131,10 @@ export const LPTokenItem: FC<LPTokenItemProps> = props => {
         props.onSelectToken(props.token);
     }, [props.onSelectToken, props.token]);
     return (
-        <Selectable selected={props.selected} onPress={onPress} style={{ marginBottom: ITEM_SEPARATOR_HEIGHT }}>
+        <Selectable
+            selected={props.selected}
+            onPress={onPress}
+            containerStyle={{ marginBottom: ITEM_SEPARATOR_HEIGHT }}>
             <FlexView style={{ alignItems: "center" }}>
                 <TokenLogo token={props.token.tokenA} small={true} replaceWETH={true} />
                 <TokenLogo token={props.token.tokenB} small={true} replaceWETH={true} style={{ marginLeft: 4 }} />

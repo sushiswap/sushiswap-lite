@@ -126,7 +126,7 @@ const TokenItem = (props: {
             selected={props.selected}
             onPress={onPress}
             disabled={props.disabled || props.selectable}
-            style={{
+            containerStyle={{
                 marginBottom: ITEM_SEPARATOR_HEIGHT
             }}>
             <FlexView style={{ alignItems: "center" }}>

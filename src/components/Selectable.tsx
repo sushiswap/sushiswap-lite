@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import { TouchableHighlight, View, ViewProps } from "react-native";
+import { TouchableHighlight, View, ViewProps, ViewStyle } from "react-native";
 import { Hoverable } from "react-native-web-hover";
 
 import useColors from "../hooks/useColors";
@@ -9,16 +9,17 @@ export interface SelectableProps extends ViewProps {
     selected: boolean;
     onPress?: () => void;
     disabled?: boolean;
+    containerStyle?: ViewStyle;
 }
 
 const Selectable: FC<SelectableProps> = props => {
-    const { borderDark, accent } = useColors();
+    const { borderDark, accent, overlay } = useColors();
     const { border } = useStyles();
     const { background, backgroundLight } = useColors();
     return (
-        <Hoverable>
+        <Hoverable style={props.containerStyle}>
             {({ hovered }) => (
-                <TouchableHighlight onPress={props.onPress}>
+                <TouchableHighlight activeOpacity={0.7} underlayColor={overlay} onPress={props.onPress}>
                     <View
                         {...props}
                         style={[

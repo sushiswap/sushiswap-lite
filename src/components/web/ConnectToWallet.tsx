@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useCallback, useContext } from "react";
 import { Image, View } from "react-native";
 
 import * as Linking from "expo-linking";
@@ -11,13 +11,13 @@ import Button from "../Button";
 const ConnectWallet = () => {
     const { primary } = useColors();
     const { darkMode } = useContext(GlobalContext);
-    const onPress = async () => {
+    const onPress = useCallback(async () => {
         if (window.ethereum) {
             await window.ethereum.request({ method: "eth_requestAccounts" });
         } else {
             await Linking.openURL("https://metamask.io/");
         }
-    };
+    }, [window.ethereum]);
     const metaMask = window.ethereum.isMetaMask;
     const source = metaMask
         ? darkMode

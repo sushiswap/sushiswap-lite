@@ -84,10 +84,11 @@ export const EthersContextProvider = ({ children }) => {
 
     useEffect(() => {
         if (window.ethereum) {
-            const onAccountsChanged = () => {
-                setAddress(window.ethereum.selectedAddress);
-                if (window.ethereum.chainId && window.ethereum.selectedAddress) {
-                    Analytics.setUserId(Number(window.ethereum.chainId) + ":" + window.ethereum.selectedAddress);
+            const onAccountsChanged = async () => {
+                const accounts = await window.ethereum.request({ method: "eth_accounts" });
+                setAddress(accounts?.[0]);
+                if (window.ethereum.chainId && accounts?.[0]) {
+                    Analytics.setUserId(Number(window.ethereum.chainId) + ":" + accounts[0]);
                 }
             };
             const onChainChanged = () => {
@@ -299,14 +300,19 @@ interface Callback<ResultType> {
     (error: null, val: ResultType): void;
 }
 
+interface RequestArguments {
+    method: string;
+    params?: unknown[] | object;
+}
+
 declare global {
     interface Window {
         ethereum: {
-            enable(): void;
+            chainId: string;
+            isMetaMask: boolean;
             send(payload: any, callback: any): any;
             send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any;
-            selectedAddress: string;
-            chainId: string;
+            request(args: RequestArguments): Promise<any>;
             on(eventName: EventType, listener: Listener);
             off(eventName: EventType, listener: Listener);
         };

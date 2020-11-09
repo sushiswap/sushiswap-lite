@@ -6,6 +6,7 @@ import { EventType, Listener } from "@ethersproject/abstract-provider";
 import AsyncStorage from "@react-native-community/async-storage";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
+import ethereum from "../constants/ethereum";
 import { ETH } from "../constants/tokens";
 import Token from "../types/Token";
 import { getContract } from "../utils";
@@ -71,8 +72,8 @@ export const EthersContextProvider = ({ children }) => {
 
     useAsyncEffect(async () => {
         // Mainnet
-        if (window.ethereum) {
-            const web3 = new ethers.providers.Web3Provider(window.ethereum);
+        if (ethereum) {
+            const web3 = new ethers.providers.Web3Provider(ethereum);
             const alchemy = new ethers.providers.AlchemyProvider(
                 web3.network,
                 __DEV__ ? "gSgAj0Ntfsn-DOKKlUhjqeUlePrVX8va" : "yLD5iJzUEo_Kvlg_PwMXl7N9ESK2_b6E"
@@ -80,13 +81,13 @@ export const EthersContextProvider = ({ children }) => {
             setProvider(alchemy);
             setSigner(await web3.getSigner());
         }
-    }, [window.ethereum]);
+    }, [ethereum]);
 
     useEffect(() => {
-        if (window.ethereum) {
+        if (ethereum) {
             const onAccountsChanged = async () => {
-                if (window.ethereum) {
-                    const accounts = await window.ethereum.request({ method: "eth_accounts" });
+                if (ethereum) {
+                    const accounts = await ethereum.request({ method: "eth_accounts" });
                     if (accounts?.[0]) {
                         setAddress(accounts[0]);
                         Analytics.setUserId(accounts[0]);
@@ -94,20 +95,20 @@ export const EthersContextProvider = ({ children }) => {
                 }
             };
             const onChainChanged = () => {
-                if (window.ethereum) {
-                    setChainId(Number(window.ethereum.chainId));
+                if (ethereum) {
+                    setChainId(Number(ethereum.chainId));
                 }
             };
             onAccountsChanged();
             onChainChanged();
-            window.ethereum.on("accountsChanged", onAccountsChanged);
-            window.ethereum.on("chainChanged", onChainChanged);
+            ethereum.on("accountsChanged", onAccountsChanged);
+            ethereum.on("chainChanged", onChainChanged);
             return () => {
-                window.ethereum!.off("accountsChanged", onAccountsChanged);
-                window.ethereum!.off("chainChanged", onAccountsChanged);
+                ethereum!.off("accountsChanged", onAccountsChanged);
+                ethereum!.off("chainChanged", onAccountsChanged);
             };
         }
-    }, [window.ethereum]);
+    }, [ethereum]);
 
     useAsyncEffect(async () => {
         if (signer && address) {

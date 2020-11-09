@@ -4,6 +4,7 @@ import { Image, View } from "react-native";
 import * as Linking from "expo-linking";
 
 import { IS_DESKTOP, Spacing } from "../../constants/dimension";
+import ethereum from "../../constants/ethereum";
 import { GlobalContext } from "../../context/GlobalContext";
 import useColors from "../../hooks/useColors";
 import Button from "../Button";
@@ -12,13 +13,13 @@ const ConnectWallet = () => {
     const { primary } = useColors();
     const { darkMode } = useContext(GlobalContext);
     const onPress = useCallback(async () => {
-        if (window.ethereum) {
-            await window.ethereum.request({ method: "eth_requestAccounts" });
+        if (ethereum) {
+            await ethereum.request({ method: "eth_requestAccounts" });
         } else {
             await Linking.openURL("https://metamask.io/");
         }
-    }, [window.ethereum]);
-    const metaMask = window.ethereum?.isMetaMask || false;
+    }, [ethereum]);
+    const metaMask = ethereum?.isMetaMask || false;
     const source = metaMask
         ? darkMode
             ? require("../../../assets/metamask-dark.png")
@@ -31,7 +32,7 @@ const ConnectWallet = () => {
                 size={"large"}
                 color={metaMask ? "#e2761b" : primary}
                 onPress={onPress}
-                title={window.ethereum ? "Connect" : "Install MetaMask"}
+                title={ethereum ? "Connect" : "Install MetaMask"}
                 containerStyle={{ width: IS_DESKTOP ? 440 : "100%" }}
                 style={{ marginTop: Spacing.large, marginHorizontal: Spacing.normal }}
             />

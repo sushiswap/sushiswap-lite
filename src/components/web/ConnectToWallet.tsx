@@ -7,7 +7,9 @@ import useColors from "../../hooks/useColors";
 import useEthereum from "../../hooks/useEthereum";
 import Button from "../Button";
 
-alert(JSON.stringify(window.ethereum));
+setTimeout(() => {
+    alert(JSON.stringify(window.ethereum));
+}, 2000);
 
 const ConnectWallet = () => {
     const { primary } = useColors();

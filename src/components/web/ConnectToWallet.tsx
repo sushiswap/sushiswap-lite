@@ -4,21 +4,22 @@ import { Image, View } from "react-native";
 import * as Linking from "expo-linking";
 
 import { IS_DESKTOP, Spacing } from "../../constants/dimension";
-import ethereum from "../../constants/ethereum";
 import { GlobalContext } from "../../context/GlobalContext";
 import useColors from "../../hooks/useColors";
+import { getEthereum } from "../../utils";
 import Button from "../Button";
 
 const ConnectWallet = () => {
     const { primary } = useColors();
     const { darkMode } = useContext(GlobalContext);
+    const ethereum = getEthereum();
     const onPress = useCallback(async () => {
         if (ethereum) {
             await ethereum.request({ method: "eth_requestAccounts" });
         } else {
             await Linking.openURL("https://metamask.io/");
         }
-    }, [ethereum]);
+    }, [getEthereum]);
     const metaMask = ethereum?.isMetaMask || false;
     const source = metaMask
         ? darkMode

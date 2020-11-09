@@ -27,17 +27,6 @@ const CONTRACTS = {
     LPTokenScanner: { abi: LPTokenScanner }
 };
 
-let ethereum = window.ethereum;
-if (window) {
-    window.addEventListener("load", () => {
-        ethereum = window.ethereum;
-    });
-}
-
-export const getEthereum = () => {
-    return ethereum;
-};
-
 export const formatBalance = (value: ethers.BigNumberish, decimals = 18, maxFraction = 0) => {
     const formatted = ethers.utils.formatUnits(value, decimals);
     if (maxFraction > 0) {

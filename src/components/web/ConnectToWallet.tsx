@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from "react";
+import React, { useCallback, useContext, useEffect } from "react";
 import { Image, View } from "react-native";
 
 import * as Linking from "expo-linking";
@@ -26,6 +26,9 @@ const ConnectWallet = () => {
             ? require("../../../assets/metamask-dark.png")
             : require("../../../assets/metamask.png")
         : require("../../../assets/sushiswap.jpg");
+    useEffect(() => {
+        alert(ethereum);
+    }, [ethereum]);
     return (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
             <Image source={source} style={{ width: metaMask ? 223 : 200, height: metaMask ? 183 : 200 }} />

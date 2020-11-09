@@ -7,8 +7,9 @@ import AsyncStorage from "@react-native-community/async-storage";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import { ETH } from "../constants/tokens";
+import useEthereum from "../hooks/useEthereum";
 import Token from "../types/Token";
-import { getContract, getEthereum } from "../utils";
+import { getContract } from "../utils";
 import { logTransaction } from "../utils/analytics-utils";
 import { fetchTokens } from "../utils/fetch-utils";
 
@@ -48,6 +49,7 @@ export const EthersContext = React.createContext({
 
 // tslint:disable-next-line:max-func-body-length
 export const EthersContextProvider = ({ children }) => {
+    const ethereum = useEthereum();
     // const { mnemonic } = useContext(GlobalContext);
     const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
     const [kovanProvider, setKovanProvider] = useState<ethers.providers.JsonRpcProvider>();
@@ -69,7 +71,6 @@ export const EthersContextProvider = ({ children }) => {
         setKovanSigner(wallet);
     }, []);
 
-    const ethereum = getEthereum();
     useAsyncEffect(async () => {
         // Mainnet
         if (ethereum) {

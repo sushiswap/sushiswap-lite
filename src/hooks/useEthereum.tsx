@@ -1,7 +1,18 @@
+import { useState } from "react";
+
 import { EventType, Listener } from "@ethersproject/abstract-provider";
+import useDelayedEffect from "./useDelayedEffect";
 
 const useEthereum = () => {
-    return window.web3?.currentProvider || window.ethereum;
+    const [ethereum, setEthereum] = useState<Ethereum>();
+    useDelayedEffect(
+        () => {
+            setEthereum(window.ethereum);
+        },
+        500,
+        []
+    );
+    return ethereum;
 };
 
 interface JsonRPCRequest {

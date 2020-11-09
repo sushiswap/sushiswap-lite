@@ -7,10 +7,6 @@ import useColors from "../../hooks/useColors";
 import useEthereum from "../../hooks/useEthereum";
 import Button from "../Button";
 
-setTimeout(() => {
-    alert(JSON.stringify(window.web3?.currentProvider));
-}, 2000);
-
 const ConnectWallet = () => {
     const { primary } = useColors();
     const { darkMode } = useContext(GlobalContext);

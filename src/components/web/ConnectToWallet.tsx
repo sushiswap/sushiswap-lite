@@ -7,6 +7,8 @@ import useColors from "../../hooks/useColors";
 import useEthereum from "../../hooks/useEthereum";
 import Button from "../Button";
 
+alert(JSON.stringify(window.ethereum));
+
 const ConnectWallet = () => {
     const { primary } = useColors();
     const { darkMode } = useContext(GlobalContext);

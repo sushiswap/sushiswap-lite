@@ -1,7 +1,5 @@
-import React, { useCallback, useContext } from "react";
+import React, { useContext } from "react";
 import { Image, View } from "react-native";
-
-import * as Linking from "expo-linking";
 
 import { IS_DESKTOP, Spacing } from "../../constants/dimension";
 import { GlobalContext } from "../../context/GlobalContext";
@@ -13,13 +11,13 @@ const ConnectWallet = () => {
     const { primary } = useColors();
     const { darkMode } = useContext(GlobalContext);
     const ethereum = useEthereum();
-    const onPress = useCallback(async () => {
+    const onPress = async () => {
         if (ethereum) {
             await ethereum.request({ method: "eth_requestAccounts" });
         } else {
-            await Linking.openURL("https://metamask.io/");
+            alert("No ethereum provider found.");
         }
-    }, [ethereum]);
+    };
     const metaMask = ethereum?.isMetaMask || false;
     const source = metaMask
         ? darkMode
@@ -33,7 +31,7 @@ const ConnectWallet = () => {
                 size={"large"}
                 color={metaMask ? "#e2761b" : primary}
                 onPress={onPress}
-                title={ethereum ? "Connect" : "Install MetaMask"}
+                title={"Connect"}
                 containerStyle={{ width: IS_DESKTOP ? 440 : "100%" }}
                 style={{ marginTop: Spacing.large, marginHorizontal: Spacing.normal }}
             />

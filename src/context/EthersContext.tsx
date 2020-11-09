@@ -85,25 +85,29 @@ export const EthersContextProvider = ({ children }) => {
     useEffect(() => {
         if (window.ethereum) {
             const onAccountsChanged = async () => {
-                const accounts = await window.ethereum.request({ method: "eth_accounts" });
-                setAddress(accounts?.[0]);
-                if (window.ethereum.chainId && accounts?.[0]) {
-                    Analytics.setUserId(Number(window.ethereum.chainId) + ":" + accounts[0]);
+                if (window.ethereum) {
+                    const accounts = await window.ethereum.request({ method: "eth_accounts" });
+                    setAddress(accounts?.[0]);
+                    if (window.ethereum.chainId && accounts?.[0]) {
+                        Analytics.setUserId(Number(window.ethereum.chainId) + ":" + accounts[0]);
+                    }
                 }
             };
             const onChainChanged = () => {
-                setChainId(Number(window.ethereum.chainId));
+                if (window.ethereum) {
+                    setChainId(Number(window.ethereum.chainId));
+                }
             };
             onAccountsChanged();
             onChainChanged();
             window.ethereum.on("accountsChanged", onAccountsChanged);
             window.ethereum.on("chainChanged", onChainChanged);
             return () => {
-                window.ethereum.off("accountsChanged", onAccountsChanged);
-                window.ethereum.off("chainChanged", onAccountsChanged);
+                window.ethereum!.off("accountsChanged", onAccountsChanged);
+                window.ethereum!.off("chainChanged", onAccountsChanged);
             };
         }
-    }, [window.ethereum, signer]);
+    }, [window.ethereum]);
 
     useAsyncEffect(async () => {
         if (signer && address) {
@@ -307,7 +311,7 @@ interface RequestArguments {
 
 declare global {
     interface Window {
-        ethereum: {
+        ethereum?: {
             chainId: string;
             isMetaMask: boolean;
             send(payload: any, callback: any): any;

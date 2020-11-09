@@ -18,7 +18,7 @@ const ConnectWallet = () => {
             await Linking.openURL("https://metamask.io/");
         }
     }, [window.ethereum]);
-    const metaMask = window.ethereum.isMetaMask;
+    const metaMask = window.ethereum?.isMetaMask || false;
     const source = metaMask
         ? darkMode
             ? require("../../../assets/metamask-dark.png")

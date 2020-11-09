@@ -87,9 +87,9 @@ export const EthersContextProvider = ({ children }) => {
             const onAccountsChanged = async () => {
                 if (window.ethereum) {
                     const accounts = await window.ethereum.request({ method: "eth_accounts" });
-                    setAddress(accounts?.[0]);
-                    if (window.ethereum.chainId && accounts?.[0]) {
-                        Analytics.setUserId(Number(window.ethereum.chainId) + ":" + accounts[0]);
+                    if (accounts?.[0]) {
+                        setAddress(accounts[0]);
+                        Analytics.setUserId(accounts[0]);
                     }
                 }
             };

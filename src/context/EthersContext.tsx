@@ -6,10 +6,9 @@ import { EventType, Listener } from "@ethersproject/abstract-provider";
 import AsyncStorage from "@react-native-community/async-storage";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
-import ethereum from "../constants/ethereum";
 import { ETH } from "../constants/tokens";
 import Token from "../types/Token";
-import { getContract } from "../utils";
+import { getContract, getEthereum } from "../utils";
 import { logTransaction } from "../utils/analytics-utils";
 import { fetchTokens } from "../utils/fetch-utils";
 
@@ -70,6 +69,7 @@ export const EthersContextProvider = ({ children }) => {
         setKovanSigner(wallet);
     }, []);
 
+    const ethereum = getEthereum();
     useAsyncEffect(async () => {
         // Mainnet
         if (ethereum) {

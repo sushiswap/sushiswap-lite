@@ -15,8 +15,8 @@ const Screen = props => {
 };
 
 const WebScreen = props => {
-    const { signer, chainId } = useContext(EthersContext);
-    if (!signer) return <ConnectToWallet />;
+    const { address, chainId } = useContext(EthersContext);
+    if (!address) return <ConnectToWallet />;
     if (chainId !== 1)
         return (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>

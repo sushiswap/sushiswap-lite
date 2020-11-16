@@ -1,8 +1,5 @@
 import { useCallback, useContext, useState } from "react";
 
-import { ethers } from "ethers";
-import useAsyncEffect from "use-async-effect";
-import { MIGRATOR2 } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import { parseBalance } from "../utils";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
@@ -16,26 +13,9 @@ export interface MigrateState extends LPTokensState {
 // tslint:disable-next-line:max-func-body-length
 const useMigrateState: () => MigrateState = () => {
     const state = useLPTokensState("my-uniswap-lp-tokens");
-    const { provider, signer, getTokenAllowance, updateTokens } = useContext(EthersContext);
+    const { signer, updateTokens } = useContext(EthersContext);
     const { migrate } = useSDK();
-    const [loading, setLoading] = useState(false);
     const [migrating, setMigrating] = useState(false);
-
-    useAsyncEffect(async () => {
-        if (provider && signer && state.selectedLPToken) {
-            setLoading(true);
-            state.setSelectedLPTokenAllowed(false);
-            try {
-                const minAllowance = ethers.BigNumber.from(2)
-                    .pow(96)
-                    .sub(1);
-                const allowance = await getTokenAllowance(state.selectedLPToken.address, MIGRATOR2);
-                state.setSelectedLPTokenAllowed(ethers.BigNumber.from(allowance).gte(minAllowance));
-            } finally {
-                setLoading(false);
-            }
-        }
-    }, [provider, signer, state.selectedLPToken]);
 
     const onMigrate = useCallback(async () => {
         if (state.selectedLPToken && state.amount && signer) {
@@ -51,11 +31,10 @@ const useMigrateState: () => MigrateState = () => {
                 setMigrating(false);
             }
         }
-    }, [state.selectedLPToken, state.amount, signer, updateTokens]);
+    }, [state.selectedLPToken, state.amount, signer, migrate, updateTokens]);
 
     return {
         ...state,
-        loading: state.loading || loading,
         onMigrate,
         migrating
     };

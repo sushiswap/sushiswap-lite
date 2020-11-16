@@ -1,8 +1,9 @@
 import { useCallback, useContext } from "react";
 
 import { CurrencyAmount, Fetcher, Pair, Percent, Router, TokenAmount, Trade, WETH } from "@sushiswap/sdk";
+import { signERC2612Permit } from "eth-permit";
 import { ethers } from "ethers";
-import { MASTER_CHEF, MIGRATOR2, ORDER_BOOK, ROUTER, SETTLEMENT, SUSHI_BAR } from "../constants/contracts";
+import { MASTER_CHEF, ORDER_BOOK, ROUTER, SETTLEMENT, SUSHI_BAR, SUSHI_ROLL } from "../constants/contracts";
 import Fraction from "../constants/Fraction";
 import { ETH } from "../constants/tokens";
 import { EthersContext } from "../context/EthersContext";
@@ -11,10 +12,12 @@ import Token from "../types/Token";
 import { convertToken, getContract, pow10 } from "../utils";
 import { logTransaction } from "../utils/analytics-utils";
 import useAllCommonPairs from "./useAllCommonPairs";
+import useEthereum from "./useEthereum";
 
 // tslint:disable-next-line:max-func-body-length
 const useSDK = () => {
     const { getTotalSupply } = useContext(EthersContext);
+    const ethereum = useEthereum();
     const { loadAllCommonPairs } = useAllCommonPairs();
     const allowedSlippage = new Percent("50", "10000"); // 0.05%
     const ttl = 60 * 20;
@@ -288,23 +291,37 @@ const useSDK = () => {
         return logTransaction(tx, "SushiBar.leave()", amount.toString());
     }, []);
 
-    const migrate = useCallback(async (lpToken: LPToken, amount: ethers.BigNumber, signer: ethers.Signer) => {
-        const migrator2 = getContract("Migrator2", MIGRATOR2, signer);
-        const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + ttl).toString(16)}`;
-        const args = [
-            lpToken.tokenA.address,
-            lpToken.tokenB.address,
-            amount,
-            ethers.constants.Zero,
-            ethers.constants.Zero,
-            deadline
-        ];
-        const gasLimit = await migrator2.estimateGas.migrate(...args);
-        const tx = await migrator2.migrate(...args, {
-            gasLimit: gasLimit.mul(120).div(100)
-        });
-        return logTransaction(tx, "Migrator2.migrate()", ...args.map(arg => arg.toString()));
-    }, []);
+    const migrate = useCallback(
+        async (lpToken: LPToken, amount: ethers.BigNumber, signer: ethers.Signer) => {
+            const sushiRoll = getContract("SushiRoll", SUSHI_ROLL, signer);
+            const deadline = Math.floor(new Date().getTime() / 1000) + ttl;
+            const permit = await signERC2612Permit(
+                ethereum,
+                lpToken.address,
+                await signer.getAddress(),
+                SUSHI_ROLL,
+                amount.toString(),
+                deadline
+            );
+            const args = [
+                lpToken.tokenA.address,
+                lpToken.tokenB.address,
+                amount,
+                ethers.constants.Zero,
+                ethers.constants.Zero,
+                deadline,
+                permit.v,
+                permit.r,
+                permit.s
+            ];
+            const gasLimit = await sushiRoll.estimateGas.migrate(...args);
+            const tx = await sushiRoll.migrate(...args, {
+                gasLimit: gasLimit.mul(120).div(100)
+            });
+            return logTransaction(tx, "SushiRoll.migrate()", ...args.map(arg => arg.toString()));
+        },
+        [ethereum]
+    );
 
     const calculateSwapFee = (fromAmount: ethers.BigNumber) => {
         return fromAmount.mul(3).div(1000);

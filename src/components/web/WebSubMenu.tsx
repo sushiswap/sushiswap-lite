@@ -41,10 +41,17 @@ export const LiquiditySubMenu = () => (
             {
                 title: "Remove Liquidity",
                 path: "/liquidity/remove"
-            },
+            }
+        ]}
+    />
+);
+
+export const MigrateSubMenu = () => (
+    <WebSubMenu
+        items={[
             {
                 title: "Migrate Liquidity",
-                path: "/liquidity/migrate"
+                path: "/migrate"
             }
         ]}
     />

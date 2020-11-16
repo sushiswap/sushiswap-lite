@@ -43,6 +43,9 @@ const WebScreens = () => {
                         <Route path={"/swap"}>
                             <SwapScreen />
                         </Route>
+                        <Route path={"/liquidity/migrate"}>
+                            <Redirect to={"/migrate"} />
+                        </Route>
                         <Route path={"/liquidity/remove"}>
                             <RemoveLiquidityScreen />
                         </Route>
@@ -60,9 +63,6 @@ const WebScreens = () => {
                         </Route>
                         <Route path={"/staking"}>
                             <StakeScreen />
-                        </Route>
-                        <Route path={"/liquidity/migrate"}>
-                            <Redirect to={"/migrate"} />
                         </Route>
                         <Redirect to={"/swap"} />
                     </Switch>

@@ -13,13 +13,13 @@ import InfoBox from "../components/InfoBox";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
 import LPTokenSelect, { LPTokenItem } from "../components/LPTokenSelect";
 import Meta from "../components/Meta";
+import Notice from "../components/Notice";
 import Text from "../components/Text";
 import Title from "../components/Title";
 import TokenInput from "../components/TokenInput";
 import WebFooter from "../components/web/WebFooter";
 import { MigrateSubMenu } from "../components/web/WebSubMenu";
 import { Spacing } from "../constants/dimension";
-import useLinker from "../hooks/useLinker";
 import useMigrateState, { MigrateState } from "../hooks/useMigrateState";
 import MetamaskError from "../types/MetamaskError";
 import { isEmptyValue, parseBalance } from "../utils";
@@ -53,6 +53,10 @@ const Migrate = () => {
             />
             <Border />
             <AmountInput state={state} />
+            <Notice
+                text={"You'll be redirected to the farming page after the migration finishes."}
+                style={{ marginTop: Spacing.normal }}
+            />
             <AmountInfo state={state} />
         </View>
     );
@@ -110,12 +114,13 @@ const MigrateButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
-    const goToRemoveLiquidity = useLinker("/liquidity/remove", "RemoveLiquidity");
     const onPress = async () => {
         onError({});
         try {
             await state.onMigrate();
-            goToRemoveLiquidity();
+            if (state.selectedLPToken) {
+                window.open("https://sushiswap.fi/pair/" + state.selectedLPToken.address, "_blank");
+            }
         } catch (e) {
             onError(e);
         }

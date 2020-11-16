@@ -37,7 +37,7 @@ export interface SwapState extends TokenPairState {
 // tslint:disable-next-line:max-func-body-length
 const useSwapState: () => SwapState = () => {
     const state = useTokenPairState();
-    const { provider, signer, kovanSigner, updateTokens } = useContext(EthersContext);
+    const { chainId, provider, signer, kovanSigner, updateTokens } = useContext(EthersContext);
     const {
         getTrade,
         swap,
@@ -72,7 +72,6 @@ const useSwapState: () => SwapState = () => {
             if (state.fromToken.symbol === "WETH") {
                 setPriceInETH(ethers.constants.WeiPerEther);
             } else {
-                const { chainId } = await provider.getNetwork();
                 try {
                     const fromToken = new Token(chainId, state.fromToken.address, state.fromToken.decimals);
                     const toToken = WETH[chainId];
@@ -83,7 +82,7 @@ const useSwapState: () => SwapState = () => {
                 }
             }
         }
-    }, [provider, state.fromToken]);
+    }, [chainId, provider, state.fromToken]);
 
     useDelayedEffect(
         () => {

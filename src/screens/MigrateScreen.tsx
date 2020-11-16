@@ -118,9 +118,6 @@ const MigrateButton = ({
         onError({});
         try {
             await state.onMigrate();
-            if (state.selectedLPToken) {
-                window.open("https://sushiswap.fi/pair/" + state.selectedLPToken.address, "_blank");
-            }
         } catch (e) {
             onError(e);
         }

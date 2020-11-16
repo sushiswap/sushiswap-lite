@@ -16,8 +16,6 @@ export interface LPTokensState extends TokenPairState {
     lpTokens: LPToken[];
     selectedLPToken?: LPToken;
     setSelectedLPToken: (token?: LPToken) => void;
-    selectedLPTokenAllowed: boolean;
-    setSelectedLPTokenAllowed: (allowed: boolean) => void;
     pair?: Pair;
     amount: string;
     setAmount: (amount: string) => void;
@@ -33,7 +31,6 @@ const useLPTokensState: (mode: Mode) => LPTokensState = mode => {
     const [loading, setLoading] = useState(true);
     const [lpTokens, setLPTokens] = useState<LPToken[]>([]);
     const [selectedLPToken, setSelectedLPToken] = useState<LPToken>();
-    const [selectedLPTokenAllowed, setSelectedLPTokenAllowed] = useState(false);
     const [pair, setPair] = useState<Pair>();
     const [amount, setAmount] = useState("");
     const { getPair } = useSDK();
@@ -103,8 +100,6 @@ const useLPTokensState: (mode: Mode) => LPTokensState = mode => {
         lpTokens,
         selectedLPToken,
         setSelectedLPToken,
-        selectedLPTokenAllowed,
-        setSelectedLPTokenAllowed,
         pair,
         amount,
         setAmount

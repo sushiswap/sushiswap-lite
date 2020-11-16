@@ -4,8 +4,8 @@ import IUniswapV2Pair from "@sushiswap/core/build/contracts/IUniswapV2Pair.json"
 import IUniswapV2Router02 from "@sushiswap/core/build/contracts/IUniswapV2Router02.json";
 import IWETH from "@sushiswap/core/build/contracts/IWETH.json";
 import MasterChef from "@sushiswap/core/build/contracts/MasterChef.json";
-import Migrator2 from "@sushiswap/core/build/contracts/Migrator2.json";
 import SushiBar from "@sushiswap/core/build/contracts/SushiBar.json";
+import SushiRoll from "@sushiswap/core/build/contracts/SushiRoll.json";
 import { ChainId, CurrencyAmount, Token as SDKToken, TokenAmount, WETH } from "@sushiswap/sdk";
 import OrderBook from "@sushiswap/settlement/deployments/kovan/OrderBook.json";
 import Settlement from "@sushiswap/settlement/deployments/mainnet/Settlement.json";
@@ -20,8 +20,8 @@ const CONTRACTS = {
     IUniswapV2Router02,
     IWETH,
     MasterChef,
-    Migrator2,
     SushiBar,
+    SushiRoll,
     OrderBook,
     Settlement,
     LPTokenScanner: { abi: LPTokenScanner }

@@ -68,8 +68,9 @@ const Menu = () => {
             }}>
             <MenuItem title={"Swap"} path={"/swap"} />
             <MenuItem title={"Liquidity"} path={"/liquidity"} />
+            <MenuItem title={"Migrate"} path={"/migrate"} />
             {/*<MenuItem title={"Farming"} path={"/farming"} />*/}
-            <MenuItem title={"Staking"} path={"/staking"} />
+            <MenuItem title={"Stake"} path={"/staking"} />
             <Status />
             <DarkModeSwitch style={{ marginLeft: Spacing.tiny, marginRight: -8, marginBottom: -3 }} />
         </FlexView>

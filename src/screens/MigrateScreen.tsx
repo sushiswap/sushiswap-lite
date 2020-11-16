@@ -1,14 +1,12 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
-import ApproveButton from "../components/ApproveButton";
 import Border from "../components/Border";
 import Button from "../components/Button";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
-import ExperimentalNotice from "../components/ExperimentalNotice";
 import FetchingButton from "../components/FetchingButton";
 import Heading from "../components/Heading";
 import InfoBox from "../components/InfoBox";
@@ -19,9 +17,9 @@ import Text from "../components/Text";
 import Title from "../components/Title";
 import TokenInput from "../components/TokenInput";
 import WebFooter from "../components/web/WebFooter";
-import { LiquiditySubMenu } from "../components/web/WebSubMenu";
-import { MIGRATOR2 } from "../constants/contracts";
+import { MigrateSubMenu } from "../components/web/WebSubMenu";
 import { Spacing } from "../constants/dimension";
+import useLinker from "../hooks/useLinker";
 import useMigrateState, { MigrateState } from "../hooks/useMigrateState";
 import MetamaskError from "../types/MetamaskError";
 import { isEmptyValue, parseBalance } from "../utils";
@@ -30,7 +28,7 @@ import Screen from "./Screen";
 const MigrateScreen = () => {
     return (
         <Screen>
-            <LiquiditySubMenu />
+            <MigrateSubMenu />
             <Container>
                 <Content>
                     <Title text={"Migrate Liquidity"} />
@@ -52,9 +50,6 @@ const Migrate = () => {
                 title={"Your Uniswap Liquidity"}
                 emptyText={"You don't have any liquidity on Uniswap."}
                 Item={LPTokenItem}
-            />
-            <ExperimentalNotice
-                contractURL={"https://github.com/sushiswap/sushiswap/blob/master/contracts/Migrator2.sol"}
             />
             <Border />
             <AmountInput state={state} />
@@ -99,16 +94,7 @@ const Controls = ({ state }: { state: MigrateState }) => {
             ) : state.loading ? (
                 <FetchingButton />
             ) : (
-                <>
-                    <ApproveButton
-                        token={state.selectedLPToken}
-                        spender={MIGRATOR2}
-                        onSuccess={() => state.setSelectedLPTokenAllowed(true)}
-                        onError={setError}
-                        hidden={state.selectedLPTokenAllowed}
-                    />
-                    <MigrateButton state={state} onError={setError} disabled={!state.selectedLPTokenAllowed} />
-                </>
+                <MigrateButton state={state} onError={setError} disabled={false} />
             )}
             {error.message && error.code !== 4001 && <ErrorMessage error={error} />}
         </View>
@@ -124,14 +110,16 @@ const MigrateButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
-    const onPress = useCallback(async () => {
+    const goToRemoveLiquidity = useLinker("/liquidity/remove", "RemoveLiquidity");
+    const onPress = async () => {
         onError({});
         try {
             await state.onMigrate();
+            goToRemoveLiquidity();
         } catch (e) {
             onError(e);
         }
-    }, []);
+    };
     return <Button title={"Migrate Liquidity"} loading={state.migrating} onPress={onPress} disabled={disabled} />;
 };
 

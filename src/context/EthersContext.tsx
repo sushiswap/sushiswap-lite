@@ -94,9 +94,9 @@ export const EthersContextProvider = ({ children }) => {
                     }
                 }
             };
-            const onChainChanged = () => {
+            const onChainChanged = async () => {
                 if (ethereum) {
-                    setChainId(Number(ethereum.chainId));
+                    setChainId(Number(await ethereum.request({ method: "eth_chainId" })));
                 }
             };
             onAccountsChanged();

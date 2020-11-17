@@ -27,7 +27,7 @@ import UnsupportedButton from "../components/UnsupportedButton";
 import WebFooter from "../components/web/WebFooter";
 import { SwapSubMenu } from "../components/web/WebSubMenu";
 import { ROUTER, SETTLEMENT } from "../constants/contracts";
-import { Spacing } from "../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import { EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
@@ -180,7 +180,7 @@ const AmountInput = ({ state }: { state: SwapState }) => {
                 token={state.fromToken}
                 amount={state.fromAmount}
                 onAmountChanged={state.setFromAmount}
-                autoFocus={true}
+                autoFocus={IS_DESKTOP}
             />
         </View>
     );

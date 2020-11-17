@@ -2,7 +2,7 @@ import React, { FC, useCallback, useContext, useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 import { ethers } from "ethers";
-import { Spacing } from "../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
 import useDelayedEffect from "../hooks/useDelayedEffect";
@@ -63,7 +63,7 @@ const TokenSearch: FC<TokenSearchProps> = props => {
                     value={props.text}
                     onChangeText={props.onChangeText}
                     placeholder={"Token name, symbol or address"}
-                    autoFocus={true}
+                    autoFocus={IS_DESKTOP}
                     inputStyle={{ marginHorizontal: Spacing.tiny, fontSize: props.text ? 20 : 16 }}
                     inputContainerStyle={{ borderBottomWidth: 0, marginRight: loading ? 32 : 0 }}
                     labelStyle={{ height: 0 }}

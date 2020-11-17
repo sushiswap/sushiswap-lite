@@ -27,7 +27,7 @@ import UnsupportedButton from "../components/UnsupportedButton";
 import WebFooter from "../components/web/WebFooter";
 import { SwapSubMenu } from "../components/web/WebSubMenu";
 import { ROUTER, SETTLEMENT } from "../constants/contracts";
-import { IS_DESKTOP, Spacing } from "../constants/dimension";
+import { Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import { EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
@@ -286,8 +286,8 @@ const WrapInfo = ({ state }: { state: SwapState }) => {
 
 const SwapInfo = ({ state, disabled }: { state: SwapState; disabled: boolean }) => {
     const { textDark, textLight, placeholder } = useColors();
-    const amount = state.trade?.outputAmount?.toFixed(IS_DESKTOP ? 18 : 8);
-    const price = state.trade?.executionPrice?.toFixed(IS_DESKTOP ? 18 : 8);
+    const amount = state.trade?.outputAmount?.toFixed();
+    const price = state.trade?.executionPrice?.toFixed();
     const impact = state.trade?.priceImpact?.toFixed(2);
     return (
         <View>

@@ -71,7 +71,12 @@ const AmountInput = ({ state }: { state: StakingState }) => {
     return (
         <View>
             <Heading text={"Amount To Unstake"} />
-            <TokenInput token={state.xSushi} amount={state.amount} onAmountChanged={state.setAmount} autoFocus={true} />
+            <TokenInput
+                token={state.xSushi}
+                amount={state.amount}
+                onAmountChanged={state.setAmount}
+                autoFocus={IS_DESKTOP}
+            />
         </View>
     );
 };

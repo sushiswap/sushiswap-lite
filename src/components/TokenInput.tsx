@@ -49,6 +49,7 @@ const TokenInput: FC<TokenInputProps> = props => {
                     value={props.amount}
                     onChangeText={onChangeText}
                     placeholder={"0.0"}
+                    keyboardType={"numeric"}
                     autoFocus={props.autoFocus || false}
                     inputStyle={{ marginHorizontal: 4 }}
                     inputContainerStyle={{ borderBottomWidth: 0 }}

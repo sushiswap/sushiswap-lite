@@ -51,9 +51,11 @@ const Migrate = () => {
     return (
         <View style={{ marginTop: Spacing.large }}>
             <MigrateModeSelect state={state} />
+            <Border />
             <UniswapLiquidityScreen state={state} />
             <Border />
             <AmountInput state={state} />
+            <Border />
             <AmountInfo state={state} />
             <Notice
                 text={
@@ -69,7 +71,7 @@ const Migrate = () => {
 
 const MigrateModeSelect = ({ state }: { state: MigrateState }) => {
     return (
-        <View style={{ marginBottom: Spacing.normal }}>
+        <View>
             <Expandable title={"Wallet Type"} expanded={!state.mode} onExpand={() => state.setMode()}>
                 <MigrateModeItem state={state} mode={"permit"} />
                 <MigrateModeItem state={state} mode={"approve"} />

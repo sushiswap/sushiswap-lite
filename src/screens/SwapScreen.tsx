@@ -180,7 +180,7 @@ const AmountInput = ({ state }: { state: SwapState }) => {
                 token={state.fromToken}
                 amount={state.fromAmount}
                 onAmountChanged={state.setFromAmount}
-                autoFocus={true}
+                autoFocus={IS_DESKTOP}
             />
         </View>
     );
@@ -286,8 +286,8 @@ const WrapInfo = ({ state }: { state: SwapState }) => {
 
 const SwapInfo = ({ state, disabled }: { state: SwapState; disabled: boolean }) => {
     const { textDark, textLight, placeholder } = useColors();
-    const amount = state.trade?.outputAmount?.toFixed(IS_DESKTOP ? 18 : 8);
-    const price = state.trade?.executionPrice?.toFixed(IS_DESKTOP ? 18 : 8);
+    const amount = state.trade?.outputAmount?.toFixed();
+    const price = state.trade?.executionPrice?.toFixed();
     const impact = state.trade?.priceImpact?.toFixed(2);
     return (
         <View>

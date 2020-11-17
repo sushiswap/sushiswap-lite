@@ -295,6 +295,27 @@ const useSDK = () => {
         async (lpToken: LPToken, amount: ethers.BigNumber, signer: ethers.Signer) => {
             const sushiRoll = getContract("SushiRoll", SUSHI_ROLL, signer);
             const deadline = Math.floor(new Date().getTime() / 1000) + ttl;
+            const args = [
+                lpToken.tokenA.address,
+                lpToken.tokenB.address,
+                amount,
+                ethers.constants.Zero,
+                ethers.constants.Zero,
+                deadline
+            ];
+            const gasLimit = await sushiRoll.estimateGas.migrate(...args);
+            const tx = await sushiRoll.migrate(...args, {
+                gasLimit: gasLimit.mul(120).div(100)
+            });
+            return logTransaction(tx, "SushiRoll.migrate()", ...args.map(arg => arg.toString()));
+        },
+        [ethereum]
+    );
+
+    const migrateWithPermit = useCallback(
+        async (lpToken: LPToken, amount: ethers.BigNumber, signer: ethers.Signer) => {
+            const sushiRoll = getContract("SushiRoll", SUSHI_ROLL, signer);
+            const deadline = Math.floor(new Date().getTime() / 1000) + ttl;
             const permit = await signERC2612Permit(
                 ethereum,
                 lpToken.address,
@@ -314,11 +335,11 @@ const useSDK = () => {
                 permit.r,
                 permit.s
             ];
-            const gasLimit = await sushiRoll.estimateGas.migrate(...args);
-            const tx = await sushiRoll.migrate(...args, {
+            const gasLimit = await sushiRoll.estimateGas.migrateWithPermit(...args);
+            const tx = await sushiRoll.migrateWithPermit(...args, {
                 gasLimit: gasLimit.mul(120).div(100)
             });
-            return logTransaction(tx, "SushiRoll.migrate()", ...args.map(arg => arg.toString()));
+            return logTransaction(tx, "SushiRoll.migrateWithPermit()", ...args.map(arg => arg.toString()));
         },
         [ethereum]
     );
@@ -373,6 +394,7 @@ const useSDK = () => {
         enterSushiBar,
         leaveSushiBar,
         migrate,
+        migrateWithPermit,
         calculateSwapFee,
         calculateLimitOrderFee,
         calculateLimitOrderReturn,

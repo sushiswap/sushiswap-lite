@@ -1,21 +1,4 @@
-import { useState } from "react";
-
 import { EventType, Listener } from "@ethersproject/abstract-provider";
-import useDelayedEffect from "./useDelayedEffect";
-
-const useEthereum = () => {
-    const [ethereum, setEthereum] = useState(window.ethereum);
-    useDelayedEffect(
-        () => {
-            if (window.ethereum) {
-                setEthereum(window.ethereum);
-            }
-        },
-        2000,
-        []
-    );
-    return ethereum;
-};
 
 interface JsonRPCRequest {
     jsonrpc: string;
@@ -41,9 +24,10 @@ interface RequestArguments {
     params?: unknown[] | object;
 }
 
-interface Ethereum {
-    chainId: string;
-    isMetaMask: boolean;
+export default interface Ethereum {
+    isMetaMask?: boolean;
+    isWalletConnect?: boolean;
+    disconnect?: () => Promise<void>;
     send(payload: any, callback: any): any;
     send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any;
     request(args: RequestArguments): Promise<any>;
@@ -54,10 +38,5 @@ interface Ethereum {
 declare global {
     interface Window {
         ethereum?: Ethereum;
-        web3?: {
-            currentProvider?: Ethereum;
-        };
     }
 }
-
-export default useEthereum;

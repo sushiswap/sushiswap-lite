@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useContext, useState } from "react";
+import React, { lazy, Suspense, useContext, useEffect, useState } from "react";
 import { Platform, View } from "react-native";
 import { Icon } from "react-native-elements";
 import { HashRouter as Router, Redirect, Route, Switch } from "react-router-dom";
@@ -9,6 +9,7 @@ import useAsyncEffect from "use-async-effect";
 import MobileWebMenu from "../components/web/MobileWebMenu";
 import WebHeader from "../components/web/WebHeader";
 import { IS_DESKTOP } from "../constants/dimension";
+import { EthersContext } from "../context/EthersContext";
 import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
 import EmptyScreen from "./EmptyScreen";
@@ -30,8 +31,12 @@ export const Screens = () => {
 
 // tslint:disable-next-line:max-func-body-length
 const WebScreens = () => {
+    const { address } = useContext(EthersContext);
     const [menuExpanded, setMenuExpanded] = useState(false);
     const { background } = useColors();
+    useEffect(() => {
+        if (!address) setMenuExpanded(false);
+    }, [address]);
     return (
         <Router>
             <Suspense fallback={<EmptyScreen />}>

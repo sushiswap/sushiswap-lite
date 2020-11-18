@@ -12,12 +12,10 @@ import Token from "../types/Token";
 import { convertToken, getContract, pow10 } from "../utils";
 import { logTransaction } from "../utils/analytics-utils";
 import useAllCommonPairs from "./useAllCommonPairs";
-import useEthereum from "./useEthereum";
 
 // tslint:disable-next-line:max-func-body-length
 const useSDK = () => {
-    const { getTotalSupply } = useContext(EthersContext);
-    const ethereum = useEthereum();
+    const { ethereum, getTotalSupply } = useContext(EthersContext);
     const { loadAllCommonPairs } = useAllCommonPairs();
     const allowedSlippage = new Percent("50", "10000"); // 0.05%
     const ttl = 60 * 20;

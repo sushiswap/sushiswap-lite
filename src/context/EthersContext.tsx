@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-community/async-storage";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import { ETH } from "../constants/tokens";
-import useEthereum from "../hooks/useEthereum";
+import Ethereum from "../types/Ethereum";
 import Token from "../types/Token";
 import { getContract } from "../utils";
 import { logTransaction } from "../utils/analytics-utils";
@@ -17,6 +17,8 @@ export type OnBlockListener = (block?: number) => void | Promise<void>;
 const PRIVATE_KEY = "0xca417c154948d370f011c5d9ac3fba516d7b15671a069e7d5d48f56b723c9cc1";
 
 export const EthersContext = React.createContext({
+    ethereum: undefined as Ethereum | undefined,
+    setEthereum: (_ethereum: Ethereum | undefined) => {},
     provider: undefined as ethers.providers.JsonRpcProvider | undefined,
     signer: undefined as ethers.providers.JsonRpcSigner | undefined,
     kovanProvider: undefined as ethers.providers.JsonRpcProvider | undefined,
@@ -48,8 +50,8 @@ export const EthersContext = React.createContext({
 
 // tslint:disable-next-line:max-func-body-length
 export const EthersContextProvider = ({ children }) => {
-    const ethereum = useEthereum();
     // const { mnemonic } = useContext(GlobalContext);
+    const [ethereum, setEthereum] = useState<Ethereum>();
     const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
     const [kovanProvider, setKovanProvider] = useState<ethers.providers.JsonRpcProvider>();
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
@@ -86,26 +88,30 @@ export const EthersContextProvider = ({ children }) => {
     useEffect(() => {
         if (ethereum) {
             const onAccountsChanged = async () => {
-                if (ethereum) {
-                    const accounts = await ethereum.request({ method: "eth_accounts" });
-                    if (accounts?.[0]) {
-                        setAddress(accounts[0]);
-                        Analytics.setUserId(accounts[0]);
-                    }
+                const accounts = await ethereum.request({ method: "eth_accounts" });
+                if (accounts?.[0]) {
+                    setAddress(accounts[0]);
+                    Analytics.setUserId(accounts[0]);
+                } else {
+                    setAddress(null);
                 }
             };
             const onChainChanged = async () => {
-                if (ethereum) {
-                    setChainId(Number(await ethereum.request({ method: "eth_chainId" })));
-                }
+                setChainId(Number(await ethereum.request({ method: "eth_chainId" })));
+            };
+            const onDisconnect = () => {
+                setAddress(null);
+                setEthereum(undefined);
             };
             onAccountsChanged();
             onChainChanged();
             ethereum.on("accountsChanged", onAccountsChanged);
             ethereum.on("chainChanged", onChainChanged);
+            ethereum.on("disconnect", onDisconnect);
             return () => {
-                ethereum!.off("accountsChanged", onAccountsChanged);
-                ethereum!.off("chainChanged", onAccountsChanged);
+                ethereum.off("accountsChanged", onAccountsChanged);
+                ethereum.off("chainChanged", onAccountsChanged);
+                ethereum.off("disconnect", onDisconnect);
             };
         }
     }, [ethereum]);
@@ -261,6 +267,8 @@ export const EthersContextProvider = ({ children }) => {
     return (
         <EthersContext.Provider
             value={{
+                ethereum,
+                setEthereum,
                 provider,
                 signer,
                 kovanProvider,

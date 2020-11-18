@@ -20,12 +20,21 @@ export interface MigrateState extends LPTokensState {
 
 // tslint:disable-next-line:max-func-body-length
 const useMigrateState: () => MigrateState = () => {
+    const { ethereum } = useContext(EthersContext);
     const state = useLPTokensState("my-uniswap-lp-tokens");
     const { provider, signer, getTokenAllowance, updateTokens } = useContext(EthersContext);
     const { migrate, migrateWithPermit } = useSDK();
     const [loading, setLoading] = useState(false);
     const [mode, setMode] = useState<MigrateMode>();
     const [migrating, setMigrating] = useState(false);
+
+    useEffect(() => {
+        if (ethereum?.isWalletConnect) {
+            setMode("approve");
+        } else {
+            setMode(undefined);
+        }
+    }, [ethereum]);
 
     useEffect(() => {
         state.setSelectedLPToken();

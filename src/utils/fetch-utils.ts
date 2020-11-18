@@ -10,7 +10,7 @@ import { getContract } from "./index";
 
 export const fetchTokens = async (
     address: string,
-    provider: ethers.providers.BaseProvider,
+    provider: ethers.providers.JsonRpcProvider,
     signer: ethers.Signer,
     customTokens?: Token[]
 ) => {
@@ -20,6 +20,7 @@ export const fetchTokens = async (
 
     const balances = await fetchTokenBalances(
         tokens.map(token => token.address),
+        provider,
         signer
     );
     return [
@@ -45,6 +46,7 @@ export const fetchPools = async (provider: ethers.providers.JsonRpcProvider, sig
     const address = await signer.getAddress();
     const balances = await fetchTokenBalances(
         pools.map(pool => pool.address),
+        provider,
         signer
     );
     return (await Promise.all(
@@ -107,6 +109,7 @@ const fetchLPTokens = async (
     ).flat();
     const balances = await fetchTokenBalances(
         pairs.map(pair => pair.token),
+        provider,
         signer
     );
     return await Promise.all(
@@ -148,14 +151,14 @@ export const findOrFetchToken = async (
     } as Token;
 };
 
-const fetchTokenBalances = async (addresses: string[], signer: ethers.Signer) => {
+const fetchTokenBalances = async (
+    addresses: string[],
+    provider: ethers.providers.JsonRpcProvider,
+    signer: ethers.Signer
+) => {
     const account = await signer.getAddress();
-    return await Promise.all(
-        addresses.map(async address => {
-            const erc20 = getContract("ERC20", address, signer);
-            return erc20.balanceOf(account);
-        })
-    );
+    const balances = await provider.send("alchemy_getTokenBalances", [account, addresses]);
+    return balances.tokenBalances.map(balance => balance.tokenBalance);
 };
 
 const LIMIT_ORDERS_LIMIT = 20;

@@ -51,7 +51,7 @@ export const EthersContext = React.createContext({
 // tslint:disable-next-line:max-func-body-length
 export const EthersContextProvider = ({ children }) => {
     // const { mnemonic } = useContext(GlobalContext);
-    const [ethereum, setEthereum] = useState<Ethereum>();
+    const [ethereum, setEthereum] = useState<Ethereum | undefined>(window.ethereum);
     const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
     const [kovanProvider, setKovanProvider] = useState<ethers.providers.JsonRpcProvider>();
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();

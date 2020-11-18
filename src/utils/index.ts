@@ -59,9 +59,13 @@ export const parseCurrencyAmount = (value: CurrencyAmount, decimals = 18) => {
     return ethers.BigNumber.from(parseBalance(value.toExact(), decimals));
 };
 
-export const getContract = (name: string, address: string, signer: ethers.Signer) => {
+export const getContract = (
+    name: string,
+    address: string,
+    signerOrProvider: ethers.Signer | ethers.providers.Provider
+) => {
     const contract = CONTRACTS[name];
-    return ethers.ContractFactory.getContract(address, contract.abi, signer);
+    return new ethers.Contract(address, contract.abi, signerOrProvider);
 };
 
 export const pow10 = (exp: ethers.BigNumberish) => {

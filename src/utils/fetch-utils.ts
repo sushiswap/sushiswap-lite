@@ -85,7 +85,7 @@ export const fetchMyUniswapLPTokens = async (
     return await fetchLPTokens(UNISWAP_FACTORY, tokens, provider, signer);
 };
 
-const LP_TOKENS_LIMIT = 2000;
+const LP_TOKENS_LIMIT = 1000;
 
 // tslint:disable-next-line:max-func-body-length
 const fetchLPTokens = async (
@@ -94,9 +94,9 @@ const fetchLPTokens = async (
     provider: ethers.providers.JsonRpcProvider,
     signer: ethers.Signer
 ) => {
-    const factoryContract = getContract("IUniswapV2Factory", factory, signer);
+    const factoryContract = getContract("IUniswapV2Factory", factory, provider);
     const length = await factoryContract.allPairsLength();
-    const scanner = getContract("LPTokenScanner", LP_TOKEN_SCANNER, signer);
+    const scanner = getContract("LPTokenScanner", LP_TOKEN_SCANNER, provider);
     const account = await signer.getAddress();
     const pages: number[] = [];
     for (let i = 0; i < length; i += LP_TOKENS_LIMIT) pages.push(i);
@@ -116,8 +116,8 @@ const fetchLPTokens = async (
         pairs.map(async (pair, index) => {
             const address = pair.token;
             const balance = ethers.BigNumber.from(balances[index]);
-            const contract = getContract("IUniswapV2Pair", address, signer);
-            const erc20 = getContract("ERC20", address, signer);
+            const contract = getContract("IUniswapV2Pair", address, provider);
+            const erc20 = getContract("ERC20", address, provider);
             const decimals = Number(await erc20.decimals());
             const totalSupply = await erc20.totalSupply();
             const tokenA = await findOrFetchToken(provider, await contract.token0(), tokens);
@@ -171,7 +171,7 @@ export const fetchMyLimitOrders = async (
     canceledHashes?: string[]
 ) => {
     const orderBook = getContract("OrderBook", ORDER_BOOK, kovanSigner);
-    const settlement = await getContract("Settlement", SETTLEMENT, signer);
+    const settlement = await getContract("Settlement", SETTLEMENT, provider);
     const maker = await signer.getAddress();
     const length = await orderBook.numberOfHashesOfMaker(maker);
     const pages: number[] = [];

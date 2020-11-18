@@ -18,8 +18,11 @@ const ConnectWallet = () => {
         : require("../../../assets/sushiswap.jpg");
     return (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-            <Image source={source} style={{ width: metaMask ? 223 : 200, height: metaMask ? 183 : 200 }} />
-            <ConnectButton />
+            <Image
+                source={source}
+                style={{ width: metaMask ? 223 : 200, height: metaMask ? 183 : 200, marginBottom: Spacing.normal }}
+            />
+            {window.ethereum && <ConnectButton />}
             <WalletConnectButton />
         </View>
     );
@@ -44,7 +47,7 @@ const ConnectButton = () => {
             onPress={onPress}
             title={metaMask ? "MetaMask" : "Connect"}
             containerStyle={{ width: IS_DESKTOP ? 440 : "100%" }}
-            style={{ marginTop: Spacing.large, marginHorizontal: Spacing.normal }}
+            style={{ marginTop: Spacing.small, marginHorizontal: Spacing.normal }}
         />
     );
 };

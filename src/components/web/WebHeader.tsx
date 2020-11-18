@@ -1,5 +1,5 @@
 import React, { FC, useContext } from "react";
-import { View } from "react-native";
+import { TouchableHighlight, View } from "react-native";
 import { Icon } from "react-native-elements";
 import { Link, useRouteMatch } from "react-router-dom";
 
@@ -97,27 +97,46 @@ const MenuIcon = ({ onExpand }) => {
 
 const Status = () => {
     const { textLight, green, borderDark } = useColors();
-    const { chainId, address, ensName } = useContext(EthersContext);
+    const { ethereum, chainId, address, ensName } = useContext(EthersContext);
     const connected = chainId === 1 && address;
     const title = connected
         ? ensName || address!.substring(0, 6) + "..." + address!.substring(address!.length - 4, address!.length)
         : "Not connected";
     const color = connected ? green : textLight;
+    const onPress = () => {
+        if (confirm("Do you want to disconnect?")) ethereum?.disconnect?.();
+    };
     return (
-        <FlexView
-            style={{
-                height: 28,
-                justifyContent: "center",
-                alignItems: "center",
-                marginLeft: Spacing.small,
-                paddingHorizontal: Spacing.small,
-                borderRadius: 16,
-                borderWidth: 1,
-                borderColor: borderDark
-            }}>
-            <View style={{ backgroundColor: color, width: 6, height: 6, borderRadius: 3, marginRight: 12 }} />
-            <Text style={{ fontSize: 15, color: textLight, marginRight: 2 }}>{title}</Text>
-        </FlexView>
+        <TouchableHighlight onPress={onPress} disabled={!ethereum?.isWalletConnect}>
+            <FlexView
+                style={{
+                    height: 28,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginLeft: Spacing.small,
+                    paddingHorizontal: Spacing.small,
+                    borderRadius: 16,
+                    borderWidth: 1,
+                    borderColor: borderDark
+                }}>
+                <View style={{ backgroundColor: color, width: 6, height: 6, borderRadius: 3, marginRight: 12 }} />
+                <Text style={{ fontSize: 15, color: textLight, marginRight: 2 }}>{title}</Text>
+                {ethereum?.isWalletConnect && <CloseIcon />}
+            </FlexView>
+        </TouchableHighlight>
+    );
+};
+
+const CloseIcon = () => {
+    const { textLight } = useColors();
+    return (
+        <Icon
+            type={"material-community"}
+            name={"close"}
+            size={15}
+            color={textLight}
+            style={{ paddingLeft: 2, paddingTop: 2 }}
+        />
     );
 };
 

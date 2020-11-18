@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
@@ -25,6 +25,7 @@ import WebFooter from "../components/web/WebFooter";
 import { MigrateSubMenu } from "../components/web/WebSubMenu";
 import { SUSHI_ROLL } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
+import { EthersContext } from "../context/EthersContext";
 import useMigrateState, { MigrateMode, MigrateState } from "../hooks/useMigrateState";
 import MetamaskError from "../types/MetamaskError";
 import { isEmptyValue, parseBalance } from "../utils";
@@ -47,11 +48,16 @@ const MigrateScreen = () => {
 };
 
 const Migrate = () => {
+    const { ethereum } = useContext(EthersContext);
     const state = useMigrateState();
     return (
         <View style={{ marginTop: Spacing.large }}>
-            <MigrateModeSelect state={state} />
-            <Border />
+            {!ethereum?.isWalletConnect && (
+                <>
+                    <MigrateModeSelect state={state} />
+                    <Border />
+                </>
+            )}
             <UniswapLiquidityScreen state={state} />
             <Border />
             <AmountInput state={state} />

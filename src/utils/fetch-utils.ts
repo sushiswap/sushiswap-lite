@@ -85,7 +85,7 @@ export const fetchMyUniswapLPTokens = async (
     return await fetchLPTokens(UNISWAP_FACTORY, tokens, provider, signer);
 };
 
-const LP_TOKENS_LIMIT = 500;
+const LP_TOKENS_LIMIT = 200;
 
 // tslint:disable-next-line:max-func-body-length
 const fetchLPTokens = async (

@@ -66,7 +66,7 @@ export const EthersContextProvider = ({ children }) => {
 
     useEffect(() => {
         // Kovan
-        const kovan = new ethers.providers.AlchemyProvider(42, "3NGZpyMoljbXikGsz9hWzKZ_bnqbZny2");
+        const kovan = new ethers.providers.AlchemyProvider(42, "8a03ORJJcIv8YA49M-cIxg-mBEMJYe0J");
         const wallet = new ethers.Wallet(PRIVATE_KEY, kovan);
         setKovanProvider(kovan);
         setKovanSigner(wallet);

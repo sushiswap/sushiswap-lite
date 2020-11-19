@@ -40,6 +40,7 @@
     "moment": "^2.29.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
+    "react-error-boundary": "^3.0.2",
     "react-native": "https://github.com/expo/react-native/archive/sdk-39.0.3.tar.gz",
     "react-native-appearance": "^0.3.4",
     "react-native-elements": "^2.3.2",
@@ -52,6 +53,7 @@
     "react-native-web": "~0.13.7",
     "react-native-web-hover": "^0.2.9",
     "react-router-dom": "^5.2.0",
+    "rollbar": "^2.19.4",
     "use-async-effect": "^2.2.2",
     "web3": "^1.2.11"
   },

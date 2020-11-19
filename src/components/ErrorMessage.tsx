@@ -3,9 +3,12 @@ import { View } from "react-native";
 
 import { Spacing } from "../constants/dimension";
 import MetamaskError from "../types/MetamaskError";
+import RollbarErrorTracking from "../utils/rollbar";
 import Text from "./Text";
 
-const ErrorMessage = ({ error }: { error: MetamaskError }) => (
+const ErrorMessage = ({ error }: { error: MetamaskError }) => {
+  RollbarErrorTracking.logErrorInRollbar(error.code + error.message);
+  return (
     <View
         style={{
             borderColor: "red",
@@ -23,6 +26,6 @@ const ErrorMessage = ({ error }: { error: MetamaskError }) => (
             {error.message}
         </Text>
     </View>
-);
+)};
 
 export default ErrorMessage;

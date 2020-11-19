@@ -9,9 +9,25 @@ import { useFonts } from "expo-font";
 import { ContextProvider } from "./src/context";
 import { Screens } from "./src/screens";
 import { YellowBox } from "react-native";
+import RollbarErrorTracking from './src/utils/rollbar'
+import { ErrorBoundary } from 'react-error-boundary'
 
 if (__DEV__) {
     YellowBox.ignoreWarnings(["Setting a timer", "VirtualizedLists should never be nested"]);
+}
+
+const ErrorFallback = (any: any) => {
+  return (
+    <div role="alert">
+      <p>Something went wrong:</p>
+      <pre style={{ color: 'red' }}>{any.error.message}</pre>
+    </div>
+  )
+}
+
+const rollBarErrorHandler = (error: Error, info: { componentStack: string }) => {
+  RollbarErrorTracking.logErrorInfo(info)
+  RollbarErrorTracking.logErrorInRollbar(error)
 }
 
 const App = () => {
@@ -24,9 +40,11 @@ const App = () => {
         return <AppLoading />;
     }
     return (
+      <ErrorBoundary FallbackComponent={ErrorFallback} onError={rollBarErrorHandler}>
         <ContextProvider>
             <Screens />
         </ContextProvider>
+      </ErrorBoundary>
     );
 };
 

@@ -38,6 +38,7 @@ const TokenSelect: FC<TokenSelectProps> = props => {
         await addCustomToken(t);
         setSearch("");
         setQuery("");
+        props.onChangeSymbol(t.symbol);
     };
     const hidden = (t: Token) => {
         let hide = props.hidden?.(t) || false;

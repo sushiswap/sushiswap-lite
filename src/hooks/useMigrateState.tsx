@@ -60,12 +60,6 @@ const useMigrateState: () => MigrateState = () => {
         if (mode && state.selectedLPToken && state.amount && provider && signer) {
             setMigrating(true);
             try {
-                const pair = await Fetcher.fetchPairData(
-                    convertToken(state.selectedLPToken.tokenA),
-                    convertToken(state.selectedLPToken.tokenB),
-                    provider
-                );
-
                 const amount = parseBalance(state.amount, state.selectedLPToken.decimals);
                 const func = mode === "approve" ? migrate : migrateWithPermit;
                 const tx = await func(state.selectedLPToken, amount, signer);
@@ -74,6 +68,11 @@ const useMigrateState: () => MigrateState = () => {
                 await state.updateLPTokens();
                 state.setSelectedLPToken(undefined);
 
+                const pair = await Fetcher.fetchPairData(
+                    convertToken(state.selectedLPToken.tokenA),
+                    convertToken(state.selectedLPToken.tokenB),
+                    provider
+                );
                 window.open("https://sushiswap.fi/pair/" + pair.liquidityToken.address, "_blank");
             } finally {
                 setMigrating(false);

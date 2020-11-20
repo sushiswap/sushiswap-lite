@@ -73,6 +73,7 @@ const Swap = () => {
                     <PriceInput state={state} />
                 </View>
             )}
+            {!state.loading && !state.trade && <NoPairNotice state={state} />}
             <TradeInfo state={state} />
         </View>
     );
@@ -249,6 +250,16 @@ const LimitOrderUnsupportedNotice = () => {
     );
 };
 
+const NoPairNotice = ({ state }: { state: SwapState }) => {
+    return (
+        <Notice
+            text={state.fromSymbol + "-" + state.toSymbol + " pair hasn't been created yet."}
+            color={"red"}
+            style={{ marginTop: Spacing.normal }}
+        />
+    );
+};
+
 const TradeInfo = ({ state }: { state: SwapState }) => {
     if (
         (state.fromSymbol === "ETH" && state.toSymbol === "WETH") ||
@@ -260,7 +271,8 @@ const TradeInfo = ({ state }: { state: SwapState }) => {
         state.fromSymbol === "" ||
         state.toSymbol === "" ||
         isEmptyValue(state.fromAmount) ||
-        (state.orderType === "limit" && state.fromSymbol === "ETH");
+        (state.orderType === "limit" && state.fromSymbol === "ETH") ||
+        (!state.loading && !state.trade);
     return (
         <InfoBox>
             {state.orderType === "limit" ? (
@@ -319,7 +331,10 @@ const SwapControls = ({ state }: { state: SwapState }) => {
     const approveRequired = state.fromSymbol !== "ETH" && !state.fromTokenAllowed;
     return (
         <View style={{ marginTop: Spacing.normal }}>
-            {!state.fromToken || !state.toToken || isEmptyValue(state.fromAmount) ? (
+            {!state.fromToken ||
+            !state.toToken ||
+            isEmptyValue(state.fromAmount) ||
+            (!state.loading && !state.trade) ? (
                 <SwapButton state={state} onError={setError} disabled={true} />
             ) : parseBalance(state.fromAmount, state.fromToken.decimals).gt(state.fromToken.balance) ? (
                 <InsufficientBalanceButton symbol={state.fromSymbol} />

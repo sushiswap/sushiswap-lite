@@ -27,7 +27,7 @@ export interface TokenSearchProps {
 // tslint:disable-next-line:max-func-body-length
 const TokenSearch: FC<TokenSearchProps> = props => {
     const { border } = useStyles();
-    const { signer, tokens } = useContext(EthersContext);
+    const { provider, tokens } = useContext(EthersContext);
     const [tokenToAdd, setTokenToAdd] = useState<Token>();
     const [loading, setLoading] = useState(false);
     const duplicate = !!tokenToAdd && tokens.findIndex(t => t.address === tokenToAdd.address) !== -1;
@@ -41,10 +41,10 @@ const TokenSearch: FC<TokenSearchProps> = props => {
     useDelayedEffect(
         async () => {
             const address = props.text.trim();
-            if (signer && ethers.utils.isAddress(address)) {
+            if (provider && ethers.utils.isAddress(address)) {
                 setLoading(true);
                 try {
-                    const token = await findOrFetchToken(address);
+                    const token = await findOrFetchToken(address, provider);
                     if (token.name && token.symbol && token.decimals) {
                         setTokenToAdd(token as Token);
                     }
@@ -54,7 +54,7 @@ const TokenSearch: FC<TokenSearchProps> = props => {
             }
         },
         300,
-        [signer, props.text]
+        [provider, props.text]
     );
     return (
         <View>

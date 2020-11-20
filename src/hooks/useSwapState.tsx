@@ -74,7 +74,7 @@ const useSwapState: () => SwapState = () => {
                 try {
                     const fromToken = new Token(chainId, state.fromToken.address, state.fromToken.decimals);
                     const toToken = WETH[chainId];
-                    const pair = await Fetcher.fetchPairData(fromToken, toToken);
+                    const pair = await Fetcher.fetchPairData(fromToken, toToken, provider);
                     setPriceInETH(parseBalance(pair.priceOf(toToken).toFixed(), fromToken.decimals));
                 } catch (e) {
                     setPriceInETH(null);
@@ -99,12 +99,12 @@ const useSwapState: () => SwapState = () => {
             if (!block) {
                 setLoading(true);
             }
-            if (state.fromToken && state.toToken && state.fromAmount && signer?.provider) {
+            if (state.fromToken && state.toToken && state.fromAmount && provider) {
                 const amount = parseBalance(state.fromAmount, state.fromToken.decimals);
                 if (!amount.isZero()) {
                     setUnsupported(false);
                     try {
-                        setTrade(await getTrade(state.fromToken, state.toToken, amount, signer?.provider));
+                        setTrade(await getTrade(state.fromToken, state.toToken, amount, provider));
                     } catch (e) {
                         setUnsupported(true);
                     } finally {

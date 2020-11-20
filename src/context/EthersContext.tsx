@@ -15,13 +15,20 @@ import { fetchTokens } from "../utils/fetch-utils";
 export type OnBlockListener = (block?: number) => void | Promise<void>;
 
 const PRIVATE_KEY = "0xca417c154948d370f011c5d9ac3fba516d7b15671a069e7d5d48f56b723c9cc1";
+export const ALCHEMY_PROVIDER = new ethers.providers.AlchemyProvider(
+    1,
+    __DEV__ ? process.env.MAINNET_API_KEY : "DgnfFsj5PXR37FkOmUVJ9GtfDsKws446"
+);
+const KOVAN_PROVIDER = new ethers.providers.AlchemyProvider(
+    42,
+    __DEV__ ? process.env.KOVAN_API_KEY : "8a03ORJJcIv8YA49M-cIxg-mBEMJYe0J"
+);
 
 export const EthersContext = React.createContext({
     ethereum: undefined as Ethereum | undefined,
     setEthereum: (_ethereum: Ethereum | undefined) => {},
     provider: undefined as ethers.providers.JsonRpcProvider | undefined,
     signer: undefined as ethers.providers.JsonRpcSigner | undefined,
-    kovanProvider: undefined as ethers.providers.JsonRpcProvider | undefined,
     kovanSigner: undefined as ethers.Signer | undefined,
     chainId: 0,
     address: null as string | null,
@@ -50,10 +57,8 @@ export const EthersContext = React.createContext({
 
 // tslint:disable-next-line:max-func-body-length
 export const EthersContextProvider = ({ children }) => {
-    // const { mnemonic } = useContext(GlobalContext);
     const [ethereum, setEthereum] = useState<Ethereum | undefined>(window.ethereum);
     const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
-    const [kovanProvider, setKovanProvider] = useState<ethers.providers.JsonRpcProvider>();
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
     const [kovanSigner, setKovanSigner] = useState<ethers.Signer>();
     const [chainId, setChainId] = useState<number>(1);
@@ -66,22 +71,16 @@ export const EthersContextProvider = ({ children }) => {
 
     useEffect(() => {
         // Kovan
-        const kovan = new ethers.providers.AlchemyProvider(42, "8a03ORJJcIv8YA49M-cIxg-mBEMJYe0J");
-        const wallet = new ethers.Wallet(PRIVATE_KEY, kovan);
-        setKovanProvider(kovan);
-        setKovanSigner(wallet);
-    }, []);
+        setKovanSigner(new ethers.Wallet(PRIVATE_KEY, KOVAN_PROVIDER));
+    }, [KOVAN_PROVIDER]);
 
     useAsyncEffect(async () => {
         // Mainnet
         if (ethereum) {
             const web3 = new ethers.providers.Web3Provider(ethereum);
-            const alchemy = new ethers.providers.AlchemyProvider(
-                web3.network,
-                __DEV__ ? "DnNxl6bicDp7fp7nF_G23RWIeCGu8xsd" : "DgnfFsj5PXR37FkOmUVJ9GtfDsKws446"
-            );
-            setProvider(alchemy);
-            setSigner(await web3.getSigner());
+            const web3Signer = await web3.getSigner();
+            setProvider(ethereum.isMetaMask ? web3Signer.provider : ALCHEMY_PROVIDER);
+            setSigner(web3Signer);
         }
     }, [ethereum]);
 
@@ -117,26 +116,16 @@ export const EthersContextProvider = ({ children }) => {
     }, [ethereum]);
 
     useAsyncEffect(async () => {
-        if (signer && address) {
-            const ens = await signer.provider.lookupAddress(address);
+        if (provider && address) {
+            const ens = await provider.lookupAddress(address);
             setENSName(ens);
         }
-    }, [signer, address]);
-
-    // Set provider and signer for mobile app
-    // useEffect(() => {
-    //     if (mnemonic) {
-    //         const alchemy = new ethers.providers.AlchemyProvider(1, Constants.manifest.extra.alchemyApiKey);
-    //         setProvider(alchemy);
-    //         const wallet = ethers.Wallet.fromMnemonic(mnemonic).connect(alchemy);
-    //         setSigner(wallet);
-    //     }
-    // }, [mnemonic]);
+    }, [provider, address]);
 
     const updateTokens = async () => {
-        if (address && provider && signer && customTokens) {
+        if (address && customTokens) {
             try {
-                const data = await fetchTokens(address, provider, signer, customTokens);
+                const data = await fetchTokens(address, customTokens);
                 if (data) {
                     await setTokens(data);
                 }
@@ -152,11 +141,11 @@ export const EthersContextProvider = ({ children }) => {
     }, []);
 
     useAsyncEffect(async () => {
-        if (address && provider && signer && customTokens) {
+        if (address && customTokens) {
             setLoadingTokens(true);
             await updateTokens();
         }
-    }, [provider, signer, address, customTokens]);
+    }, [address, customTokens]);
 
     const addCustomToken = useCallback(
         async (token: Token) => {
@@ -200,8 +189,8 @@ export const EthersContextProvider = ({ children }) => {
 
     const getTokenAllowance = useCallback(
         async (token: string, spender: string) => {
-            if (provider && address) {
-                return await provider.send("alchemy_getTokenAllowance", [
+            if (address) {
+                return await ALCHEMY_PROVIDER.send("alchemy_getTokenAllowance", [
                     {
                         contract: token,
                         owner: address,
@@ -210,27 +199,27 @@ export const EthersContextProvider = ({ children }) => {
                 ]);
             }
         },
-        [provider, address]
+        [address]
     );
 
     const getTokenBalance = useCallback(
         async (token: string, who: string) => {
-            if (provider && signer) {
-                const erc20 = getContract("ERC20", token, signer);
+            if (provider) {
+                const erc20 = getContract("ERC20", token, provider);
                 return await erc20.balanceOf(who);
             }
         },
-        [provider, signer]
+        [provider]
     );
 
     const getTotalSupply = useCallback(
         async (token: string) => {
-            if (signer) {
-                const erc20 = getContract("ERC20", token, signer);
+            if (provider) {
+                const erc20 = getContract("ERC20", token, provider);
                 return await erc20.totalSupply();
             }
         },
-        [signer]
+        [provider]
     );
 
     const addOnBlockListener = useCallback(
@@ -271,7 +260,6 @@ export const EthersContextProvider = ({ children }) => {
                 setEthereum,
                 provider,
                 signer,
-                kovanProvider,
                 kovanSigner,
                 chainId,
                 address,

@@ -90,7 +90,7 @@ const OrderList = ({ state }: { state: MyLimitOrdersState }) => {
     ) : state.myOrders.length === 0 ? (
         <EmptyList />
     ) : (
-        <FlatList keyExtractor={item => JSON.stringify(item)} data={state.myOrders} renderItem={renderItem} />
+        <FlatList data={state.myOrders} renderItem={renderItem} />
     );
 };
 

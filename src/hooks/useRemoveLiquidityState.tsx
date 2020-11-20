@@ -16,13 +16,13 @@ export interface RemoveLiquidityState extends LPTokensState {
 // tslint:disable-next-line:max-func-body-length
 const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
     const state = useLPTokensState("my-lp-tokens");
-    const { provider, signer, getTokenAllowance, updateTokens } = useContext(EthersContext);
+    const { signer, getTokenAllowance, updateTokens } = useContext(EthersContext);
     const { removeLiquidity, removeLiquidityETH } = useSDK();
     const [loading, setLoading] = useState(false);
     const [removing, setRemoving] = useState(false);
 
     useAsyncEffect(async () => {
-        if (provider && signer && state.selectedLPToken) {
+        if (signer && state.selectedLPToken) {
             state.setFromSymbol(state.selectedLPToken.tokenA.symbol);
             state.setToSymbol(state.selectedLPToken.tokenB.symbol);
 
@@ -38,7 +38,7 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
                 setLoading(false);
             }
         }
-    }, [provider, signer, state.selectedLPToken]);
+    }, [signer, state.selectedLPToken]);
 
     // tslint:disable-next-line:max-func-body-length
     useAsyncEffect(async () => {

@@ -107,8 +107,8 @@ const fetchLPTokens = async (
             const erc20 = getContract("ERC20", address, provider);
             const decimals = Number(await erc20.decimals());
             const totalSupply = await erc20.totalSupply();
-            const tokenA = await findOrFetchToken(await contract.token0(), tokens);
-            const tokenB = await findOrFetchToken(await contract.token1(), tokens);
+            const tokenA = await findOrFetchToken(await contract.token0(), provider, tokens);
+            const tokenB = await findOrFetchToken(await contract.token1(), provider, tokens);
             const name = tokenA.symbol + "-" + tokenB.symbol + " LP Token";
             const symbol = tokenA.symbol + "-" + tokenB.symbol;
             return { address, decimals, name, symbol, balance, totalSupply, tokenA, tokenB } as LPToken;
@@ -116,14 +116,28 @@ const fetchLPTokens = async (
     );
 };
 
-export const findOrFetchToken = async (address: string, tokens?: Token[]) => {
+export const findOrFetchToken = async (
+    address: string,
+    provider: ethers.providers.JsonRpcProvider,
+    tokens?: Token[]
+) => {
     if (tokens) {
         const token = tokens.find(t => t.address.toLowerCase() === address.toLowerCase());
         if (token) {
             return token;
         }
     }
-    const meta = await ALCHEMY_PROVIDER.send("alchemy_getTokenMetadata", [address]);
+    let meta = await ALCHEMY_PROVIDER.send("alchemy_getTokenMetadata", [address]);
+    if (!meta.name || meta.symbol || meta.decimals || meta.logoURI) {
+        const erc20 = getContract("ERC20", address, provider);
+        const data = await Promise.all(["name", "symbol", "decimals"].map(field => erc20.callStatic[field]()));
+        meta = {
+            name: data[0],
+            symbol: data[1],
+            decimals: data[2],
+            logoURI: ""
+        };
+    }
     return {
         address,
         name: meta.name,
@@ -162,8 +176,8 @@ export const fetchMyLimitOrders = async (
             const args = await orderBook.orderOfHash(hash);
             return new Order(
                 signer,
-                await findOrFetchToken(args.fromToken, tokens),
-                await findOrFetchToken(args.toToken, tokens),
+                await findOrFetchToken(args.fromToken, provider, tokens),
+                await findOrFetchToken(args.toToken, provider, tokens),
                 args.amountIn,
                 args.amountOutMin,
                 args.recipient,

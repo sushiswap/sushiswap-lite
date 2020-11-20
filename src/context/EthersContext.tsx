@@ -136,8 +136,7 @@ export const EthersContextProvider = ({ children }) => {
     };
 
     useAsyncEffect(async () => {
-        await AsyncStorage.removeItem("custom_tokens");
-        // setCustomTokens(JSON.parse((await AsyncStorage.getItem("custom_tokens")) || "[]"));
+        setCustomTokens(JSON.parse((await AsyncStorage.getItem("custom_tokens")) || "[]"));
     }, []);
 
     useAsyncEffect(async () => {

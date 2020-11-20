@@ -26,7 +26,7 @@ export type Action = "deposit" | "withdraw";
 // tslint:disable-next-line:max-func-body-length
 const useFarmingState: () => FarmingState = () => {
     const state = useLPTokensState("pools");
-    const { provider, signer, getTokenAllowance } = useContext(EthersContext);
+    const { signer, getTokenAllowance } = useContext(EthersContext);
     const { getExpectedSushiRewardPerBlock, deposit, withdraw } = useSDK();
     const [filteredBy, setFilteredBy] = useState("" as LPTokenSelectFilter);
     const [action, setAction] = useState<Action>();
@@ -56,7 +56,7 @@ const useFarmingState: () => FarmingState = () => {
     }, [signer, state.selectedLPToken]);
 
     useAsyncEffect(async () => {
-        if (provider && signer && state.selectedLPToken) {
+        if (signer && state.selectedLPToken) {
             setLoading(true);
             state.setSelectedLPTokenAllowed(false);
             try {
@@ -69,7 +69,7 @@ const useFarmingState: () => FarmingState = () => {
                 setLoading(false);
             }
         }
-    }, [provider, signer, state.selectedLPToken]);
+    }, [signer, state.selectedLPToken]);
 
     useEffect(() => {
         state.setAmount("");

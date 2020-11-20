@@ -28,7 +28,7 @@ type Mode = "pools" | "my-lp-tokens" | "my-uniswap-lp-tokens";
 // tslint:disable-next-line:max-func-body-length
 const useLPTokensState: (mode: Mode) => LPTokensState = mode => {
     const state = useTokenPairState();
-    const { provider, signer, address, tokens } = useContext(EthersContext);
+    const { provider, address, tokens } = useContext(EthersContext);
     const [lastTimeRefreshed, setLastTimeRefreshed] = useState(0);
     const [loading, setLoading] = useState(true);
     const [lpTokens, setLPTokens] = useState<LPToken[]>([]);
@@ -39,13 +39,13 @@ const useLPTokensState: (mode: Mode) => LPTokensState = mode => {
     const { getPair } = useSDK();
 
     const updateLPTokens = async () => {
-        if (provider && signer) {
+        if (address && provider) {
             try {
                 const data = await (mode === "pools"
-                    ? fetchPools(provider, signer)
+                    ? fetchPools(address, provider)
                     : mode === "my-lp-tokens"
-                    ? fetchMyLPTokens(tokens, provider, signer)
-                    : fetchMyUniswapLPTokens(tokens, provider, signer));
+                    ? fetchMyLPTokens(address, tokens, provider)
+                    : fetchMyUniswapLPTokens(address, tokens, provider));
                 if (data) {
                     setLPTokens(data);
                 }

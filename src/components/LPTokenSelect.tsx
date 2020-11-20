@@ -110,7 +110,7 @@ const LPTokenList = ({
     ) : data.length === 0 ? (
         <EmptyList text={emptyText} />
     ) : (
-        <FlatList keyExtractor={item => JSON.stringify(item)} data={data} renderItem={renderItem} />
+        <FlatList keyExtractor={item => item.address} data={data} renderItem={renderItem} />
     );
 };
 

@@ -32,7 +32,7 @@ export interface TokenPairState {
 
 // tslint:disable-next-line:max-func-body-length
 const useTokenPairState: () => TokenPairState = () => {
-    const { provider, signer, address, tokens, updateTokens, getTokenAllowance } = useContext(EthersContext);
+    const { signer, address, tokens, updateTokens, getTokenAllowance } = useContext(EthersContext);
     const { wrapETH, unwrapETH } = useSDK();
     const [fromSymbol, setFromSymbol] = useState("");
     const [toSymbol, setToSymbol] = useState("");
@@ -60,7 +60,7 @@ const useTokenPairState: () => TokenPairState = () => {
     }, [address]);
 
     useAsyncEffect(async () => {
-        if (fromToken && toToken && provider && signer) {
+        if (fromToken && toToken && signer) {
             setFromTokenAllowed(false);
             setToTokenAllowed(false);
             setLoading(true);
@@ -80,7 +80,7 @@ const useTokenPairState: () => TokenPairState = () => {
                 setLoading(false);
             }
         }
-    }, [fromToken, toToken, provider, signer]);
+    }, [fromToken, toToken, signer]);
 
     const onWrap = useCallback(async () => {
         if (fromAmount && signer) {

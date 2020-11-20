@@ -32,7 +32,7 @@ export interface StakingState {
 
 // tslint:disable-next-line:max-func-body-length
 const useStakingState: () => StakingState = () => {
-    const { provider, signer, address, getTokenAllowance, tokens, updateTokens } = useContext(EthersContext);
+    const { signer, address, getTokenAllowance, tokens, updateTokens } = useContext(EthersContext);
     const { enterSushiBar, leaveSushiBar } = useSDK();
     const [sushiStaked, setSushiStaked] = useState<ethers.BigNumber>();
     const [sushiSupply, setSushiSupply] = useState<ethers.BigNumber>();
@@ -52,7 +52,7 @@ const useStakingState: () => StakingState = () => {
     }, [address]);
 
     useAsyncEffect(async () => {
-        if (sushi && xSushi && provider && signer) {
+        if (sushi && xSushi && signer) {
             setSushiAllowed(false);
             setXSushiAllowed(false);
             setLoading(true);
@@ -74,7 +74,7 @@ const useStakingState: () => StakingState = () => {
                 setLoading(false);
             }
         }
-    }, [sushi, xSushi, provider, signer]);
+    }, [sushi, xSushi, signer]);
 
     const onEnter = useCallback(async () => {
         if (amount && sushi && signer) {

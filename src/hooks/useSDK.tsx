@@ -1,6 +1,6 @@
 import { useCallback, useContext } from "react";
 
-import { CurrencyAmount, Fetcher, Pair, Percent, Router, TokenAmount, Trade, WETH } from "@sushiswap/sdk";
+import { Currency, CurrencyAmount, Fetcher, Pair, Percent, Router, TokenAmount, Trade, WETH } from "@sushiswap/sdk";
 import { signERC2612Permit } from "eth-permit";
 import { ethers } from "ethers";
 import { MASTER_CHEF, ORDER_BOOK, ROUTER, SETTLEMENT, SUSHI_BAR, SUSHI_ROLL } from "../constants/contracts";
@@ -30,7 +30,7 @@ const useSDK = () => {
             if (provider) {
                 const isETH = fromToken.symbol === "ETH";
                 const from = convertToken(fromToken);
-                const to = convertToken(toToken);
+                const to = toToken.symbol === "ETH" ? Currency.ETHER : convertToken(toToken);
                 const pairs = await loadAllCommonPairs(from, to, provider);
                 const amount = isETH
                     ? CurrencyAmount.ether(fromAmount.toString())

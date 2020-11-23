@@ -1,6 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 
+import BackgroundImage from "../components/BackgroundImage";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import Title from "../components/Title";
@@ -14,14 +15,15 @@ const EmptyScreen = () => {
     return (
         <View style={{ width: "100%", height: "100%", backgroundColor: background }}>
             <Screen>
-                <WebSubMenu items={[]} />
                 <Container>
+                    <BackgroundImage />
                     <Content>
                         <Title text={"Loading..."} />
                     </Content>
+                    <WebHeader />
                 </Container>
+                <WebSubMenu items={[]} />
             </Screen>
-            <WebHeader />
         </View>
     );
 };

@@ -9,6 +9,7 @@ import { GlobalContext } from "../../context/GlobalContext";
 import useColors from "../../hooks/useColors";
 import DarkModeSwitch from "../DarkModeSwitch";
 import FlexView from "../FlexView";
+import SvgLogo from "../svg/SvgLogo";
 import Text from "../Text";
 
 export interface WebHeaderProps {
@@ -16,7 +17,7 @@ export interface WebHeaderProps {
 }
 
 const WebHeader: FC<WebHeaderProps> = props => {
-    const { header } = useColors();
+    const { header, borderDark } = useColors();
     return (
         <View
             // @ts-ignore
@@ -27,7 +28,9 @@ const WebHeader: FC<WebHeaderProps> = props => {
                 width: "100%",
                 height: HEADER_HEIGHT,
                 paddingBottom: Spacing.small,
-                backgroundColor: header
+                backgroundColor: header,
+                borderBottomWidth: 1,
+                borderColor: borderDark
             }}>
             <FlexView
                 style={{
@@ -51,11 +54,12 @@ export const Title = () => {
     const { textDark, white } = useColors();
     const color = darkMode ? white : textDark;
     return (
-        <View style={{ alignSelf: "center", alignItems: "center" }}>
+        <FlexView style={{ alignSelf: "center", alignItems: "center" }}>
+            <SvgLogo width={36} height={36} style={{ marginRight: 4 }} />
             <Link to={"/"} style={{ textDecoration: "none" }}>
                 <Text style={{ fontSize: 28, color }}>SushiSwap</Text>
             </Link>
-        </View>
+        </FlexView>
     );
 };
 

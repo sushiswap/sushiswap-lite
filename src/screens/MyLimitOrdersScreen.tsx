@@ -3,6 +3,7 @@ import { FlatList, Platform, View } from "react-native";
 
 import moment from "moment";
 import useAsyncEffect from "use-async-effect";
+import BackgroundImage from "../components/BackgroundImage";
 import Button from "../components/Button";
 import Container from "../components/Container";
 import Content from "../components/Content";
@@ -33,15 +34,16 @@ import Screen from "./Screen";
 const MyLimitOrdersScreen = () => {
     return (
         <Screen>
-            <SwapSubMenu />
             <Container>
+                <BackgroundImage />
                 <Content>
                     <Title text={"My Orders"} />
                     <Text light={true}>Scan limit orders you've placed and cancel them if needed.</Text>
                     <MyLimitOrders />
-                    {Platform.OS === "web" && <WebFooter />}
                 </Content>
+                {Platform.OS === "web" && <WebFooter />}
             </Container>
+            <SwapSubMenu />
         </Screen>
     );
 };

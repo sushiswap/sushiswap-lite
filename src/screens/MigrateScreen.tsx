@@ -3,6 +3,7 @@ import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
 import ApproveButton from "../components/ApproveButton";
+import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
 import Container from "../components/Container";
@@ -34,15 +35,16 @@ import Screen from "./Screen";
 const MigrateScreen = () => {
     return (
         <Screen>
-            <MigrateSubMenu />
             <Container>
+                <BackgroundImage />
                 <Content>
                     <Title text={"Migrate Liquidity"} />
                     <Text light={true}>Migrate your Uniswap LP tokens to SushiSwap LP tokens.</Text>
                     <Migrate />
-                    {Platform.OS === "web" && <WebFooter />}
                 </Content>
+                {Platform.OS === "web" && <WebFooter />}
             </Container>
+            <MigrateSubMenu />
         </Screen>
     );
 };

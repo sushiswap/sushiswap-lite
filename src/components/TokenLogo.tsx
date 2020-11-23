@@ -27,7 +27,7 @@ const TokenLogo = (props: {
                 props.style
             ]}>
             <Image
-                source={error ? placeholder : source}
+                source={!props.token.logoURI || error ? placeholder : source}
                 onError={() => setError(true)}
                 style={{
                     width: "100%",

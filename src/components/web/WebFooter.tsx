@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { View } from "react-native";
 
 import { Spacing } from "../../constants/dimension";
@@ -15,21 +15,10 @@ const WebFooter = () => (
             }}>
             <SocialIcons />
             <Text note={true} style={{ marginTop: Spacing.tiny, textAlign: "center", width: "100%" }}>
-                2020 Built by <Link to={"https://levx.io"} text={"LevX Team"} />
+                Built with ❤️ by SushiSwap
             </Text>
         </View>
     </Column>
 );
-
-const Link = ({ to, text }) => {
-    const onPress = useCallback(() => {
-        window.open(to, "_blank");
-    }, []);
-    return (
-        <Text note={true} style={{ textDecorationLine: "underline" }} onPress={onPress}>
-            {text}
-        </Text>
-    );
-};
 
 export default WebFooter;

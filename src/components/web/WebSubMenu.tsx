@@ -73,14 +73,14 @@ export const StakingSubMenu = () => (
 );
 
 const WebSubMenu: FC<WebSubMenuProps> = props => {
-    const { borderDark, submenu } = useColors();
+    const { submenu } = useColors();
     return (
         <View
             style={{
+                position: "absolute",
+                top: 0,
                 height: SUB_MENU_HEIGHT,
                 width: "100%",
-                borderBottomWidth: 1,
-                borderColor: borderDark + "40",
                 backgroundColor: submenu
             }}>
             <FlexView

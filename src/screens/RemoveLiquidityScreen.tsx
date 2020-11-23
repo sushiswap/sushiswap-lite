@@ -3,6 +3,7 @@ import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
 import ApproveButton from "../components/ApproveButton";
+import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
 import Container from "../components/Container";
@@ -29,15 +30,16 @@ import Screen from "./Screen";
 const RemoveLiquidityScreen = () => {
     return (
         <Screen>
-            <LiquiditySubMenu />
             <Container>
+                <BackgroundImage />
                 <Content>
                     <Title text={"Remove Liquidity"} />
                     <Text light={true}>Scan your liquidity and remove one if needed.</Text>
                     <RemoveLiquidity />
-                    {Platform.OS === "web" && <WebFooter />}
                 </Content>
+                {Platform.OS === "web" && <WebFooter />}
             </Container>
+            <LiquiditySubMenu />
         </Screen>
     );
 };

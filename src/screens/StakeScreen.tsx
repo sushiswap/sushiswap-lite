@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Platform, View } from "react-native";
 
 import ApproveButton from "../components/ApproveButton";
+import BackgroundImage from "../components/BackgroundImage";
 import Button from "../components/Button";
 import Container from "../components/Container";
 import Content from "../components/Content";
@@ -28,15 +29,16 @@ import Screen from "./Screen";
 const StakeScreen = () => {
     return (
         <Screen>
-            <StakingSubMenu />
             <Container>
+                <BackgroundImage />
                 <Content>
                     <Title text={"Stake"} />
                     <Text light={true}>Earn recurring income by staking your SUSHI.</Text>
                     <Staking />
-                    {Platform.OS === "web" && <WebFooter />}
                 </Content>
+                {Platform.OS === "web" && <WebFooter />}
             </Container>
+            <StakingSubMenu />
         </Screen>
     );
 };

@@ -3,6 +3,7 @@ import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
 import ApproveButton from "../components/ApproveButton";
+import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
 import Container from "../components/Container";
@@ -37,15 +38,16 @@ import Screen from "./Screen";
 const LiquidityScreen = () => {
     return (
         <Screen>
-            <LiquiditySubMenu />
             <Container>
+                <BackgroundImage />
                 <Content>
                     <Title text={"Add Liquidity"} />
                     <Text light={true}>Add liquidity to a pool and get LP tokens of the pair.</Text>
                     <AddLiquidity />
-                    {Platform.OS === "web" && <WebFooter />}
                 </Content>
+                {Platform.OS === "web" && <WebFooter />}
             </Container>
+            <LiquiditySubMenu />
         </Screen>
     );
 };

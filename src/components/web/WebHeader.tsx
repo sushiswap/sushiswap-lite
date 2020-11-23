@@ -16,7 +16,7 @@ export interface WebHeaderProps {
 }
 
 const WebHeader: FC<WebHeaderProps> = props => {
-    const { header } = useColors();
+    const { header, borderDark } = useColors();
     return (
         <View
             // @ts-ignore
@@ -27,7 +27,9 @@ const WebHeader: FC<WebHeaderProps> = props => {
                 width: "100%",
                 height: HEADER_HEIGHT,
                 paddingBottom: Spacing.small,
-                backgroundColor: header
+                backgroundColor: header,
+                borderBottomWidth: 1,
+                borderColor: borderDark
             }}>
             <FlexView
                 style={{

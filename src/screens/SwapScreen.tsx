@@ -4,6 +4,7 @@ import { Platform, View } from "react-native";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import ApproveButton from "../components/ApproveButton";
+import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
 import Container from "../components/Container";
@@ -42,15 +43,16 @@ import Screen from "./Screen";
 const SwapScreen = () => {
     return (
         <Screen>
-            <SwapSubMenu />
             <Container>
+                <BackgroundImage />
                 <Content>
                     <Title text={"New Order"} />
                     <Text light={true}>Swap now or place a limit order with a desired price.</Text>
                     <Swap />
-                    {Platform.OS === "web" && <WebFooter />}
                 </Content>
+                {Platform.OS === "web" && <WebFooter />}
             </Container>
+            <SwapSubMenu />
         </Screen>
     );
 };

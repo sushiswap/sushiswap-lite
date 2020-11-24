@@ -1,31 +1,24 @@
-import React, { useCallback, useContext } from "react";
-import { View } from "react-native";
-
-import Switch from "expo-dark-mode-switch";
+import React, { useContext } from "react";
+import { TouchableHighlight, View } from "react-native";
 
 import { GlobalContext } from "../context/GlobalContext";
+import SvgMoon from "./svg/SvgMoon";
+import SvgSun from "./svg/SvgSun";
 
 const DarkModeSwitch = props => {
     const { darkMode, setDarkMode } = useContext(GlobalContext);
-    const onChange = useCallback(
-        async dark => {
-            await setDarkMode(dark);
-        },
-        [setDarkMode]
-    );
+    const onPress = async () => {
+        await setDarkMode(!darkMode);
+    };
     return (
         <View style={props.style}>
-            <Switch
-                value={darkMode}
-                onChange={onChange}
-                style={{
-                    transform: [
-                        {
-                            scale: 0.75
-                        }
-                    ]
-                }}
-            />
+            <TouchableHighlight onPress={onPress}>
+                {darkMode ? (
+                    <SvgMoon width={24} height={24} style={{ marginLeft: 4 }} />
+                ) : (
+                    <SvgSun width={28} height={28} />
+                )}
+            </TouchableHighlight>
         </View>
     );
 };

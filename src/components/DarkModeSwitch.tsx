@@ -14,9 +14,9 @@ const DarkModeSwitch = props => {
         <View style={props.style}>
             <TouchableHighlight onPress={onPress}>
                 {darkMode ? (
-                    <SvgMoon width={24} height={24} style={{ marginLeft: 4 }} />
+                    <SvgMoon width={24} height={24} style={{ marginHorizontal: 2 }} />
                 ) : (
-                    <SvgSun width={28} height={28} />
+                    <SvgSun width={30} height={30} />
                 )}
             </TouchableHighlight>
         </View>

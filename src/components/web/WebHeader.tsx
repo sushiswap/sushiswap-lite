@@ -58,6 +58,9 @@ export const Title = () => {
             <SvgLogo width={36} height={36} style={{ marginRight: 4 }} />
             <Link to={"/"} style={{ textDecoration: "none" }}>
                 <Text style={{ fontSize: 28, color }}>SushiSwap</Text>
+                <Text fontWeight={"light"} style={{ fontSize: 28, color, marginLeft: 4 }}>
+                    lite
+                </Text>
             </Link>
         </FlexView>
     );

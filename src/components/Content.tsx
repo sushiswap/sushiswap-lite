@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { View, ViewProps } from "react-native";
 
-import { DESKTOP_CONTENT_WIDTH, IS_DESKTOP, Spacing, SUB_MENU_HEIGHT } from "../constants/dimension";
+import { DESKTOP_CONTENT_WIDTH, IS_DESKTOP, SCREEN_WIDTH, Spacing, SUB_MENU_HEIGHT } from "../constants/dimension";
 import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
 import useStyles from "../hooks/useStyles";
@@ -18,7 +18,7 @@ const Content: React.FunctionComponent<ViewProps> = props => {
                     ...border({ color: darkMode ? borderColor : undefined }),
                     ...shadow(),
                     backgroundColor: background,
-                    width: IS_DESKTOP ? DESKTOP_CONTENT_WIDTH : "100%",
+                    width: IS_DESKTOP ? DESKTOP_CONTENT_WIDTH : SCREEN_WIDTH - Spacing.large,
                     marginLeft: "auto",
                     marginRight: "auto",
                     marginTop: Spacing.huge + SUB_MENU_HEIGHT,

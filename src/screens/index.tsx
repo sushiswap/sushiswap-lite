@@ -39,8 +39,8 @@ const WebScreens = () => {
     }, [address]);
     return (
         <Router>
-            <Suspense fallback={<EmptyScreen />}>
-                <View style={{ flex: 1, backgroundColor: background }}>
+            <View style={{ flex: 1, backgroundColor: background }}>
+                <Suspense fallback={<EmptyScreen />}>
                     <Switch>
                         <Route path={"/swap/my-orders"}>
                             <MyLimitOrdersScreen />
@@ -71,10 +71,10 @@ const WebScreens = () => {
                         </Route>
                         <Redirect to={"/swap"} />
                     </Switch>
-                    <WebHeader onExpandMenu={() => setMenuExpanded(true)} />
-                    {!IS_DESKTOP && <MobileWebMenu expanded={menuExpanded} onCollapse={() => setMenuExpanded(false)} />}
-                </View>
-            </Suspense>
+                </Suspense>
+                <WebHeader onExpandMenu={() => setMenuExpanded(true)} />
+                {!IS_DESKTOP && <MobileWebMenu expanded={menuExpanded} onCollapse={() => setMenuExpanded(false)} />}
+            </View>
         </Router>
     );
 };

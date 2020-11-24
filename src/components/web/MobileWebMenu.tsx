@@ -25,18 +25,18 @@ const MobileWebMenu = ({ expanded, onCollapse }) => {
                         paddingBottom: Spacing.normal,
                         backgroundColor: overlay
                     }}>
-                    <FlexView style={{ marginTop: Spacing.small }}>
-                        <DarkModeSwitch style={{ marginTop: -2 }} />
+                    <View style={{ marginTop: Spacing.small }}>
                         <CloseButton onPress={onCollapse} />
-                    </FlexView>
+                    </View>
                     <View style={{ alignItems: "flex-end" }}>
+                        <DarkModeSwitch style={{ marginBottom: 4 }} />
                         <Status />
                         <View style={{ height: Spacing.large }} />
                         <MobileWebMenuItem title={"Swap"} path={"/swap"} />
                         <MobileWebMenuItem title={"Liquidity"} path={"/liquidity"} />
                         <MobileWebMenuItem title={"Migrate"} path={"/migrate"} />
                         {/*<MobileWebMenuItem title={"Farming"} path={"/farming"} />*/}
-                        <MobileWebMenuItem title={"Staking"} path={"/staking"} />
+                        <MobileWebMenuItem title={"Stake"} path={"/staking"} />
                     </View>
                 </View>
             </TouchableWithoutFeedback>

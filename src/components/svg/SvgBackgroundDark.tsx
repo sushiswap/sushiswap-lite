@@ -673,7 +673,7 @@ function SvgBackgroundDark(props: SvgProps) {
                             stroke="#fff"
                             strokeWidth={6.24}
                             strokeLinejoin="round"
-                            transform="matrix(1.84616 .56078 -1.14678 .90277 13532.107 2379.001)"
+                            transform="matrix(1.96709 .45188 -.9241 .9619 11860.057 2667.155)"
                         />
                         <Path
                             fill="#f9f9f9"
@@ -681,7 +681,7 @@ function SvgBackgroundDark(props: SvgProps) {
                             strokeWidth={4.69}
                             strokeLinejoin="round"
                             d="M423.791 3825.11h14.614v480.927h-14.614z"
-                            transform="matrix(-1.34583 -.0828 .11398 -.44301 18137.519 11317.2)"
+                            transform="matrix(-1.35639 -.00564 .00776 -.44649 18561.7 11282.448)"
                         />
                         <Path
                             d="M438.405 3831.81c0-3.7-3.274-6.7-7.307-6.7s-7.307 3-7.307 6.7v467.53c0 3.7 3.274 6.7 7.307 6.7s7.307-3 7.307-6.7v-467.53z"
@@ -689,7 +689,7 @@ function SvgBackgroundDark(props: SvgProps) {
                             stroke="#0e0f23"
                             strokeWidth={4.69}
                             strokeLinejoin="round"
-                            transform="matrix(-1.34583 -.0828 .1847 -.71786 17867.016 12368.54)"
+                            transform="matrix(-1.35639 -.00564 .01257 -.7235 18543.284 12342.036)"
                         />
                         <Path
                             fill="#f9f9f9"
@@ -697,7 +697,7 @@ function SvgBackgroundDark(props: SvgProps) {
                             strokeWidth={4.73}
                             strokeLinejoin="round"
                             d="M423.791 3825.11h14.614v480.927h-14.614z"
-                            transform="matrix(-1.34583 -.0828 .1111 -.43178 18148.57 11274.248)"
+                            transform="matrix(-1.35639 -.00564 .00756 -.43517 18562.452 11239.16)"
                         />
                         <Path
                             fill="#f9f9f9"
@@ -705,7 +705,7 @@ function SvgBackgroundDark(props: SvgProps) {
                             strokeWidth={4.77}
                             strokeLinejoin="round"
                             d="M423.791 3825.11h14.614v480.927h-14.614z"
-                            transform="matrix(-1.34583 -.0828 .1081 -.42012 18160.044 11229.655)"
+                            transform="matrix(-1.35639 -.00564 .00736 -.42342 18563.234 11194.216)"
                         />
                         <Path
                             fill="#fa52a0"
@@ -713,7 +713,7 @@ function SvgBackgroundDark(props: SvgProps) {
                             strokeWidth={4.81}
                             strokeLinejoin="round"
                             d="M423.791 3139.43h14.614v1166.61h-14.614z"
-                            transform="matrix(-1.34583 -.0828 .10505 -.4083 18171.686 11184.4)"
+                            transform="matrix(-1.35639 -.00564 .00715 -.4115 18564.025 11148.607)"
                         />
                     </G>
                     <G>
@@ -765,7 +765,7 @@ function SvgBackgroundDark(props: SvgProps) {
                             stroke="#fff"
                             strokeWidth={6.24}
                             strokeLinejoin="round"
-                            transform="matrix(2.13363 .20224 -.41358 1.04334 8845.74 3629.144)"
+                            transform="matrix(1.90515 .51142 -1.04584 .93162 12852.245 2495.204)"
                         />
                         <Path
                             fill="#f9f9f9"
@@ -773,7 +773,7 @@ function SvgBackgroundDark(props: SvgProps) {
                             strokeWidth={4.69}
                             strokeLinejoin="round"
                             d="M423.791 3825.11h14.614v480.927h-14.614z"
-                            transform="matrix(-1.31781 .15716 -.21635 -.43379 19662.657 11177.932)"
+                            transform="matrix(-1.35299 -.0473 .0651 -.44537 18433.904 11299.36)"
                         />
                         <Path
                             d="M438.405 3831.81c0-3.7-3.274-6.7-7.307-6.7s-7.307 3-7.307 6.7v467.53c0 3.7 3.274 6.7 7.307 6.7s7.307-3 7.307-6.7v-467.53z"
@@ -781,7 +781,7 @@ function SvgBackgroundDark(props: SvgProps) {
                             stroke="#0e0f23"
                             strokeWidth={4.69}
                             strokeLinejoin="round"
-                            transform="matrix(-1.31781 .15716 -.35058 -.70292 20176.097 12207.383)"
+                            transform="matrix(-1.35299 -.0473 .1055 -.72168 18279.407 12356.292)"
                         />
                         <Path
                             fill="#f9f9f9"
@@ -789,7 +789,7 @@ function SvgBackgroundDark(props: SvgProps) {
                             strokeWidth={4.73}
                             strokeLinejoin="round"
                             d="M423.791 3825.11h14.614v480.927h-14.614z"
-                            transform="matrix(-1.31781 .15716 -.21087 -.4228 19641.681 11135.875)"
+                            transform="matrix(-1.35299 -.0473 .06345 -.43408 18440.216 11256.18)"
                         />
                         <Path
                             fill="#f9f9f9"
@@ -797,7 +797,7 @@ function SvgBackgroundDark(props: SvgProps) {
                             strokeWidth={4.77}
                             strokeLinejoin="round"
                             d="M423.791 3825.11h14.614v480.927h-14.614z"
-                            transform="matrix(-1.31781 .15716 -.20518 -.41138 19619.904 11092.21)"
+                            transform="matrix(-1.35299 -.0473 .06174 -.42236 18446.77 11211.35)"
                         />
                         <Path
                             fill="#fa52a0"
@@ -805,7 +805,7 @@ function SvgBackgroundDark(props: SvgProps) {
                             strokeWidth={4.81}
                             strokeLinejoin="round"
                             d="M423.791 3204.63h14.614v1101.41h-14.614z"
-                            transform="matrix(-1.31781 .15716 -.1994 -.3998 19597.802 11047.898)"
+                            transform="matrix(-1.35299 -.0473 .06 -.41046 18453.418 11165.855)"
                         />
                     </G>
                     <G>

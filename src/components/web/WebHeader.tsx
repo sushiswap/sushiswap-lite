@@ -58,6 +58,9 @@ export const Title = () => {
             <SvgLogo width={36} height={36} style={{ marginRight: 4 }} />
             <Link to={"/"} style={{ textDecoration: "none" }}>
                 <Text style={{ fontSize: 28, color }}>SushiSwap</Text>
+                <Text fontWeight={"light"} style={{ fontSize: 28, color, marginLeft: 4 }}>
+                    lite
+                </Text>
             </Link>
         </FlexView>
     );
@@ -68,15 +71,15 @@ const Menu = () => {
         <FlexView
             style={{
                 height: "100%",
-                alignItems: "flex-end"
+                alignItems: "center"
             }}>
             <MenuItem title={"Swap"} path={"/swap"} />
             <MenuItem title={"Liquidity"} path={"/liquidity"} />
             <MenuItem title={"Migrate"} path={"/migrate"} />
             {/*<MenuItem title={"Farming"} path={"/farming"} />*/}
             <MenuItem title={"Stake"} path={"/staking"} />
+            <DarkModeSwitch style={{ marginLeft: Spacing.small }} />
             <Status />
-            <DarkModeSwitch style={{ marginLeft: Spacing.tiny, marginRight: -8, marginBottom: -3 }} />
         </FlexView>
     );
 };
@@ -87,7 +90,13 @@ const MenuItem = ({ title, path }) => {
     const active = match?.path?.startsWith(path);
     return (
         <Link to={path} style={{ marginLeft: Spacing.tiny, textDecoration: "none" }}>
-            <Text style={{ fontFamily: "regular", fontSize: 18, color: active ? textDark : textLight, padding: 3 }}>
+            <Text
+                style={{
+                    fontFamily: "regular",
+                    fontSize: 18,
+                    color: active ? textDark : textLight,
+                    padding: 3
+                }}>
                 {title}
             </Text>
         </Link>

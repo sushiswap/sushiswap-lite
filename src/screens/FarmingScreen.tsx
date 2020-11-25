@@ -90,10 +90,13 @@ const TokenItem: FC<LPTokenItemProps> = props => {
                 <Text medium={true} caption={true} style={{ marginLeft: Spacing.tiny }}>
                     {props.token.tokenA.symbol}-{props.token.tokenB.symbol}
                 </Text>
-                <Text caption={true} medium={true} style={{ flex: 1, textAlign: "right", marginRight: Spacing.tiny }}>
+                <Text
+                    caption={IS_DESKTOP}
+                    medium={true}
+                    style={{ flex: 1, textAlign: "right", marginRight: Spacing.tiny }}>
                     {formatPercentage(apy)}%
                 </Text>
-                <Text caption={true} light={true} fontWeight={"light"}>
+                <Text caption={IS_DESKTOP} light={true} fontWeight={"light"}>
                     APY
                 </Text>
                 {props.selected ? <CloseIcon /> : <SelectIcon />}

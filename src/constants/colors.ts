@@ -12,7 +12,7 @@ export const Colors = {
     light: {
         accent: "#FA52A0",
         header: "#ffffffb8",
-        submenu: "transparent",
+        submenu: "#ffffff80",
         background: "#ffffff",
         backgroundLight: "#f0f0f0",
         border: "#e5e5e5",
@@ -28,7 +28,7 @@ export const Colors = {
     dark: {
         accent: "#27B0E6",
         header: "#0D0E20",
-        submenu: "transparent",
+        submenu: "#00000020",
         background: "#0e0f23",
         backgroundLight: "#0D0E20",
         border: "#ffffff33",

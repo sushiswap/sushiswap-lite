@@ -44,6 +44,10 @@ export const fetchPools = async (account: string, tokens: Token[], provider: eth
     const info = await sushiData.sushi.info();
     const masterchefInfo = await sushiData.masterchef.info();
     const pools = await sushiData.masterchef.pools();
+    const balances = await fetchTokenBalances(
+        account,
+        pools.map(pool => pool.lpToken)
+    );
     return (
         await Promise.all<LPToken | null>(
             pools.map(
@@ -68,6 +72,7 @@ export const fetchPools = async (account: string, tokens: Token[], provider: eth
                             tokenA: result[1].tokenA,
                             tokenB: result[1].tokenB,
                             symbol: result[1].tokenA.symbol + "-" + result[1].tokenB.symbol + " LP",
+                            balance: ethers.BigNumber.from(balances[i] || 0),
                             totalValueUSD: result[0][0].totalValueUSD
                         };
                     } catch (e) {

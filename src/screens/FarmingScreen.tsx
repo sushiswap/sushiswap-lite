@@ -33,7 +33,7 @@ import useColors from "../hooks/useColors";
 import useFarmingState, { FarmingState } from "../hooks/useFarmingState";
 import useLinker from "../hooks/useLinker";
 import MetamaskError from "../types/MetamaskError";
-import { formatPercentage, isEmptyValue, parseBalance } from "../utils";
+import { formatBalance, formatPercentage, isEmptyValue, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const FarmingScreen = () => {
@@ -43,7 +43,7 @@ const FarmingScreen = () => {
                 <BackgroundImage />
                 <Content>
                     <Title text={"Start Farming"} />
-                    <Text light={true}>Stake your LP tokens and earn additional SUSHI income.</Text>
+                    <Text light={true}>Stake your LP tokens and earn additional SUSHI rewards.</Text>
                     <Farming />
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
@@ -90,10 +90,7 @@ const TokenItem: FC<LPTokenItemProps> = props => {
                 <Text medium={true} caption={true} style={{ marginLeft: Spacing.tiny }}>
                     {props.token.tokenA.symbol}-{props.token.tokenB.symbol}
                 </Text>
-                <Text
-                    caption={IS_DESKTOP}
-                    medium={true}
-                    style={{ flex: 1, textAlign: "right", marginRight: Spacing.tiny }}>
+                <Text caption={IS_DESKTOP} medium={true} style={{ flex: 1, textAlign: "right", marginRight: 4 }}>
                     {formatPercentage(apy)}%
                 </Text>
                 <Text caption={IS_DESKTOP} light={true} fontWeight={"light"}>
@@ -152,6 +149,11 @@ const AddLiquidityNotice = ({ state }: { state: FarmingState }) => {
 const DepositInfo = ({ state }: { state: FarmingState }) => {
     return (
         <InfoBox>
+            <Meta
+                label={"Total Supply"}
+                text={formatBalance(state.selectedLPToken?.totalSupply || 0, 18)}
+                disabled={!state.selectedLPToken}
+            />
             <Meta
                 label={"Total Value Locked"}
                 text={"$" + Math.floor(state.selectedLPToken?.totalValueUSD || 0)}

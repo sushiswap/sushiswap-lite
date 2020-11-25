@@ -149,18 +149,14 @@ const AddLiquidityNotice = ({ state }: { state: FarmingState }) => {
 const DepositInfo = ({ state }: { state: FarmingState }) => {
     return (
         <InfoBox>
-            <Meta
-                label={"Total Supply"}
-                text={formatBalance(state.selectedLPToken?.totalSupply || 0, 18)}
-                disabled={!state.selectedLPToken}
-            />
+            <Meta label={"My Balance"} text={formatBalance(state.selectedLPToken?.balance || 0)} />
             <Meta
                 label={"Total Value Locked"}
                 text={"$" + Math.floor(state.selectedLPToken?.totalValueUSD || 0)}
                 disabled={!state.selectedLPToken}
             />
             <Meta
-                label={"APY"}
+                label={"Annual Percentage Yield"}
                 text={formatPercentage(state.selectedLPToken?.apy || 0)}
                 suffix={"%"}
                 disabled={!state.selectedLPToken}

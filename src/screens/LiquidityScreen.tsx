@@ -24,7 +24,7 @@ import UnsupportedButton from "../components/UnsupportedButton";
 import WebFooter from "../components/web/WebFooter";
 import { LiquiditySubMenu } from "../components/web/WebSubMenu";
 import { ROUTER } from "../constants/contracts";
-import { Spacing } from "../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import { EthersContext } from "../context/EthersContext";
 import useAddLiquidityState, { AddLiquidityState } from "../hooks/useAddLiquidityState";
@@ -199,7 +199,7 @@ const PairPriceInfo = ({ state }: { state: AddLiquidityState }) => {
     const symbol = state.fromSymbol + "-" + state.toSymbol;
     return (
         <InfoBox>
-            <Text style={{ fontSize: 28, marginBottom: Spacing.normal, color }}>
+            <Text style={{ fontSize: IS_DESKTOP ? 28 : 20, marginBottom: Spacing.normal, color }}>
                 {disabled ? "N/A" : amount ? amount + " " + symbol : "Fetching…"}
             </Text>
             <PriceMeta state={state} price={price} disabled={!state.fromSymbol || !state.toSymbol} />
@@ -209,7 +209,7 @@ const PairPriceInfo = ({ state }: { state: AddLiquidityState }) => {
 };
 
 const PriceMeta = ({ state, price, disabled }) => (
-    <Meta label={"Price"} text={price} suffix={state.toSymbol + " = 1 " + state.fromSymbol} disabled={disabled} />
+    <Meta label={"Ratio"} text={price} suffix={state.toSymbol + " = 1 " + state.fromSymbol} disabled={disabled} />
 );
 
 // tslint:disable-next-line:max-func-body-length

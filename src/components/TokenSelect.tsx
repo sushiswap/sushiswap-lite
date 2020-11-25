@@ -2,15 +2,17 @@ import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from
 import { FlatList, View, ViewStyle } from "react-native";
 
 import { ethers } from "ethers";
-import { Spacing } from "../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
 import useDelayedEffect from "../hooks/useDelayedEffect";
 import Token from "../types/Token";
+import CloseIcon from "./CloseIcon";
 import Expandable from "./Expandable";
 import FlexView from "./FlexView";
 import { ITEM_SEPARATOR_HEIGHT } from "./ItemSeparator";
 import Loading from "./Loading";
 import Selectable from "./Selectable";
+import SelectIcon from "./SelectIcon";
 import Text from "./Text";
 import TokenAmount from "./TokenAmount";
 import TokenLogo from "./TokenLogo";
@@ -134,7 +136,8 @@ const TokenItem = (props: {
                 <TokenLogo token={props.token} disabled={props.disabled} />
                 <TokenName token={props.token} disabled={props.disabled} />
                 <TokenAmount token={props.token} disabled={props.disabled} style={{ flex: 1, textAlign: "right" }} />
-                <TokenSymbol token={props.token} disabled={props.disabled} />
+                {IS_DESKTOP && <TokenSymbol token={props.token} disabled={props.disabled} />}
+                {props.selected ? <CloseIcon /> : <SelectIcon />}
             </FlexView>
         </Selectable>
     );

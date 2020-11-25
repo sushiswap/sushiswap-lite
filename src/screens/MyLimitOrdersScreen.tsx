@@ -22,7 +22,7 @@ import TokenLogo from "../components/TokenLogo";
 import TokenSymbol from "../components/TokenSymbol";
 import WebFooter from "../components/web/WebFooter";
 import { SwapSubMenu } from "../components/web/WebSubMenu";
-import { Spacing } from "../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import useColors from "../hooks/useColors";
 import useMyLimitOrdersState, { MyLimitOrdersState } from "../hooks/useMyLimitOrdersState";
@@ -148,7 +148,7 @@ const Token = ({ token, amount, disabled, buy }) => {
                 {buy ? "﹢" : "﹣"}
             </Text>
             <TokenAmount token={token} amount={amount} disabled={disabled} />
-            <TokenSymbol token={token} disabled={disabled} />
+            {IS_DESKTOP && <TokenSymbol token={token} disabled={disabled} />}
         </FlexView>
     );
 };

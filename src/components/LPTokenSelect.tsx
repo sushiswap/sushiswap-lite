@@ -6,11 +6,13 @@ import useColors from "../hooks/useColors";
 import { LPTokensState } from "../hooks/useLPTokensState";
 import LPToken from "../types/LPToken";
 import { formatBalance } from "../utils";
+import CloseIcon from "./CloseIcon";
 import Expandable from "./Expandable";
 import FlexView from "./FlexView";
 import { ITEM_SEPARATOR_HEIGHT } from "./ItemSeparator";
 import Loading from "./Loading";
 import Selectable from "./Selectable";
+import SelectIcon from "./SelectIcon";
 import Text from "./Text";
 import TokenLogo from "./TokenLogo";
 
@@ -85,7 +87,7 @@ const EmptyList = ({ text }: { text: string }) => {
 
 export const LPTokenItem: FC<LPTokenItemProps> = props => {
     const { textMedium } = useColors();
-    const balance = formatBalance(props.token.balance, props.token.decimals, 8);
+    const balance = formatBalance(props.token.balance, props.token.decimals, 6);
     const onPress = useCallback(() => {
         props.onSelectToken(props.token);
     }, [props.onSelectToken, props.token]);
@@ -105,6 +107,7 @@ export const LPTokenItem: FC<LPTokenItemProps> = props => {
                         {balance}
                     </Text>
                 </View>
+                {props.selected ? <CloseIcon /> : <SelectIcon />}
             </FlexView>
         </Selectable>
     );

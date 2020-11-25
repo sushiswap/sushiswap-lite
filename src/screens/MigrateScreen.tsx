@@ -6,19 +6,21 @@ import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
+import CloseIcon from "../components/CloseIcon";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
 import Expandable from "../components/Expandable";
 import FetchingButton from "../components/FetchingButton";
+import FlexView from "../components/FlexView";
 import Heading from "../components/Heading";
 import InfoBox from "../components/InfoBox";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
 import { ITEM_SEPARATOR_HEIGHT } from "../components/ItemSeparator";
 import LPTokenSelect, { LPTokenItem } from "../components/LPTokenSelect";
 import Meta from "../components/Meta";
-import Notice from "../components/Notice";
 import Selectable from "../components/Selectable";
+import SelectIcon from "../components/SelectIcon";
 import Text from "../components/Text";
 import Title from "../components/Title";
 import TokenInput from "../components/TokenInput";
@@ -27,6 +29,7 @@ import { MigrateSubMenu } from "../components/web/WebSubMenu";
 import { SUSHI_ROLL } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
+import useLinker from "../hooks/useLinker";
 import useMigrateState, { MigrateMode, MigrateState } from "../hooks/useMigrateState";
 import MetamaskError from "../types/MetamaskError";
 import { isEmptyValue, parseBalance } from "../utils";
@@ -63,16 +66,7 @@ const Migrate = () => {
             <UniswapLiquidityScreen state={state} />
             <Border />
             <AmountInput state={state} />
-            <Border />
             <AmountInfo state={state} />
-            <Notice
-                text={
-                    "☘️ You'll be redirected to the pair page after the migration finishes.\n" +
-                    "Start earning additional income with 'Stake' on that page."
-                }
-                clear={true}
-                style={{ marginTop: Spacing.normal }}
-            />
         </View>
     );
 };
@@ -108,14 +102,17 @@ const MigrateModeItem = ({
     return (
         <Selectable
             containerStyle={{ marginBottom: ITEM_SEPARATOR_HEIGHT }}
-            style={{
-                paddingHorizontal: Spacing.small + Spacing.tiny
-            }}
+            style={{ paddingLeft: Spacing.small + Spacing.tiny, paddingRight: Spacing.small }}
             selected={selected}
             disabled={selectable}
             onPress={onPress}>
-            <Text fontWeight={"regular"}>{type}</Text>
-            <Text note={true}>{desc}</Text>
+            <FlexView style={{ alignItems: "center" }}>
+                <View style={{ flex: 1 }}>
+                    <Text fontWeight={"regular"}>{type}</Text>
+                    <Text note={true}>{desc}</Text>
+                </View>
+                {selected ? <CloseIcon /> : <SelectIcon />}
+            </FlexView>
         </Selectable>
     );
 };
@@ -200,10 +197,12 @@ const MigrateButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
+    const goToFarm = useLinker("/farming", "Farming");
     const onPress = async () => {
         onError({});
         try {
             await state.onMigrate();
+            goToFarm();
         } catch (e) {
             onError(e);
         }

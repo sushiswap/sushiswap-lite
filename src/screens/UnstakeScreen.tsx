@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Platform, View } from "react-native";
 
 import BackgroundImage from "../components/BackgroundImage";
+import Border from "../components/Border";
 import Button from "../components/Button";
 import Container from "../components/Container";
 import Content from "../components/Content";
@@ -44,6 +45,7 @@ const Staking = () => {
     return (
         <View style={{ marginTop: Spacing.large }}>
             <XSushiBalance state={state} />
+            <Border />
             <AmountInput state={state} />
             {state.xSushi && state.xSushi.balance.isZero() && (
                 <Notice text={"You don't have any xSUSHI."} color={"orange"} style={{ marginTop: Spacing.small }} />
@@ -57,10 +59,8 @@ const XSushiBalance = ({ state }: { state: StakingState }) => {
     return (
         <View>
             <Heading text={"Your xSUSHI"} />
-            <Text disabled={!state.xSushi} style={{ fontSize: 28, marginBottom: Spacing.normal }}>
-                {!state.xSushi
-                    ? "Fetching..."
-                    : formatBalance(state.xSushi.balance, state.xSushi.decimals, IS_DESKTOP ? 18 : 8)}
+            <Text disabled={!state.xSushi} style={{ fontSize: IS_DESKTOP ? 28 : 20, marginBottom: Spacing.small }}>
+                {!state.xSushi ? "Fetching..." : formatBalance(state.xSushi.balance, state.xSushi.decimals)}
             </Text>
         </View>
     );
@@ -93,7 +93,7 @@ const UnstakeInfo = ({ state }: { state: StakingState }) => {
               .div(state.xSushiSupply!);
     return (
         <InfoBox>
-            <Text disabled={disabled} style={{ fontSize: 28 }}>
+            <Text disabled={disabled} style={{ fontSize: IS_DESKTOP ? 28 : 20 }}>
                 {!sushiAmount ? "N/A" : formatBalance(sushiAmount, state.sushi!.decimals, 8) + " SUSHI"}
             </Text>
             <Controls state={state} />

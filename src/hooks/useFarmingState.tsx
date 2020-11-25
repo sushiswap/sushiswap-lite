@@ -9,7 +9,6 @@ import useLPTokensState, { LPTokensState } from "./useLPTokensState";
 import useSDK from "./useSDK";
 
 export interface FarmingState extends LPTokensState {
-    expectedSushiRewardPerBlock?: ethers.BigNumber;
     onDeposit: () => Promise<void>;
     depositing: boolean;
     onWithdraw: () => Promise<void>;
@@ -17,12 +16,11 @@ export interface FarmingState extends LPTokensState {
 }
 
 // tslint:disable-next-line:max-func-body-length
-const useFarmingState: () => FarmingState = () => {
-    const state = useLPTokensState("pools");
+const useFarmingState: (myPools: boolean) => FarmingState = myPools => {
+    const state = useLPTokensState(myPools ? "my-pools" : "pools");
     const { signer, getTokenAllowance } = useContext(EthersContext);
-    const { getExpectedSushiRewardPerBlock, deposit, withdraw } = useSDK();
+    const { deposit, withdraw } = useSDK();
     const [loading, setLoading] = useState(false);
-    const [expectedSushiRewardPerBlock, setExpectedSushiRewardPerBlock] = useState<ethers.BigNumber>();
     const [depositing, setDepositing] = useState(false);
     const [withdrawing, setWithdrawing] = useState(false);
 
@@ -30,19 +28,7 @@ const useFarmingState: () => FarmingState = () => {
         setLoading(false);
         setDepositing(false);
         setWithdrawing(false);
-        setExpectedSushiRewardPerBlock(undefined);
     }, [state.selectedLPToken]);
-
-    useAsyncEffect(async () => {
-        if (signer && state.selectedLPToken) {
-            setLoading(true);
-            try {
-                setExpectedSushiRewardPerBlock(await getExpectedSushiRewardPerBlock(state.selectedLPToken, signer));
-            } finally {
-                setLoading(false);
-            }
-        }
-    }, [signer, state.selectedLPToken]);
 
     useAsyncEffect(async () => {
         if (signer && state.selectedLPToken) {
@@ -93,7 +79,6 @@ const useFarmingState: () => FarmingState = () => {
     return {
         ...state,
         loading: state.loading || loading,
-        expectedSushiRewardPerBlock,
         onDeposit,
         depositing,
         onWithdraw,

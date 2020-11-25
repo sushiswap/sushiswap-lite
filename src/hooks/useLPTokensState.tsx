@@ -4,7 +4,7 @@ import { Pair } from "@sushiswap/sdk";
 import useAsyncEffect from "use-async-effect";
 import { EthersContext } from "../context/EthersContext";
 import LPToken from "../types/LPToken";
-import { fetchMyLPTokens, fetchMyUniswapLPTokens, fetchPools } from "../utils/fetch-utils";
+import { fetchMyLPTokens, fetchMyPools, fetchMyUniswapLPTokens, fetchPools } from "../utils/fetch-utils";
 import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useSDK from "./useSDK";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";
@@ -23,7 +23,7 @@ export interface LPTokensState extends TokenPairState {
     setAmount: (amount: string) => void;
 }
 
-type Mode = "pools" | "my-lp-tokens" | "my-uniswap-lp-tokens";
+type Mode = "pools" | "my-pools" | "my-lp-tokens" | "my-uniswap-lp-tokens";
 
 let updatingLPTokens = false;
 
@@ -44,7 +44,9 @@ const useLPTokensState: (mode: Mode) => LPTokensState = mode => {
         if (address && provider && tokens.length > 0 && !updatingLPTokens) {
             try {
                 updatingLPTokens = true;
-                const data = await (mode === "pools"
+                const data = await (mode === "my-pools"
+                    ? fetchMyPools(address, tokens, provider)
+                    : mode === "pools"
                     ? fetchPools(address, tokens, provider)
                     : mode === "my-lp-tokens"
                     ? fetchMyLPTokens(address, tokens, provider)

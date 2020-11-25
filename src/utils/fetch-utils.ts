@@ -83,6 +83,41 @@ export const fetchPools = async (account: string, tokens: Token[], provider: eth
         )
     ).filter(pool => !!pool) as LPToken[];
 };
+// tslint:disable-next-line:max-func-body-length
+export const fetchMyPools = async (account: string, tokens: Token[], provider: ethers.providers.JsonRpcProvider) => {
+    const pools = await sushiData.masterchef.pools();
+    const balances = await fetchTokenBalances(
+        account,
+        pools.map(pool => pool.lpToken)
+    );
+    return (
+        await Promise.all<LPToken | null>(
+            pools.map(
+                async (pool, i): Promise<LPToken | null> => {
+                    try {
+                        const result = await Promise.all([
+                            fetchMyStake(pool.lpToken, i, account, provider),
+                            fetchPairTokens(pool.lpToken, tokens, provider)
+                        ]);
+                        if (result[0].amountDeposited.isZero()) return null;
+                        return {
+                            ...pool,
+                            address: pool.lpToken,
+                            tokenA: result[1].tokenA,
+                            tokenB: result[1].tokenB,
+                            symbol: result[1].tokenA.symbol + "-" + result[1].tokenB.symbol + " LP",
+                            balance: ethers.BigNumber.from(balances[i] || 0),
+                            amountDeposited: result[0].amountDeposited,
+                            pendingSushi: result[0].pendingSushi
+                        };
+                    } catch (e) {
+                        return null;
+                    }
+                }
+            )
+        )
+    ).filter(pool => !!pool) as LPToken[];
+};
 
 const calcAPY = (derivedETH, allocPoint, totalAllocPoint, totalValueETH) => {
     return (derivedETH * blocksPerDay * sushiPerBlock * 3 * 365 * (allocPoint / totalAllocPoint)) / totalValueETH;

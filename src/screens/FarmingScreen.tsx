@@ -42,8 +42,8 @@ const FarmingScreen = () => {
             <Container>
                 <BackgroundImage />
                 <Content>
-                    <Title text={"Start Farming"} />
-                    <Text light={true}>Stake your LP tokens and earn additional SUSHI rewards.</Text>
+                    <Title text={"Plant Seeds"} />
+                    <Text light={true}>Deposit your LP tokens and earn additional SUSHI rewards.</Text>
                     <Farming />
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
@@ -54,7 +54,7 @@ const FarmingScreen = () => {
 };
 
 const Farming = () => {
-    const state = useFarmingState();
+    const state = useFarmingState(false);
     const emptyText = "Temporarily unable to load pools.";
     return (
         <View style={{ marginTop: Spacing.large }}>
@@ -149,16 +149,20 @@ const AddLiquidityNotice = ({ state }: { state: FarmingState }) => {
 const DepositInfo = ({ state }: { state: FarmingState }) => {
     return (
         <InfoBox>
-            <Meta label={"My Balance"} text={formatBalance(state.selectedLPToken?.balance || 0)} />
             <Meta
-                label={"Total Value Locked"}
-                text={"$" + Math.floor(state.selectedLPToken?.totalValueUSD || 0)}
+                label={"My Balance"}
+                text={formatBalance(state.selectedLPToken?.balance || 0)}
                 disabled={!state.selectedLPToken}
             />
             <Meta
                 label={"Annual Percentage Yield"}
                 text={formatPercentage(state.selectedLPToken?.apy || 0)}
                 suffix={"%"}
+                disabled={!state.selectedLPToken}
+            />
+            <Meta
+                label={"Total Value Locked"}
+                text={"$" + Math.floor(state.selectedLPToken?.totalValueUSD || 0)}
                 disabled={!state.selectedLPToken}
             />
             <DepositControls state={state} />

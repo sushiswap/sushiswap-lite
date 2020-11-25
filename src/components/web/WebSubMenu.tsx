@@ -76,11 +76,11 @@ export const FarmingSubMenu = () => (
     <WebSubMenu
         items={[
             {
-                title: "Start Farming",
+                title: "Plant Seeds",
                 path: "/farming/start"
             },
             {
-                title: "Harvest",
+                title: "Harvest SUSHI",
                 path: "/farming/harvest"
             }
         ]}

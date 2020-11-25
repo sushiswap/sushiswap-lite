@@ -188,17 +188,12 @@ export const EthersContextProvider = ({ children }) => {
 
     const getTokenAllowance = useCallback(
         async (token: string, spender: string) => {
-            if (address) {
-                return await ALCHEMY_PROVIDER.send("alchemy_getTokenAllowance", [
-                    {
-                        contract: token,
-                        owner: address,
-                        spender
-                    }
-                ]);
+            if (provider && address) {
+                const erc20 = getContract("ERC20", token, provider);
+                return erc20.allowance(address, spender);
             }
         },
-        [address]
+        [provider, address]
     );
 
     const getTokenBalance = useCallback(

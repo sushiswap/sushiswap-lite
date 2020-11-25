@@ -57,9 +57,9 @@ const WebScreens = () => {
                         <Route path={"/liquidity"}>
                             <LiquidityScreen />
                         </Route>
-                        {/*<Route path={"/farming"}>*/}
-                        {/*    <FarmingScreen />*/}
-                        {/*</Route>*/}
+                        <Route path={"/farming"}>
+                            <FarmingScreen />
+                        </Route>
                         <Route path={"/migrate"}>
                             <MigrateScreen />
                         </Route>

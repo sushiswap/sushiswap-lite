@@ -25,6 +25,8 @@ export interface LPTokensState extends TokenPairState {
 
 type Mode = "pools" | "my-lp-tokens" | "my-uniswap-lp-tokens";
 
+let updatingLPTokens = false;
+
 // tslint:disable-next-line:max-func-body-length
 const useLPTokensState: (mode: Mode) => LPTokensState = mode => {
     const state = useTokenPairState();
@@ -39,10 +41,11 @@ const useLPTokensState: (mode: Mode) => LPTokensState = mode => {
     const { getPair } = useSDK();
 
     const updateLPTokens = async () => {
-        if (address && provider) {
+        if (address && provider && tokens.length > 0 && !updatingLPTokens) {
             try {
+                updatingLPTokens = true;
                 const data = await (mode === "pools"
-                    ? fetchPools(address, provider)
+                    ? fetchPools(address, tokens, provider)
                     : mode === "my-lp-tokens"
                     ? fetchMyLPTokens(address, tokens, provider)
                     : fetchMyUniswapLPTokens(address, tokens, provider));
@@ -50,6 +53,7 @@ const useLPTokensState: (mode: Mode) => LPTokensState = mode => {
                     setLPTokens(data);
                 }
             } finally {
+                updatingLPTokens = false;
                 setLoading(false);
             }
         }

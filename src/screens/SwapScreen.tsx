@@ -247,7 +247,7 @@ const LimitOrderUnsupportedNotice = () => {
             text={"⚠️ ETH not supported for limit orders. Use WETH instead."}
             color={placeholder}
             clear={true}
-            style={{ marginVertical: Spacing.small }}
+            style={{ marginVertical: Spacing.small, marginHorizontal: Spacing.tiny }}
         />
     );
 };

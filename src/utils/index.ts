@@ -27,6 +27,17 @@ const CONTRACTS = {
     LPTokenScanner: { abi: LPTokenScanner }
 };
 
+export const formatPercentage = (value: number, maxFraction = 2) => {
+    const formatted = String(value * 100);
+    if (maxFraction > 0) {
+        const split = formatted.split(".");
+        if (split.length > 1) {
+            return split[0] + "." + split[1].substr(0, maxFraction);
+        }
+    }
+    return formatted;
+};
+
 export const formatBalance = (value: ethers.BigNumberish, decimals = 18, maxFraction = 0) => {
     const formatted = ethers.utils.formatUnits(value, decimals);
     if (maxFraction > 0) {

@@ -2,7 +2,6 @@ import { useCallback, useContext, useEffect, useState } from "react";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
-import { LPTokenSelectFilter } from "../components/LPTokenSelect";
 import { MASTER_CHEF } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import { parseBalance } from "../utils";
@@ -10,34 +9,24 @@ import useLPTokensState, { LPTokensState } from "./useLPTokensState";
 import useSDK from "./useSDK";
 
 export interface FarmingState extends LPTokensState {
-    action?: Action;
-    setAction: (action?: Action) => void;
     expectedSushiRewardPerBlock?: ethers.BigNumber;
-    filteredBy: LPTokenSelectFilter;
-    setFilteredBy: (filter: LPTokenSelectFilter) => void;
     onDeposit: () => Promise<void>;
     depositing: boolean;
     onWithdraw: () => Promise<void>;
     withdrawing: boolean;
 }
 
-export type Action = "deposit" | "withdraw";
-
 // tslint:disable-next-line:max-func-body-length
 const useFarmingState: () => FarmingState = () => {
     const state = useLPTokensState("pools");
     const { signer, getTokenAllowance } = useContext(EthersContext);
     const { getExpectedSushiRewardPerBlock, deposit, withdraw } = useSDK();
-    const [filteredBy, setFilteredBy] = useState("" as LPTokenSelectFilter);
-    const [action, setAction] = useState<Action>();
     const [loading, setLoading] = useState(false);
     const [expectedSushiRewardPerBlock, setExpectedSushiRewardPerBlock] = useState<ethers.BigNumber>();
     const [depositing, setDepositing] = useState(false);
     const [withdrawing, setWithdrawing] = useState(false);
 
     useEffect(() => {
-        setFilteredBy("");
-        setAction(undefined);
         setLoading(false);
         setDepositing(false);
         setWithdrawing(false);
@@ -70,10 +59,6 @@ const useFarmingState: () => FarmingState = () => {
             }
         }
     }, [signer, state.selectedLPToken]);
-
-    useEffect(() => {
-        state.setAmount("");
-    }, [action]);
 
     const onDeposit = useCallback(async () => {
         if (state.selectedLPToken?.id && state.amount && signer) {
@@ -108,10 +93,6 @@ const useFarmingState: () => FarmingState = () => {
     return {
         ...state,
         loading: state.loading || loading,
-        filteredBy,
-        setFilteredBy,
-        action,
-        setAction,
         expectedSushiRewardPerBlock,
         onDeposit,
         depositing,

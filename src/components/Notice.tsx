@@ -20,7 +20,7 @@ const Notice = (props: NoticeProps) => {
     const borderStyle = border({ color: props.color });
     const color = props.color || borderStyle.borderColor;
     return (
-        <View style={[props.clear ? { paddingHorizontal: Spacing.tiny } : borderStyle, props.style]}>
+        <View style={[props.clear ? {} : borderStyle, props.style]}>
             <Text
                 note={true}
                 style={{

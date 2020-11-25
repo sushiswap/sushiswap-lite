@@ -1,4 +1,5 @@
 import { FACTORY_ADDRESS as SUSHISWAP_FACTORY } from "@sushiswap/sdk";
+import sushiData from "@sushiswap/sushi-data";
 import { FACTORY_ADDRESS as UNISWAP_FACTORY } from "@uniswap/sdk";
 import { ethers } from "ethers";
 import { LP_TOKEN_SCANNER, MASTER_CHEF, ORDER_BOOK, SETTLEMENT } from "../constants/contracts";
@@ -8,6 +9,9 @@ import { Order, OrderStatus } from "../hooks/useSDK";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
 import { getContract } from "./index";
+
+const blocksPerDay = 6500;
+const sushiPerBlock = 80;
 
 export const fetchTokens = async (account: string, customTokens?: Token[]) => {
     const response = await fetch("https://lite.sushiswap.fi/tokens.json");
@@ -35,31 +39,71 @@ export const fetchTokens = async (account: string, customTokens?: Token[]) => {
     });
 };
 
-export const fetchPools = async (account: string, provider: ethers.providers.JsonRpcProvider) => {
-    const response = await fetch("https://lite.sushiswap.fi/pools.json");
-    const pools = await response.json();
-    const balances = await fetchTokenBalances(
-        account,
-        pools.map(pool => pool.address)
-    );
-    return (await Promise.all(
-        pools.map(async (pool, i) => {
-            const poolToken = getContract("ERC20", pool.address, provider);
-            const totalDeposited = await poolToken.balanceOf(MASTER_CHEF);
-            const masterChef = getContract("MasterChef", MASTER_CHEF, provider);
-            const { amount: amountDeposited } = await masterChef.userInfo(i, account);
-            const pendingSushi = await masterChef.pendingSushi(i, account);
-            return {
-                ...pool,
-                id: i,
-                symbol: pool.tokenA.symbol + "-" + pool.tokenB.symbol + " LP",
-                balance: ethers.BigNumber.from(balances[i] || 0),
-                totalDeposited,
-                amountDeposited,
-                pendingSushi
-            };
-        })
-    )) as LPToken[];
+// tslint:disable-next-line:max-func-body-length
+export const fetchPools = async (account: string, tokens: Token[], provider: ethers.providers.JsonRpcProvider) => {
+    const info = await sushiData.sushi.info();
+    const masterchefInfo = await sushiData.masterchef.info();
+    const pools = await sushiData.masterchef.pools();
+    return (
+        await Promise.all<LPToken | null>(
+            pools.map(
+                async (pool, i): Promise<LPToken | null> => {
+                    try {
+                        const result = await Promise.all([
+                            fetchStakedValue(pool.lpToken),
+                            fetchPairTokens(pool.lpToken, tokens, provider)
+                        ]);
+                        if (result[0].length === 0) return null;
+                        const apy = calcAPY(
+                            info[0].derivedETH,
+                            pool.allocPoint,
+                            masterchefInfo[0].totalAllocPoint,
+                            result[0][0].totalValueETH
+                        );
+                        if (apy === 0) return null;
+                        return {
+                            ...pool,
+                            apy,
+                            address: pool.lpToken,
+                            tokenA: result[1].tokenA,
+                            tokenB: result[1].tokenB,
+                            symbol: result[1].tokenA.symbol + "-" + result[1].tokenB.symbol + " LP",
+                            totalValueUSD: result[0][0].totalValueUSD
+                        };
+                    } catch (e) {
+                        return null;
+                    }
+                }
+            )
+        )
+    ).filter(pool => !!pool) as LPToken[];
+};
+
+const calcAPY = (derivedETH, allocPoint, totalAllocPoint, totalValueETH) => {
+    return (derivedETH * blocksPerDay * sushiPerBlock * 3 * 365 * (allocPoint / totalAllocPoint)) / totalValueETH;
+};
+
+const fetchStakedValue = async (lpToken: string) => {
+    return await sushiData.masterchef.stakedValue({ lpToken });
+};
+
+const fetchMyStake = async (
+    lpToken: string,
+    poolId: number,
+    account: string,
+    provider: ethers.providers.JsonRpcProvider
+) => {
+    const masterChef = getContract("MasterChef", MASTER_CHEF, provider);
+    const { amount: amountDeposited } = await masterChef.userInfo(poolId, account);
+    const pendingSushi = await masterChef.pendingSushi(poolId, account);
+    return { amountDeposited, pendingSushi };
+};
+
+const fetchPairTokens = async (lpToken: string, tokens: Token[], provider: ethers.providers.JsonRpcProvider) => {
+    const contract = getContract("IUniswapV2Pair", lpToken, provider);
+    const tokenA = await findOrFetchToken(await contract.token0(), provider, tokens);
+    const tokenB = await findOrFetchToken(await contract.token1(), provider, tokens);
+    return { tokenA, tokenB };
 };
 
 export const fetchMyLPTokens = async (account: string, tokens: Token[], provider: ethers.providers.JsonRpcProvider) => {
@@ -129,14 +173,7 @@ export const findOrFetchToken = async (
     }
     let meta = await ALCHEMY_PROVIDER.send("alchemy_getTokenMetadata", [address]);
     if (!meta.name || meta.symbol || meta.decimals || meta.logoURI) {
-        const erc20 = getContract("ERC20", address, provider);
-        const data = await Promise.all(["name", "symbol", "decimals"].map(field => erc20.callStatic[field]()));
-        meta = {
-            name: data[0],
-            symbol: data[1],
-            decimals: data[2],
-            logoURI: ""
-        };
+        meta = await fetchTokenMeta(address, provider);
     }
     return {
         address,
@@ -146,6 +183,25 @@ export const findOrFetchToken = async (
         logoURI: meta.logo,
         balance: ethers.constants.Zero
     } as Token;
+};
+
+const fetchTokenMeta = async (address: string, provider: ethers.providers.JsonRpcProvider) => {
+    const erc20 = getContract("ERC20", address, provider);
+    const data = await Promise.all(
+        ["name", "symbol", "decimals"].map(field => {
+            try {
+                return erc20.callStatic[field]();
+            } catch (e) {
+                return "";
+            }
+        })
+    );
+    return {
+        name: data[0],
+        symbol: data[1],
+        decimals: data[2],
+        logoURI: ""
+    };
 };
 
 const fetchTokenBalances = async (account: string, addresses: string[]) => {

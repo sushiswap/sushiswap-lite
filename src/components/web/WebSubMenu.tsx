@@ -72,6 +72,21 @@ export const StakingSubMenu = () => (
     />
 );
 
+export const FarmingSubMenu = () => (
+    <WebSubMenu
+        items={[
+            {
+                title: "Start Farming",
+                path: "/farming/start"
+            },
+            {
+                title: "Harvest",
+                path: "/farming/harvest"
+            }
+        ]}
+    />
+);
+
 const WebSubMenu: FC<WebSubMenuProps> = props => {
     const { submenu } = useColors();
     return (

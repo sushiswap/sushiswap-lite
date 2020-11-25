@@ -110,12 +110,12 @@ const WithdrawInfo = ({ state }: { state: FarmingState }) => {
     const sushi = total && amount.lte(total) ? state.selectedLPToken!.pendingSushi?.mul(amount).div(total) : undefined;
     return (
         <InfoBox>
-            <Meta label={"SUSHI Rewards"} text={sushi ? formatBalance(sushi) : ""} disabled={!state.selectedLPToken} />
             <Meta
                 label={"Amount Deposited"}
                 text={total ? formatBalance(total) : ""}
                 disabled={!state.selectedLPToken}
             />
+            <Meta label={"SUSHI Rewards"} text={sushi ? formatBalance(sushi) : ""} disabled={!state.selectedLPToken} />
             <WithdrawControls state={state} />
         </InfoBox>
     );

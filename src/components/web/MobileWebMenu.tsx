@@ -34,9 +34,9 @@ const MobileWebMenu = ({ expanded, onCollapse }) => {
                         <View style={{ height: Spacing.large }} />
                         <MobileWebMenuItem title={"Swap"} path={"/swap"} />
                         <MobileWebMenuItem title={"Liquidity"} path={"/liquidity"} />
-                        <MobileWebMenuItem title={"Migrate"} path={"/migrate"} />
-                        <MobileWebMenuItem title={"Stake"} path={"/staking"} />
                         <MobileWebMenuItem title={"Farm"} path={"/farming"} />
+                        <MobileWebMenuItem title={"Stake"} path={"/staking"} />
+                        <MobileWebMenuItem title={"Migrate"} path={"/migrate"} />
                     </View>
                 </View>
             </TouchableWithoutFeedback>

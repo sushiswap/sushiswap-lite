@@ -96,7 +96,7 @@ export const fetchMyPools = async (account: string, tokens: Token[], provider: e
                 async (pool, i): Promise<LPToken | null> => {
                     try {
                         const result = await Promise.all([
-                            fetchMyStake(pool.lpToken, i, account, provider),
+                            fetchMyStake(pool.id, account, provider),
                             fetchPairTokens(pool.lpToken, tokens, provider)
                         ]);
                         if (result[0].amountDeposited.isZero()) return null;
@@ -127,12 +127,7 @@ const fetchStakedValue = async (lpToken: string) => {
     return await sushiData.masterchef.stakedValue({ lpToken });
 };
 
-const fetchMyStake = async (
-    lpToken: string,
-    poolId: number,
-    account: string,
-    provider: ethers.providers.JsonRpcProvider
-) => {
+const fetchMyStake = async (poolId: number, account: string, provider: ethers.providers.JsonRpcProvider) => {
     const masterChef = getContract("MasterChef", MASTER_CHEF, provider);
     const { amount: amountDeposited } = await masterChef.userInfo(poolId, account);
     const pendingSushi = await masterChef.pendingSushi(poolId, account);

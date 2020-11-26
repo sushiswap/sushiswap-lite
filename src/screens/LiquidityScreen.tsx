@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useState } from "react";
 import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
+import AmountMeta from "../components/AmountMeta";
 import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
@@ -24,7 +25,7 @@ import UnsupportedButton from "../components/UnsupportedButton";
 import WebFooter from "../components/web/WebFooter";
 import { LiquiditySubMenu } from "../components/web/WebSubMenu";
 import { ROUTER } from "../constants/contracts";
-import { IS_DESKTOP, Spacing } from "../constants/dimension";
+import { Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import { EthersContext } from "../context/EthersContext";
 import useAddLiquidityState, { AddLiquidityState } from "../hooks/useAddLiquidityState";
@@ -180,7 +181,6 @@ const FirstProviderInfo = ({ state }: { state: AddLiquidityState }) => {
 
 const PairPriceInfo = ({ state }: { state: AddLiquidityState }) => {
     const [amount, setAmount] = useState<string>();
-    const { textDark, textLight, placeholder } = useColors();
     const { calculateAmountOfLPTokenMinted } = useSDK();
     useAsyncEffect(async () => {
         if (state.pair && !isEmptyValue(state.fromAmount) && !isEmptyValue(state.toAmount)) {
@@ -195,13 +195,10 @@ const PairPriceInfo = ({ state }: { state: AddLiquidityState }) => {
     const disabled = isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount);
     const price =
         state.pair && state.fromToken ? state.pair.priceOf(convertToken(state.fromToken)).toFixed(8) : undefined;
-    const color = disabled ? placeholder : amount ? textDark : textLight;
     const symbol = state.fromSymbol + "-" + state.toSymbol;
     return (
         <InfoBox>
-            <Text style={{ fontSize: IS_DESKTOP ? 28 : 20, marginBottom: Spacing.normal, color }}>
-                {disabled ? "N/A" : amount ? amount + " " + symbol : "Fetching…"}
-            </Text>
+            <AmountMeta amount={amount} suffix={symbol} disabled={disabled} />
             <PriceMeta state={state} price={price} disabled={!state.fromSymbol || !state.toSymbol} />
             <Controls state={state} />
         </InfoBox>

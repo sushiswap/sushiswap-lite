@@ -2,6 +2,7 @@ import React, { FC, useCallback, useState } from "react";
 import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
+import AmountMeta from "../components/AmountMeta";
 import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
@@ -33,7 +34,7 @@ import useColors from "../hooks/useColors";
 import useFarmingState, { FarmingState } from "../hooks/useFarmingState";
 import useLinker from "../hooks/useLinker";
 import MetamaskError from "../types/MetamaskError";
-import { formatBalance, formatPercentage, isEmptyValue, parseBalance } from "../utils";
+import { formatBalance, formatPercentage, formatUSD, isEmptyValue, parseBalance, pow10 } from "../utils";
 import Screen from "./Screen";
 
 const FarmingScreen = () => {
@@ -147,8 +148,15 @@ const AddLiquidityNotice = ({ state }: { state: FarmingState }) => {
 };
 
 const DepositInfo = ({ state }: { state: FarmingState }) => {
+    const disabled = isEmptyValue(state.amount) || !state.selectedLPToken?.sushiRewardedPerYear;
+    const sushiPerYear = disabled
+        ? 0
+        : parseBalance(state.amount)
+              .mul(state.selectedLPToken!.sushiRewardedPerYear!)
+              .div(pow10(18));
     return (
         <InfoBox>
+            <AmountMeta amount={formatBalance(sushiPerYear, 18, 8)} suffix={"SUSHI / 1y"} disabled={disabled} />
             <Meta
                 label={"My Balance"}
                 text={formatBalance(state.selectedLPToken?.balance || 0)}
@@ -162,7 +170,7 @@ const DepositInfo = ({ state }: { state: FarmingState }) => {
             />
             <Meta
                 label={"Total Value Locked"}
-                text={"$" + Math.floor(state.selectedLPToken?.totalValueUSD || 0)}
+                text={formatUSD(state.selectedLPToken?.totalValueUSD || 0)}
                 disabled={!state.selectedLPToken}
             />
             <DepositControls state={state} />

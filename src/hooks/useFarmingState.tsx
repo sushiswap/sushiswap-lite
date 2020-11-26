@@ -1,10 +1,11 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 
+import { TokenAmount } from "@sushiswap/sdk";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import { MASTER_CHEF } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
-import { parseBalance } from "../utils";
+import { convertToken, parseBalance } from "../utils";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
 import useSDK from "./useSDK";
 
@@ -28,6 +29,8 @@ const useFarmingState: (myPools: boolean) => FarmingState = myPools => {
         setLoading(false);
         setDepositing(false);
         setWithdrawing(false);
+        state.setFromAmount("");
+        state.setToAmount("");
     }, [state.selectedLPToken]);
 
     useAsyncEffect(async () => {
@@ -45,6 +48,29 @@ const useFarmingState: (myPools: boolean) => FarmingState = myPools => {
             }
         }
     }, [signer, state.selectedLPToken]);
+
+    useAsyncEffect(() => {
+        if (
+            state.pair &&
+            state.selectedLPToken &&
+            state.selectedLPToken.totalSupply &&
+            state.selectedLPToken.amountDeposited
+        ) {
+            const lpToken = convertToken(state.selectedLPToken);
+            const tokenA = convertToken(state.selectedLPToken.tokenA);
+            const tokenB = convertToken(state.selectedLPToken.tokenB);
+            const totalSupply = new TokenAmount(lpToken, state.selectedLPToken.totalSupply.toString());
+            const lpTokenAmount = new TokenAmount(lpToken, state.selectedLPToken.amountDeposited.toString());
+            const tokenAAmount = state.pair.involvesToken(tokenA)
+                ? state.pair.getLiquidityValue(tokenA, totalSupply, lpTokenAmount)
+                : null;
+            state.setFromAmount(tokenAAmount?.toFixed() || "");
+            const tokenBAmount = state.pair.involvesToken(tokenA)
+                ? state.pair.getLiquidityValue(tokenB, totalSupply, lpTokenAmount)
+                : null;
+            state.setToAmount(tokenBAmount?.toFixed() || "");
+        }
+    }, [state.pair, state.selectedLPToken]);
 
     const onDeposit = useCallback(async () => {
         if (state.selectedLPToken?.id && state.amount && signer) {

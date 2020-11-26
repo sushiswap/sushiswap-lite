@@ -2,6 +2,7 @@ import React, { FC, useCallback, useState } from "react";
 import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
+import AmountMeta from "../components/AmountMeta";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
@@ -107,15 +108,26 @@ const Withdraw = ({ state }: { state: FarmingState }) => {
 const WithdrawInfo = ({ state }: { state: FarmingState }) => {
     const amount = parseBalance(state.amount);
     const total = state.selectedLPToken?.amountDeposited;
-    const sushi = total && amount.lte(total) ? state.selectedLPToken!.pendingSushi?.mul(amount).div(total) : undefined;
+    const sushi = total && amount.lte(total) ? state.selectedLPToken!.pendingSushi?.mul(amount).div(total) : null;
+    const disabled = !state.pair || !state.selectedLPToken;
     return (
         <InfoBox>
-            <Meta
-                label={"Amount Deposited"}
-                text={total ? formatBalance(total) : ""}
-                disabled={!state.selectedLPToken}
+            <AmountMeta
+                amount={sushi ? formatBalance(sushi) : ""}
+                suffix={"SUSHI"}
+                disabled={disabled || isEmptyValue(state.amount)}
             />
-            <Meta label={"SUSHI Rewards"} text={sushi ? formatBalance(sushi) : ""} disabled={!state.selectedLPToken} />
+            <Meta label={"Deposited LP Token"} text={total ? formatBalance(total) : ""} disabled={disabled} />
+            <Meta
+                label={"Deposited " + (state.selectedLPToken ? state.selectedLPToken.tokenA.symbol : "Token 1")}
+                text={state.fromAmount}
+                disabled={disabled}
+            />
+            <Meta
+                label={"Deposited " + (state.selectedLPToken ? state.selectedLPToken.tokenB.symbol : "Token 2")}
+                text={state.toAmount}
+                disabled={disabled}
+            />
             <WithdrawControls state={state} />
         </InfoBox>
     );

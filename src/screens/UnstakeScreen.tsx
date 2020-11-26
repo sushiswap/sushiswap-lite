@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Platform, View } from "react-native";
 
+import AmountMeta from "../components/AmountMeta";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
@@ -59,9 +60,11 @@ const XSushiBalance = ({ state }: { state: StakingState }) => {
     return (
         <View>
             <Heading text={"Your xSUSHI"} />
-            <Text disabled={!state.xSushi} style={{ fontSize: IS_DESKTOP ? 28 : 20, marginBottom: Spacing.small }}>
-                {!state.xSushi ? "Fetching..." : formatBalance(state.xSushi.balance, state.xSushi.decimals)}
-            </Text>
+            <AmountMeta
+                amount={state.xSushi ? formatBalance(state.xSushi.balance, state.xSushi.decimals) : ""}
+                suffix={"xSUSHI"}
+                disabled={!state.xSushi}
+            />
         </View>
     );
 };

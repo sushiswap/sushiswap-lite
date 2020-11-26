@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Platform, View } from "react-native";
 
+import AmountMeta from "../components/AmountMeta";
 import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
@@ -63,9 +64,11 @@ const SushiBalance = ({ state }: { state: StakingState }) => {
     return (
         <View>
             <Heading text={"Your SUSHI"} />
-            <Text disabled={!state.sushi} style={{ fontSize: IS_DESKTOP ? 28 : 20, marginBottom: Spacing.small }}>
-                {!state.sushi ? "Fetching..." : formatBalance(state.sushi.balance, state.sushi.decimals)}
-            </Text>
+            <AmountMeta
+                amount={state.sushi ? formatBalance(state.sushi.balance, state.sushi.decimals) : ""}
+                suffix={"SUSHI"}
+                disabled={!state.sushi}
+            />
         </View>
     );
 };
@@ -108,9 +111,11 @@ const StakeInfo = ({ state }: { state: StakingState }) => {
         : Fraction.from(xSushiAmount!.add(xSushiBalance!), state.xSushiSupply!).toString();
     return (
         <InfoBox>
-            <Text disabled={disabled} style={{ fontSize: IS_DESKTOP ? 28 : 20, marginBottom: Spacing.normal }}>
-                {!xSushiAmount ? "N/A" : formatBalance(xSushiAmount, state.xSushi!.decimals, 8) + " xSUSHI"}
-            </Text>
+            <AmountMeta
+                amount={xSushiAmount ? formatBalance(xSushiAmount, state.xSushi!.decimals, 8) : ""}
+                suffix={"xSUSHI"}
+                disabled={disabled}
+            />
             <Meta label={"xSUSHI Share"} text={share} suffix={"%"} disabled={disabled} />
             <Meta label={"Total xSUSHI"} text={xSushiTotal} disabled={disabled} />
             <Controls state={state} />

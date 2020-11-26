@@ -3,6 +3,7 @@ import { Platform, View } from "react-native";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
+import AmountMeta from "../components/AmountMeta";
 import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
@@ -305,20 +306,12 @@ const WrapInfo = ({ state }: { state: SwapState }) => {
 };
 
 const SwapInfo = ({ state, disabled }: { state: SwapState; disabled: boolean }) => {
-    const { textDark, textLight, placeholder } = useColors();
     const amount = state.trade?.outputAmount?.toFixed();
     const price = state.trade?.executionPrice?.toFixed();
     const impact = state.trade?.priceImpact?.toFixed(2);
     return (
         <View>
-            <Text
-                style={{
-                    fontSize: IS_DESKTOP ? 28 : 20,
-                    marginBottom: Spacing.normal,
-                    color: disabled ? placeholder : amount ? textDark : textLight
-                }}>
-                {disabled ? "N/A" : amount ? amount + " " + state.toSymbol : "Fetching…"}
-            </Text>
+            <AmountMeta amount={amount} suffix={state.toSymbol} disabled={disabled} />
             <Meta
                 label={"Price"}
                 text={price}

@@ -8,7 +8,7 @@ import { ALCHEMY_PROVIDER } from "../context/EthersContext";
 import { Order, OrderStatus } from "../hooks/useSDK";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
-import { getContract } from "./index";
+import { getContract, parseBalance, pow10 } from "./index";
 
 const blocksPerDay = 6500;
 const sushiPerBlock = 80;
@@ -48,79 +48,83 @@ export const fetchPools = async (account: string, tokens: Token[], provider: eth
         account,
         pools.map(pool => pool.lpToken)
     );
-    return (
-        await Promise.all<LPToken | null>(
-            pools.map(
-                async (pool, i): Promise<LPToken | null> => {
-                    try {
-                        const result = await Promise.all([
-                            fetchStakedValue(pool.lpToken),
-                            fetchPairTokens(pool.lpToken, tokens, provider)
-                        ]);
-                        if (result[0].length === 0) return null;
-                        const apy = calcAPY(
-                            info[0].derivedETH,
-                            pool.allocPoint,
-                            masterchefInfo[0].totalAllocPoint,
-                            result[0][0].totalValueETH
-                        );
-                        if (apy === 0) return null;
-                        return {
-                            ...pool,
-                            apy,
-                            address: pool.lpToken,
-                            tokenA: result[1].tokenA,
-                            tokenB: result[1].tokenB,
-                            symbol: result[1].tokenA.symbol + "-" + result[1].tokenB.symbol + " LP",
-                            balance: ethers.BigNumber.from(balances[i] || 0),
-                            totalValueUSD: result[0][0].totalValueUSD
-                        };
-                    } catch (e) {
-                        return null;
-                    }
-                }
-            )
-        )
-    ).filter(pool => !!pool) as LPToken[];
+    // tslint:disable-next-line:max-func-body-length
+    const fetchPool = async (pool, i): Promise<LPToken | null> => {
+        try {
+            const result = await Promise.all([
+                fetchStakedValue(pool.lpToken),
+                fetchPairTokens(pool.lpToken, tokens, provider)
+            ]);
+            if (result[0].length === 0) return null;
+            const apy = calcAPY(
+                info[0].derivedETH,
+                pool.allocPoint,
+                masterchefInfo[0].totalAllocPoint,
+                result[0][0].totalValueETH
+            );
+            if (apy === 0) return null;
+            return {
+                ...pool,
+                apy,
+                address: pool.lpToken,
+                decimals: 18,
+                tokenA: result[1].tokenA,
+                tokenB: result[1].tokenB,
+                symbol: result[1].tokenA.symbol + "-" + result[1].tokenB.symbol + " LP",
+                balance: ethers.BigNumber.from(balances[i] || 0),
+                sushiRewardedPerYear: calcSushiRewardedPerYear(
+                    pool.allocPoint,
+                    masterchefInfo[0].totalAllocPoint,
+                    result[0][0].totalSupply
+                ),
+                totalSupply: parseBalance(String(result[0][0].totalSupply), 18),
+                totalValueUSD: result[0][0].totalValueUSD
+            };
+        } catch (e) {
+            return null;
+        }
+    };
+    return (await Promise.all(pools.map(fetchPool))).filter(pool => !!pool) as LPToken[];
 };
-// tslint:disable-next-line:max-func-body-length
+
 export const fetchMyPools = async (account: string, tokens: Token[], provider: ethers.providers.JsonRpcProvider) => {
     const pools = await sushiData.masterchef.pools();
-    const balances = await fetchTokenBalances(
-        account,
-        pools.map(pool => pool.lpToken)
-    );
-    return (
-        await Promise.all<LPToken | null>(
-            pools.map(
-                async (pool, i): Promise<LPToken | null> => {
-                    try {
-                        const result = await Promise.all([
-                            fetchMyStake(pool.id, account, provider),
-                            fetchPairTokens(pool.lpToken, tokens, provider)
-                        ]);
-                        if (result[0].amountDeposited.isZero()) return null;
-                        return {
-                            ...pool,
-                            address: pool.lpToken,
-                            tokenA: result[1].tokenA,
-                            tokenB: result[1].tokenB,
-                            symbol: result[1].tokenA.symbol + "-" + result[1].tokenB.symbol + " LP",
-                            balance: ethers.BigNumber.from(balances[i] || 0),
-                            amountDeposited: result[0].amountDeposited,
-                            pendingSushi: result[0].pendingSushi
-                        };
-                    } catch (e) {
-                        return null;
-                    }
-                }
-            )
-        )
-    ).filter(pool => !!pool) as LPToken[];
+    const fetchMyPool = async (pool): Promise<LPToken | null> => {
+        try {
+            const myStake = await fetchMyStake(pool.id, account, provider);
+            if (myStake.amountDeposited.isZero()) return null;
+            const result = await Promise.all([
+                fetchStakedValue(pool.lpToken),
+                fetchPairTokens(pool.lpToken, tokens, provider)
+            ]);
+            return {
+                ...pool,
+                address: pool.lpToken,
+                decimals: 18,
+                tokenA: result[1].tokenA,
+                tokenB: result[1].tokenB,
+                symbol: result[1].tokenA.symbol + "-" + result[1].tokenB.symbol + " LP",
+                balance: ethers.constants.Zero,
+                amountDeposited: myStake.amountDeposited,
+                pendingSushi: myStake.pendingSushi,
+                totalSupply: parseBalance(String(result[0][0].totalSupply), 18)
+            };
+        } catch (e) {
+            return null;
+        }
+    };
+    return (await Promise.all(pools.map(fetchMyPool))).filter(pool => !!pool) as LPToken[];
 };
 
 const calcAPY = (derivedETH, allocPoint, totalAllocPoint, totalValueETH) => {
     return (derivedETH * blocksPerDay * sushiPerBlock * 3 * 365 * (allocPoint / totalAllocPoint)) / totalValueETH;
+};
+
+const calcSushiRewardedPerYear = (allocPoint, totalAllocPoint, totalSupply) => {
+    return ethers.BigNumber.from(blocksPerDay * sushiPerBlock * 3 * 365 * allocPoint)
+        .mul(pow10(36))
+        .div(totalAllocPoint)
+        .div(parseBalance(String(totalSupply)));
 };
 
 const fetchStakedValue = async (lpToken: string) => {

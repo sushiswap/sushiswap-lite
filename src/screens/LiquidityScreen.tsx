@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useState } from "react";
 import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
+import AmountMeta from "../components/AmountMeta";
 import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
@@ -180,7 +181,6 @@ const FirstProviderInfo = ({ state }: { state: AddLiquidityState }) => {
 
 const PairPriceInfo = ({ state }: { state: AddLiquidityState }) => {
     const [amount, setAmount] = useState<string>();
-    const { textDark, textLight, placeholder } = useColors();
     const { calculateAmountOfLPTokenMinted } = useSDK();
     useAsyncEffect(async () => {
         if (state.pair && !isEmptyValue(state.fromAmount) && !isEmptyValue(state.toAmount)) {
@@ -195,13 +195,10 @@ const PairPriceInfo = ({ state }: { state: AddLiquidityState }) => {
     const disabled = isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount);
     const price =
         state.pair && state.fromToken ? state.pair.priceOf(convertToken(state.fromToken)).toFixed(8) : undefined;
-    const color = disabled ? placeholder : amount ? textDark : textLight;
     const symbol = state.fromSymbol + "-" + state.toSymbol;
     return (
         <InfoBox>
-            <Text style={{ fontSize: 28, marginBottom: Spacing.normal, color }}>
-                {disabled ? "N/A" : amount ? amount + " " + symbol : "Fetching…"}
-            </Text>
+            <AmountMeta amount={amount} suffix={symbol} disabled={disabled} />
             <PriceMeta state={state} price={price} disabled={!state.fromSymbol || !state.toSymbol} />
             <Controls state={state} />
         </InfoBox>
@@ -209,7 +206,7 @@ const PairPriceInfo = ({ state }: { state: AddLiquidityState }) => {
 };
 
 const PriceMeta = ({ state, price, disabled }) => (
-    <Meta label={"Price"} text={price} suffix={state.toSymbol + " = 1 " + state.fromSymbol} disabled={disabled} />
+    <Meta label={"Ratio"} text={price} suffix={state.toSymbol + " = 1 " + state.fromSymbol} disabled={disabled} />
 );
 
 // tslint:disable-next-line:max-func-body-length

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Image, View, ViewStyle } from "react-native";
 
+import useColors from "../hooks/useColors";
 import Token from "../types/Token";
 
 const TokenLogo = (props: {
@@ -10,6 +11,7 @@ const TokenLogo = (props: {
     disabled?: boolean;
     style?: ViewStyle;
 }) => {
+    const { backgroundLight: disabled } = useColors();
     const [error, setError] = useState(false);
     const size = props.small ? 22 : 27;
     const placeholder = require("../../assets/empty-token.png");
@@ -21,7 +23,7 @@ const TokenLogo = (props: {
                 {
                     width: size,
                     height: size,
-                    backgroundColor: props.disabled ? "black" : "white",
+                    backgroundColor: props.disabled ? disabled : "white",
                     borderRadius: size / 2
                 },
                 props.style

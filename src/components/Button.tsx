@@ -12,7 +12,7 @@ export interface ButtonProps extends NativeButtonProps {
 
 // tslint:disable-next-line:max-func-body-length
 const Button: FC<ButtonProps> = props => {
-    const { primary, textMedium, placeholder, backgroundLight } = useColors();
+    const { accent, textMedium, placeholder, backgroundLight } = useColors();
     const type = props.type || "solid";
     const size = props.size || "normal";
     const height = props.size === "small" ? 36 : size === "normal" ? 45 : 54;
@@ -37,7 +37,7 @@ const Button: FC<ButtonProps> = props => {
             ]}
             titleStyle={[{ fontSize, fontFamily, color }, props.titleStyle]}
             disabledTitleStyle={[{ fontSize, fontFamily, color: placeholder }, props.titleStyle]}
-            style={[{ backgroundColor: type === "solid" ? props.color || primary : "transparent" }, props.style]}
+            style={[{ backgroundColor: type === "solid" ? props.color || accent : "transparent" }, props.style]}
             disabledStyle={[
                 { backgroundColor: type === "solid" ? backgroundLight : "transparent" },
                 props.disabledStyle

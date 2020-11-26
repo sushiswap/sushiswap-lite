@@ -1,18 +1,18 @@
 import React, { FC, useCallback } from "react";
 import { FlatList, View, ViewStyle } from "react-native";
 
-import { ethers } from "ethers";
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 import { LPTokensState } from "../hooks/useLPTokensState";
 import LPToken from "../types/LPToken";
-import { formatBalance, pow10 } from "../utils";
-import CheckBox from "./CheckBox";
+import { formatBalance } from "../utils";
+import CloseIcon from "./CloseIcon";
 import Expandable from "./Expandable";
 import FlexView from "./FlexView";
 import { ITEM_SEPARATOR_HEIGHT } from "./ItemSeparator";
 import Loading from "./Loading";
 import Selectable from "./Selectable";
+import SelectIcon from "./SelectIcon";
 import Text from "./Text";
 import TokenLogo from "./TokenLogo";
 
@@ -22,9 +22,6 @@ export interface LPTokenSelectProps {
     state: LPTokensState;
     title: string;
     emptyText: string;
-    showFilter?: boolean;
-    filter?: LPTokenSelectFilter;
-    onFilterChanged?: (filter: LPTokenSelectFilter) => void;
     Item: FC<LPTokenItemProps>;
     style?: ViewStyle;
 }
@@ -32,7 +29,6 @@ export interface LPTokenSelectProps {
 export interface LPTokenItemProps {
     token: LPToken;
     selected: boolean;
-    filter?: LPTokenSelectFilter;
     onSelectToken: (token: LPToken) => void;
 }
 
@@ -44,27 +40,12 @@ const LPTokenSelect: FC<LPTokenSelectProps> = props => {
                 title={props.title}
                 expanded={!props.state.selectedLPToken}
                 onExpand={() => props.state.setSelectedLPToken()}>
-                <LPTokenList state={props.state} filter={props.filter} emptyText={props.emptyText} Item={props.Item} />
+                <LPTokenList state={props.state} emptyText={props.emptyText} Item={props.Item} />
             </Expandable>
             {props.state.selectedLPToken && (
-                <LPTokenItem token={props.state.selectedLPToken} selected={true} onSelectToken={onUnselectToken} />
+                <props.Item token={props.state.selectedLPToken} selected={true} onSelectToken={onUnselectToken} />
             )}
         </View>
-    );
-};
-
-const Filter = ({ filter, onFilterChanged }) => {
-    const handler = (f: string) => () => onFilterChanged(f);
-    return (
-        <FlexView style={{ width: "100%", justifyContent: "flex-end" }}>
-            <CheckBox checked={filter === "balance"} onPress={handler("balance")} title={"with balance"} />
-            <CheckBox
-                checked={filter === "amountDeposited"}
-                onPress={handler("amountDeposited")}
-                title={"with deposit"}
-            />
-            <CheckBox checked={!filter} onPress={handler("")} title={"all"} />
-        </FlexView>
     );
 };
 
@@ -72,45 +53,25 @@ const Filter = ({ filter, onFilterChanged }) => {
 const LPTokenList = ({
     state,
     emptyText,
-    filter,
     Item
 }: {
     state: LPTokensState;
     emptyText: string;
-    filter?: LPTokenSelectFilter;
     Item: FC<LPTokenItemProps>;
 }) => {
     const renderItem = useCallback(
         ({ item }) => {
-            return (
-                <Item
-                    key={item.address}
-                    token={item}
-                    selected={false}
-                    filter={filter}
-                    onSelectToken={state.setSelectedLPToken}
-                />
-            );
+            return <Item key={item.symbol} token={item} selected={false} onSelectToken={state.setSelectedLPToken} />;
         },
-        [filter, state.setSelectedLPToken]
+        [state.setSelectedLPToken]
     );
-    let data = state.lpTokens.sort((t1, t2) => {
-        return (t2.totalDeposited || ethers.constants.Zero)
-            .sub(t1.totalDeposited || ethers.constants.Zero)
-            .div(pow10(14))
-            .toNumber();
-    });
-    if (filter === "amountDeposited") {
-        data = data.filter(token => token.amountDeposited?.gt(0));
-    } else if (filter === "balance") {
-        data = data.filter(token => token.balance.gt(0));
-    }
+    const data = state.lpTokens.sort((p1, p2) => (p2.apy || 0) - (p1.apy || 0));
     return state.loading ? (
         <Loading />
     ) : data.length === 0 ? (
         <EmptyList text={emptyText} />
     ) : (
-        <FlatList keyExtractor={item => item.address} data={data} renderItem={renderItem} />
+        <FlatList keyExtractor={item => item.symbol} data={data} renderItem={renderItem} />
     );
 };
 
@@ -126,7 +87,7 @@ const EmptyList = ({ text }: { text: string }) => {
 
 export const LPTokenItem: FC<LPTokenItemProps> = props => {
     const { textMedium } = useColors();
-    const balance = formatBalance(props.token.balance, props.token.decimals, 8);
+    const balance = formatBalance(props.token.balance, props.token.decimals, 6);
     const onPress = useCallback(() => {
         props.onSelectToken(props.token);
     }, [props.onSelectToken, props.token]);
@@ -142,13 +103,11 @@ export const LPTokenItem: FC<LPTokenItemProps> = props => {
                     {props.token.tokenA.symbol}-{props.token.tokenB.symbol}
                 </Text>
                 <View style={{ flex: 1, marginLeft: Spacing.tiny }}>
-                    {/*<Text note={true} style={{ textAlign: "right", color: textLight }}>*/}
-                    {/*    My Balance*/}
-                    {/*</Text>*/}
                     <Text caption={true} light={true} style={{ textAlign: "right", color: textMedium }}>
                         {balance}
                     </Text>
                 </View>
+                {props.selected ? <CloseIcon /> : <SelectIcon />}
             </FlexView>
         </Selectable>
     );

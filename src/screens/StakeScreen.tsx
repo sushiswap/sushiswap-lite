@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Platform, View } from "react-native";
 
+import AmountMeta from "../components/AmountMeta";
 import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
+import Border from "../components/Border";
 import Button from "../components/Button";
 import Container from "../components/Container";
 import Content from "../components/Content";
@@ -48,6 +50,7 @@ const Staking = () => {
     return (
         <View style={{ marginTop: Spacing.large }}>
             <SushiBalance state={state} />
+            <Border />
             <AmountInput state={state} />
             {state.sushi && state.sushi.balance.isZero() && (
                 <Notice text={"You don't have any SUSHI."} color={"orange"} style={{ marginTop: Spacing.small }} />
@@ -61,11 +64,11 @@ const SushiBalance = ({ state }: { state: StakingState }) => {
     return (
         <View>
             <Heading text={"Your SUSHI"} />
-            <Text disabled={!state.sushi} style={{ fontSize: 28, marginBottom: Spacing.normal }}>
-                {!state.sushi
-                    ? "Fetching..."
-                    : formatBalance(state.sushi.balance, state.sushi.decimals, IS_DESKTOP ? 18 : 8)}
-            </Text>
+            <AmountMeta
+                amount={state.sushi ? formatBalance(state.sushi.balance, state.sushi.decimals) : ""}
+                suffix={"SUSHI"}
+                disabled={!state.sushi}
+            />
         </View>
     );
 };
@@ -101,16 +104,18 @@ const StakeInfo = ({ state }: { state: StakingState }) => {
         : parseBalance(state.amount, state.sushi!.decimals)
               .mul(state.xSushiSupply!)
               .div(state.sushiStaked!);
-    const xSushiTotal = disabled ? undefined : formatBalance(state.xSushiSupply!, state.xSushi!.decimals);
+    const xSushiTotal = disabled ? undefined : formatBalance(state.xSushiSupply!, state.xSushi!.decimals, 8);
     const xSushiBalance = disabled ? undefined : state.xSushi!.balance.add(xSushiAmount!);
     const share = disabled
         ? undefined
         : Fraction.from(xSushiAmount!.add(xSushiBalance!), state.xSushiSupply!).toString();
     return (
         <InfoBox>
-            <Text disabled={disabled} style={{ fontSize: 28, marginBottom: Spacing.normal }}>
-                {!xSushiAmount ? "N/A" : formatBalance(xSushiAmount, state.xSushi!.decimals, 8) + " xSUSHI"}
-            </Text>
+            <AmountMeta
+                amount={xSushiAmount ? formatBalance(xSushiAmount, state.xSushi!.decimals, 8) : ""}
+                suffix={"xSUSHI"}
+                disabled={disabled}
+            />
             <Meta label={"xSUSHI Share"} text={share} suffix={"%"} disabled={disabled} />
             <Meta label={"Total xSUSHI"} text={xSushiTotal} disabled={disabled} />
             <Controls state={state} />

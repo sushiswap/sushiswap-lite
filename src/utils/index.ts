@@ -27,6 +27,27 @@ const CONTRACTS = {
     LPTokenScanner: { abi: LPTokenScanner }
 };
 
+export const formatUSD = (value: number, maxFraction = 0) => {
+    const formatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: maxFraction
+    });
+    return formatter.format(value);
+};
+
+export const formatPercentage = (value: number, maxFraction = 2) => {
+    const formatted = String(value * 100);
+    if (maxFraction > 0) {
+        const split = formatted.split(".");
+        if (split.length > 1) {
+            return split[0] + "." + split[1].substr(0, maxFraction);
+        }
+    }
+    return formatted;
+};
+
 export const formatBalance = (value: ethers.BigNumberish, decimals = 18, maxFraction = 0) => {
     const formatted = ethers.utils.formatUnits(value, decimals);
     if (maxFraction > 0) {

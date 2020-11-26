@@ -1,11 +1,10 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 
-import { Fetcher } from "@sushiswap/sdk";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import { SUSHI_ROLL } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
-import { convertToken, parseBalance } from "../utils";
+import { parseBalance } from "../utils";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
 import useSDK from "./useSDK";
 
@@ -67,13 +66,6 @@ const useMigrateState: () => MigrateState = () => {
                 await updateTokens();
                 await state.updateLPTokens();
                 state.setSelectedLPToken(undefined);
-
-                const pair = await Fetcher.fetchPairData(
-                    convertToken(state.selectedLPToken.tokenA),
-                    convertToken(state.selectedLPToken.tokenB),
-                    provider
-                );
-                window.open("https://sushiswap.fi/pair/" + pair.liquidityToken.address, "_blank");
             } finally {
                 setMigrating(false);
             }

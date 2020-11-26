@@ -80,15 +80,11 @@ const AmountInfo = ({ state }: { state: RemoveLiquidityState }) => {
     return (
         <InfoBox>
             <Meta
-                label={state.fromToken ? "Amount of " + state.fromToken.symbol : "Amount of Token 1"}
+                label={state.fromToken ? state.fromToken.symbol : "Token 1"}
                 text={state.fromAmount}
                 disabled={disabled}
             />
-            <Meta
-                label={state.toToken ? "Amount of " + state.toToken.symbol : "Amount of Token 2"}
-                text={state.toAmount}
-                disabled={disabled}
-            />
+            <Meta label={state.toToken ? state.toToken.symbol : "Token 2"} text={state.toAmount} disabled={disabled} />
             <Controls state={state} />
         </InfoBox>
     );

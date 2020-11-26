@@ -15,6 +15,7 @@ import useColors from "../hooks/useColors";
 import EmptyScreen from "./EmptyScreen";
 
 const FarmingScreen = lazy(() => import("./FarmingScreen"));
+const HarvestScreen = lazy(() => import("./HarvestScreen"));
 const LiquidityScreen = lazy(() => import("./LiquidityScreen"));
 const MigrateScreen = lazy(() => import("./MigrateScreen"));
 const MyLimitOrdersScreen = lazy(() => import("./MyLimitOrdersScreen"));
@@ -57,9 +58,15 @@ const WebScreens = () => {
                         <Route path={"/liquidity"}>
                             <LiquidityScreen />
                         </Route>
-                        {/*<Route path={"/farming"}>*/}
-                        {/*    <FarmingScreen />*/}
-                        {/*</Route>*/}
+                        <Route path={"/farming/start"}>
+                            <FarmingScreen />
+                        </Route>
+                        <Route path={"/farming/harvest"}>
+                            <HarvestScreen />
+                        </Route>
+                        <Route path={"/farming"}>
+                            <Redirect to={"/farming/start"} />
+                        </Route>
                         <Route path={"/migrate"}>
                             <MigrateScreen />
                         </Route>

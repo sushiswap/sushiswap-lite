@@ -3,16 +3,19 @@ import { Platform, View } from "react-native";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
+import AmountMeta from "../components/AmountMeta";
 import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
+import CloseIcon from "../components/CloseIcon";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
 import Expandable from "../components/Expandable";
 import ExperimentalNotice from "../components/ExperimentalNotice";
 import FetchingButton from "../components/FetchingButton";
+import FlexView from "../components/FlexView";
 import Heading from "../components/Heading";
 import InfoBox from "../components/InfoBox";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
@@ -20,6 +23,7 @@ import { ITEM_SEPARATOR_HEIGHT } from "../components/ItemSeparator";
 import Meta from "../components/Meta";
 import Notice from "../components/Notice";
 import Selectable from "../components/Selectable";
+import SelectIcon from "../components/SelectIcon";
 import Text from "../components/Text";
 import Title from "../components/Title";
 import TokenInput from "../components/TokenInput";
@@ -117,14 +121,17 @@ const OrderTypeItem = ({
     return (
         <Selectable
             containerStyle={{ marginBottom: ITEM_SEPARATOR_HEIGHT }}
-            style={{
-                paddingHorizontal: Spacing.small + Spacing.tiny
-            }}
+            style={{ paddingLeft: Spacing.small + Spacing.tiny, paddingRight: Spacing.small }}
             selected={selected}
             disabled={selectable}
             onPress={onPress}>
-            <Text fontWeight={"regular"}>{type}</Text>
-            <Text note={true}>{desc}</Text>
+            <FlexView style={{ alignItems: "center" }}>
+                <View style={{ flex: 1 }}>
+                    <Text fontWeight={"regular"}>{type}</Text>
+                    <Text note={true}>{desc}</Text>
+                </View>
+                {selected ? <CloseIcon /> : <SelectIcon />}
+            </FlexView>
         </Selectable>
     );
 };
@@ -247,7 +254,7 @@ const LimitOrderUnsupportedNotice = () => {
             text={"⚠️ ETH not supported for limit orders. Use WETH instead."}
             color={placeholder}
             clear={true}
-            style={{ marginVertical: Spacing.small }}
+            style={{ marginVertical: Spacing.small, marginHorizontal: Spacing.tiny }}
         />
     );
 };
@@ -299,20 +306,12 @@ const WrapInfo = ({ state }: { state: SwapState }) => {
 };
 
 const SwapInfo = ({ state, disabled }: { state: SwapState; disabled: boolean }) => {
-    const { textDark, textLight, placeholder } = useColors();
     const amount = state.trade?.outputAmount?.toFixed();
     const price = state.trade?.executionPrice?.toFixed();
     const impact = state.trade?.priceImpact?.toFixed(2);
     return (
         <View>
-            <Text
-                style={{
-                    fontSize: 28,
-                    marginBottom: Spacing.normal,
-                    color: disabled ? placeholder : amount ? textDark : textLight
-                }}>
-                {disabled ? "N/A" : amount ? amount + " " + state.toSymbol : "Fetching…"}
-            </Text>
+            <AmountMeta amount={amount} suffix={state.toSymbol} disabled={disabled} />
             <Meta
                 label={"Price"}
                 text={price}

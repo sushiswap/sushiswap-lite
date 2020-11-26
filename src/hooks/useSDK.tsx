@@ -243,16 +243,6 @@ const useSDK = () => {
         []
     );
 
-    const getExpectedSushiRewardPerBlock = useCallback(async (token: LPToken, signer: ethers.Signer) => {
-        const masterChef = getContract("MasterChef", MASTER_CHEF, signer);
-        const totalAllocPoint = await masterChef.totalAllocPoint();
-        const sushiPerBlock = await masterChef.sushiPerBlock();
-        const { allocPoint } = await masterChef.poolInfo(token.id);
-        return ethers.BigNumber.from(sushiPerBlock)
-            .mul(allocPoint)
-            .div(totalAllocPoint);
-    }, []);
-
     const deposit = useCallback(async (lpTokenId: number, amount: ethers.BigNumber, signer: ethers.Signer) => {
         const masterChef = getContract("MasterChef", MASTER_CHEF, signer);
         const gasLimit = await masterChef.estimateGas.deposit(lpTokenId, amount);
@@ -386,7 +376,6 @@ const useSDK = () => {
         addLiquidityETH,
         removeLiquidity,
         removeLiquidityETH,
-        getExpectedSushiRewardPerBlock,
         deposit,
         withdraw,
         enterSushiBar,

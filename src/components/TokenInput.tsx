@@ -51,7 +51,7 @@ const TokenInput: FC<TokenInputProps> = props => {
                     placeholder={"0.0"}
                     keyboardType={"numeric"}
                     autoFocus={props.autoFocus || false}
-                    inputStyle={{ marginHorizontal: 4 }}
+                    inputStyle={{ marginHorizontal: Spacing.tiny }}
                     inputContainerStyle={{ borderBottomWidth: 0 }}
                     labelStyle={{ fontFamily: "light", height: props.label ? "auto" : 0 }}
                     containerStyle={{
@@ -95,7 +95,7 @@ const MaxButton = (props: { token: Token; updateAmount; maxButtonText?: string }
                 title={props.maxButtonText || (IS_DESKTOP ? "MAX " + props.token.symbol : "MAX")}
                 fontWeight={"bold"}
                 onPress={onPressMax}
-                buttonStyle={{ paddingHorizontal: 4 }}
+                buttonStyle={{ paddingHorizontal: Spacing.tiny }}
             />
         </View>
     );

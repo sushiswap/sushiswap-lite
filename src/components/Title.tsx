@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 
-import { Spacing } from "../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import Text from "./Text";
 
 interface TitleProps {
@@ -9,7 +9,7 @@ interface TitleProps {
 
 const Title: FC<TitleProps> = props => {
     return (
-        <Text fontWeight={"bold"} style={{ marginBottom: Spacing.tiny, fontSize: 40 }}>
+        <Text fontWeight={"bold"} style={{ marginBottom: Spacing.tiny, fontSize: IS_DESKTOP ? 40 : 28 }}>
             {props.text}
         </Text>
     );

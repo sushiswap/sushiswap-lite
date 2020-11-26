@@ -58,14 +58,11 @@ const WebScreens = () => {
                         <Route path={"/liquidity"}>
                             <LiquidityScreen />
                         </Route>
-                        <Route path={"/farming/start"}>
-                            <FarmingScreen />
-                        </Route>
                         <Route path={"/farming/harvest"}>
                             <HarvestScreen />
                         </Route>
                         <Route path={"/farming"}>
-                            <Redirect to={"/farming/start"} />
+                            <FarmingScreen />
                         </Route>
                         <Route path={"/migrate"}>
                             <MigrateScreen />

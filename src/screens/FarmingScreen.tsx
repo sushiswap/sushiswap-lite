@@ -77,6 +77,7 @@ const Farming = () => {
 // tslint:disable-next-line:max-func-body-length
 const TokenItem: FC<LPTokenItemProps> = props => {
     const apy = props.token.apy || 0;
+    const multiplier = props.token.multiplier || 0;
     const onPress = useCallback(() => {
         props.onSelectToken(props.token);
     }, [props.onSelectToken, props.token]);
@@ -91,12 +92,15 @@ const TokenItem: FC<LPTokenItemProps> = props => {
                 <Text medium={true} caption={true} style={{ marginLeft: Spacing.tiny }}>
                     {props.token.tokenA.symbol}-{props.token.tokenB.symbol}
                 </Text>
-                <Text caption={IS_DESKTOP} medium={true} style={{ flex: 1, textAlign: "right", marginRight: 4 }}>
-                    {formatPercentage(apy)}%
-                </Text>
-                <Text caption={IS_DESKTOP} light={true} fontWeight={"light"}>
-                    APY
-                </Text>
+                <View style={{ flex: 1, alignItems: "flex-end" }}>
+                    <Text note={true}>
+                        {multiplier > 1 ? "✨" : ""}
+                        {multiplier.toFixed(2) || "1.00"}x APY
+                    </Text>
+                    <Text caption={IS_DESKTOP} medium={true}>
+                        {formatPercentage(apy)}%
+                    </Text>
+                </View>
                 {props.selected ? <CloseIcon /> : <SelectIcon />}
             </FlexView>
         </Selectable>

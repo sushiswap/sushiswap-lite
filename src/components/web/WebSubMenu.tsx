@@ -77,7 +77,7 @@ export const FarmingSubMenu = () => (
         items={[
             {
                 title: "Plant LP Tokens",
-                path: "/farming/start"
+                path: "/farming"
             },
             {
                 title: "Harvest SUSHI",

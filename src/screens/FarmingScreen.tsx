@@ -163,14 +163,14 @@ const DepositInfo = ({ state }: { state: FarmingState }) => {
                 disabled={!state.selectedLPToken}
             />
             <Meta
-                label={"Annual Percentage Yield"}
-                text={formatPercentage(state.selectedLPToken?.apy || 0)}
-                suffix={"%"}
+                label={"Total Value Locked"}
+                text={formatUSD(state.selectedLPToken?.totalValueUSD || 0)}
                 disabled={!state.selectedLPToken}
             />
             <Meta
-                label={"Total Value Locked"}
-                text={formatUSD(state.selectedLPToken?.totalValueUSD || 0)}
+                label={"Annual Percentage Yield"}
+                text={formatPercentage(state.selectedLPToken?.apy || 0)}
+                suffix={"%"}
                 disabled={!state.selectedLPToken}
             />
             <DepositControls state={state} />

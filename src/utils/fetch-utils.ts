@@ -78,7 +78,8 @@ export const fetchPools = async (account: string, tokens: Token[], provider: eth
                     result[0][0].totalSupply
                 ),
                 totalSupply: parseBalance(String(result[0][0].totalSupply), 18),
-                totalValueUSD: result[0][0].totalValueUSD
+                totalValueUSD: result[0][0].totalValueUSD,
+                multiplier: pool.allocPoint / 1000
             };
         } catch (e) {
             return null;

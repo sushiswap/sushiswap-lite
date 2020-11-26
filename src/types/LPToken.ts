@@ -11,4 +11,5 @@ export default interface LPToken extends Token {
     sushiRewardedPerYear?: ethers.BigNumber;
     apy?: number;
     totalValueUSD?: number;
+    multiplier?: number;
 }

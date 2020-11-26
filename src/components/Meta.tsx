@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 
+import { IS_DESKTOP } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 import useLinker from "../hooks/useLinker";
 import FlexView from "./FlexView";
@@ -23,13 +24,13 @@ const Meta: FC<MetaProps> = props => {
         : "Fetching…";
     return (
         <FlexView style={{ justifyContent: "space-between", marginTop: 4 }}>
-            <Text fontWeight={"bold"} style={{ fontSize: 13, color: props.disabled ? placeholder : textMedium }}>
+            <Text note={!IS_DESKTOP} fontWeight={"bold"} style={{ color: props.disabled ? placeholder : textMedium }}>
                 {props.label}
             </Text>
             <Text
+                note={!IS_DESKTOP}
                 onPress={props.url ? onPress : undefined}
                 style={{
-                    fontSize: 13,
                     color: props.disabled ? placeholder : props.text ? textMedium : textLight,
                     textDecorationLine: props.url ? "underline" : "none"
                 }}>

@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { FlatList, View, ViewStyle } from "react-native";
 
-import { ethers } from "ethers";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
 import useDelayedEffect from "../hooks/useDelayedEffect";
@@ -43,11 +42,10 @@ const TokenSelect: FC<TokenSelectProps> = props => {
         props.onChangeSymbol(t.symbol);
     };
     const hidden = (t: Token) => {
-        let hide = props.hidden?.(t) || false;
-        if (!hide && query.length > 0 && !ethers.utils.isAddress(query)) {
-            hide = !t.symbol.toLowerCase().includes(query) && !t.name.toLowerCase().includes(query);
+        if (query.length > 0) {
+            return !t.symbol.toLowerCase().includes(query) && !t.name.toLowerCase().includes(query);
         }
-        return hide;
+        return props.hidden?.(t) || false;
     };
     useEffect(() => setSearch(""), [props.symbol]);
     useDelayedEffect(() => setQuery(search.trim().toLowerCase()), 300, [search]);

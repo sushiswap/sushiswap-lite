@@ -42,7 +42,7 @@ const FarmingScreen = () => {
             <Container>
                 <BackgroundImage />
                 <Content>
-                    <Title text={"Plant Seeds"} />
+                    <Title text={"Plant LP Tokens"} />
                     <Text light={true}>Deposit your LP tokens and earn additional SUSHI rewards.</Text>
                     <Farming />
                 </Content>

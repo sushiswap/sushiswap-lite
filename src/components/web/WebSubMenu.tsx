@@ -76,7 +76,7 @@ export const FarmingSubMenu = () => (
     <WebSubMenu
         items={[
             {
-                title: "Plant Seeds",
+                title: "Plant LP Tokens",
                 path: "/farming/start"
             },
             {

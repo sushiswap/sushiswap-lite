@@ -23,6 +23,7 @@ const RemoveLiquidityScreen = lazy(() => import("./RemoveLiquidityScreen"));
 const StakeScreen = lazy(() => import("./StakeScreen"));
 const UnstakeScreen = lazy(() => import("./UnstakeScreen"));
 const SwapScreen = lazy(() => import("./SwapScreen"));
+const HomeScreen = lazy(() => import("./HomeScreen"));
 
 export const Screens = () => {
     const { load } = useContext(GlobalContext);
@@ -73,7 +74,9 @@ const WebScreens = () => {
                         <Route path={"/staking"}>
                             <StakeScreen />
                         </Route>
-                        <Redirect to={"/swap"} />
+                        <Route path={"/"}>
+                            <HomeScreen />
+                        </Route>
                     </Switch>
                 </Suspense>
                 <WebHeader onExpandMenu={() => setMenuExpanded(true)} />

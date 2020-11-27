@@ -23,7 +23,7 @@ const Content: React.FunctionComponent<ViewProps> = props => {
                     marginRight: "auto",
                     marginTop: Spacing.huge + SUB_MENU_HEIGHT,
                     marginBottom: Spacing.large,
-                    padding: Spacing.small + Spacing.tiny
+                    padding: IS_DESKTOP ? Spacing.normal : Spacing.small + Spacing.tiny
                 },
                 props.style
             ]}

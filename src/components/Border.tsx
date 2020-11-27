@@ -4,7 +4,7 @@ import { View } from "react-native";
 import { Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 
-const Border = () => {
+const Border = props => {
     const { border } = useColors();
     return (
         <View
@@ -12,8 +12,8 @@ const Border = () => {
                 height: 1,
                 width: "100%",
                 backgroundColor: border,
-                marginTop: Spacing.small,
-                marginBottom: Spacing.small + Spacing.tiny
+                marginTop: props.small ? Spacing.tiny : Spacing.small,
+                marginBottom: props.small ? Spacing.tiny : Spacing.small + Spacing.tiny
             }}
         />
     );

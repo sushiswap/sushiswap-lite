@@ -1,15 +1,20 @@
 import React, { FC } from "react";
+import { TextStyle } from "react-native";
 
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import Text from "./Text";
 
 interface TitleProps {
     text: string;
+    fontWeight?: "light" | "regular" | "bold";
+    style?: TextStyle;
 }
 
 const Title: FC<TitleProps> = props => {
     return (
-        <Text fontWeight={"bold"} style={{ marginBottom: Spacing.tiny, fontSize: IS_DESKTOP ? 40 : 28 }}>
+        <Text
+            fontWeight={props.fontWeight || "bold"}
+            style={[{ marginBottom: Spacing.tiny, fontSize: IS_DESKTOP ? 40 : 28 }, props.style]}>
             {props.text}
         </Text>
     );

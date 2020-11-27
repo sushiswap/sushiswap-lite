@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { Pair } from "@sushiswap/sdk";
 import sushiData from "@sushiswap/sushi-data";
@@ -27,7 +27,7 @@ const CACHE: TokenWithValue[] = [];
 
 // tslint:disable-next-line:max-func-body-length
 const useHomeState = () => {
-    const { provider, signer, loadingTokens, tokens: list } = useContext(EthersContext);
+    const { provider, signer, address, loadingTokens, tokens: list } = useContext(EthersContext);
     const [tokens, setTokens] = useState<TokenWithValue[]>();
     const [lpTokens, setLPTokens] = useState<LPTokenWithValue[]>();
     const [pools, setPools] = useState<LPTokenWithValue[]>();
@@ -35,6 +35,15 @@ const useHomeState = () => {
     const [loadingLPTokens, setLoadingLPTokens] = useState(true);
     const [loadingPools, setLoadingPools] = useState(true);
     const { getPair } = useSDK();
+
+    useEffect(() => {
+        setTokens(undefined);
+        setLPTokens(undefined);
+        setPools(undefined);
+        setLoading(true);
+        setLoadingLPTokens(true);
+        setLoadingPools(true);
+    }, [address]);
 
     // Load Tokens
     useAsyncEffect(async () => {

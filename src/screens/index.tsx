@@ -74,9 +74,10 @@ const WebScreens = () => {
                         <Route path={"/staking"}>
                             <StakeScreen />
                         </Route>
-                        <Route path={"/"}>
+                        <Route path={"/home"}>
                             <HomeScreen />
                         </Route>
+                        <Redirect to={"/home"} />
                     </Switch>
                 </Suspense>
                 <WebHeader onExpandMenu={() => setMenuExpanded(true)} />

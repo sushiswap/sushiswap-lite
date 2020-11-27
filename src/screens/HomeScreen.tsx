@@ -63,9 +63,9 @@ const Home = ({ state }: { state: HomeState }) => {
     return (
         <View style={{ marginTop: Spacing.large }}>
             <MyTokens state={state} />
-            <View style={{ height: Spacing.large + Spacing.normal }} />
+            <View style={{ height: Spacing.large + (IS_DESKTOP ? Spacing.normal : 0) }} />
             <MyLPTokens state={state} />
-            <View style={{ height: Spacing.large + Spacing.normal }} />
+            <View style={{ height: Spacing.large + (IS_DESKTOP ? Spacing.normal : 0) }} />
             <Pools state={state} />
         </View>
     );

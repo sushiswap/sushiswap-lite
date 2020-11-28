@@ -185,17 +185,22 @@ const fetchLPTokens = async (
     );
     return await Promise.all(
         pairs.map(async (pair, index) => {
-            const address = pair.token;
-            const balance = ethers.BigNumber.from(balances[index]);
-            const contract = getContract("IUniswapV2Pair", address, provider);
-            const erc20 = getContract("ERC20", address, provider);
-            const decimals = Number(await erc20.decimals());
-            const totalSupply = await erc20.totalSupply();
-            const tokenA = await findOrFetchToken(await contract.token0(), provider, tokens);
-            const tokenB = await findOrFetchToken(await contract.token1(), provider, tokens);
-            const name = tokenA.symbol + "-" + tokenB.symbol + " LP Token";
-            const symbol = tokenA.symbol + "-" + tokenB.symbol;
-            return { address, decimals, name, symbol, balance, totalSupply, tokenA, tokenB } as LPToken;
+            const erc20 = getContract("ERC20", pair.token, provider);
+            const result = await Promise.all([
+                erc20.decimals(),
+                erc20.totalSupply(),
+                fetchPairTokens(pair.token, tokens, provider)
+            ]);
+            return {
+                address: pair.token,
+                decimals: Number(result[0]),
+                name: result[2].tokenA.symbol + "-" + result[2].tokenB.symbol + " LP Token",
+                symbol: result[2].tokenA.symbol + "-" + result[2].tokenB.symbol,
+                balance: ethers.BigNumber.from(balances[index]),
+                totalSupply: result[1],
+                tokenA: result[2].tokenA,
+                tokenB: result[2].tokenB
+            } as LPToken;
         })
     );
 };

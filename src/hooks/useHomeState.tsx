@@ -86,7 +86,7 @@ const useHomeState = () => {
     // Load Farming
     useAsyncEffect(async () => {
         const weth = list.find(t => t.symbol === "WETH");
-        if (provider && signer && weth && tokens && tokens.length > 0) {
+        if (provider && signer && weth && tokens && tokens.length > 0 && lpTokens) {
             setLoadingPools(true);
             const wethPriceUSD = Fraction.parse(String(await sushiData.weth.price()));
             const fetched = await fetchMyPools(await signer.getAddress(), tokens, provider);
@@ -100,7 +100,7 @@ const useHomeState = () => {
                 setLoadingPools(false);
             }
         }
-    }, [getPair, provider, signer, tokens]);
+    }, [getPair, provider, signer, tokens, lpTokens]);
 
     return {
         loadingTokens: loading || loadingTokens,

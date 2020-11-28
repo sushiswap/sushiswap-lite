@@ -35,22 +35,20 @@ interface LPTokenItemProps {
 
 const HomeScreen = () => {
     const state = useHomeState();
+    const loading = state.loadingTokens || state.loadingLPTokens || state.loadingPools;
     const totalValue = sum(state.tokens) + sum(state.lpTokens) + sum(state.pools);
     return (
         <Screen>
             <Container>
                 <BackgroundImage />
                 <Content style={{ paddingBottom: Spacing.huge }}>
-                    <FlexView style={{ alignItems: "flex-end", marginRight: Spacing.tiny }}>
-                        <Title text={"Total Value"} style={{ flex: 1 }} />
-                        <Title
-                            text={formatUSD(totalValue)}
-                            fontWeight={"light"}
-                            style={{
-                                fontSize: IS_DESKTOP ? 36 : 24
-                            }}
-                        />
-                    </FlexView>
+                    <Title text={"Total Value"} style={{ flex: 1 }} />
+                    <Title
+                        text={loading ? "Fetching…" : formatUSD(totalValue)}
+                        fontWeight={"light"}
+                        disabled={loading}
+                        style={{ fontSize: IS_DESKTOP ? 32 : 24 }}
+                    />
                     <Home state={state} />
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
@@ -61,7 +59,7 @@ const HomeScreen = () => {
 
 const Home = ({ state }: { state: HomeState }) => {
     return (
-        <View style={{ marginTop: Spacing.large }}>
+        <View style={{ marginTop: IS_DESKTOP ? Spacing.large : Spacing.normal }}>
             <MyTokens state={state} />
             <View style={{ height: Spacing.large + (IS_DESKTOP ? Spacing.normal : 0) }} />
             <MyLPTokens state={state} />
@@ -75,7 +73,7 @@ const MyTokens = ({ state }: { state: HomeState }) => {
     const goToSwap = useLinker("/swap", "Swap");
     return (
         <View>
-            <Heading text={"Tokens"} buttonText={"Swap"} onPressButton={goToSwap} />
+            <Heading text={"Tokens"} buttonText={"Manage"} onPressButton={goToSwap} />
             <TokenList loading={state.loadingTokens} tokens={state.tokens} TokenItem={TokenItem} />
         </View>
     );

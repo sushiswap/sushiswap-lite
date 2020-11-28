@@ -61,9 +61,9 @@ const Home = ({ state }: { state: HomeState }) => {
     return (
         <View style={{ marginTop: IS_DESKTOP ? Spacing.large : Spacing.normal }}>
             <MyTokens state={state} />
-            <View style={{ height: Spacing.large + (IS_DESKTOP ? Spacing.normal : 0) }} />
+            <View style={{ height: Spacing.large }} />
             <MyLPTokens state={state} />
-            <View style={{ height: Spacing.large + (IS_DESKTOP ? Spacing.normal : 0) }} />
+            <View style={{ height: Spacing.large }} />
             <Pools state={state} />
         </View>
     );
@@ -93,7 +93,7 @@ const MyLPTokens = ({ state }: { state: HomeState }) => {
 const Pools = ({ state }: { state: HomeState }) => {
     return (
         <View>
-            <Heading text={"Farming"} />
+            <Heading text={"Farms"} />
             {/* @ts-ignore */}
             <TokenList loading={state.loadingPools} tokens={state.pools} TokenItem={LPTokenItem} />
         </View>

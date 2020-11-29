@@ -44,7 +44,7 @@ const HomeScreen = () => {
                 <Content style={{ paddingBottom: Spacing.huge }}>
                     <Title text={"Total Value"} style={{ flex: 1 }} />
                     <Title
-                        text={loading ? "Fetching…" : formatUSD(totalValue)}
+                        text={loading ? "Fetching…" : formatUSD(totalValue, 4)}
                         fontWeight={"light"}
                         disabled={loading}
                         style={{ fontSize: IS_DESKTOP ? 32 : 24 }}
@@ -144,9 +144,12 @@ const TokenItem = (props: TokenItemProps) => {
     return (
         <FlexView style={{ alignItems: "center", paddingHorizontal: Spacing.tiny, paddingVertical: 4 }}>
             <TokenLogo token={props.token} disabled={props.disabled} />
-            <TokenName token={props.token} disabled={props.disabled} />
+            <View>
+                <TokenPrice token={props.token} disabled={props.disabled} style={{ marginLeft: Spacing.small }} />
+                <TokenName token={props.token} disabled={props.disabled} />
+            </View>
             <View style={{ flex: 1, alignItems: "flex-end" }}>
-                <TokenPrice token={props.token} disabled={props.disabled} />
+                <TokenValue token={props.token} disabled={props.disabled} />
                 <FlexView>
                     <TokenAmount token={props.token} disabled={props.disabled} />
                     {IS_DESKTOP && <TokenSymbol token={props.token} disabled={props.disabled} />}
@@ -165,7 +168,7 @@ const LPTokenItem = (props: LPTokenItemProps) => {
                 {props.token.tokenA.symbol}-{props.token.tokenB.symbol}
             </Text>
             <View style={{ flex: 1, alignItems: "flex-end" }}>
-                <TokenPrice token={props.token} disabled={props.disabled} />
+                <TokenValue token={props.token} disabled={props.disabled} />
                 <FlexView>
                     <TokenAmount token={props.token} amount={props.token.amountDeposited} disabled={props.disabled} />
                 </FlexView>
@@ -175,6 +178,14 @@ const LPTokenItem = (props: LPTokenItemProps) => {
 };
 
 const TokenPrice = (props: { token: TokenWithValue; disabled?: boolean; style?: TextStyle }) => {
+    return (
+        <Text note={true} fontWeight={"light"} disabled={props.disabled} style={props.style}>
+            {formatUSD(props.token.priceUSD || 0, 4)}
+        </Text>
+    );
+};
+
+const TokenValue = (props: { token: TokenWithValue; disabled?: boolean; style?: TextStyle }) => {
     return (
         <Text note={true} fontWeight={"light"} disabled={props.disabled} style={props.style}>
             {formatUSD(props.token.valueUSD || 0, 4)}

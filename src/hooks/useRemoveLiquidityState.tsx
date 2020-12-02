@@ -1,14 +1,18 @@
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import { ROUTER } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
+import Token from "../types/Token";
 import { convertToken, formatBalance, parseBalance, parseCurrencyAmount } from "../utils";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
 import useSwapRouter from "./useSwapRouter";
+import useZapper from "./useZapper";
 
 export interface RemoveLiquidityState extends LPTokensState {
+    outputToken?: Token;
+    setOutputToken: (token?: Token) => void;
     onRemove: () => Promise<void>;
     removing: boolean;
 }
@@ -16,10 +20,20 @@ export interface RemoveLiquidityState extends LPTokensState {
 // tslint:disable-next-line:max-func-body-length
 const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
     const state = useLPTokensState("my-lp-tokens");
-    const { signer, getTokenAllowance, updateTokens } = useContext(EthersContext);
+    const { provider, signer, getTokenAllowance, updateTokens } = useContext(EthersContext);
     const { removeLiquidity, removeLiquidityETH } = useSwapRouter();
+    const { zapOut } = useZapper();
     const [loading, setLoading] = useState(false);
+    const [outputToken, setOutputToken] = useState<Token>();
     const [removing, setRemoving] = useState(false);
+
+    useEffect(() => {
+        setOutputToken(undefined);
+    }, [state.selectedLPToken]);
+
+    useEffect(() => {
+        state.setAmount("");
+    }, [outputToken]);
 
     useAsyncEffect(async () => {
         if (signer && state.selectedLPToken) {
@@ -37,6 +51,9 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
             } finally {
                 setLoading(false);
             }
+        } else {
+            state.setFromSymbol("");
+            state.setToSymbol("");
         }
     }, [signer, state.selectedLPToken]);
 
@@ -80,29 +97,48 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
         }
     }, [state.selectedLPToken, state.amount, state.pair, state.fromToken, state.toToken, signer]);
 
+    const removeFromRouter = async () => {
+        if (state.selectedLPToken && signer) {
+            const fromAmount = parseBalance(state.fromAmount, state.fromToken!.decimals);
+            const toAmount = parseBalance(state.toAmount, state.toToken!.decimals);
+            const liquidity = parseBalance(state.amount, state.selectedLPToken.decimals);
+            if (state.fromSymbol === "WETH" || state.toSymbol === "WETH") {
+                const token = state.fromSymbol === "WETH" ? state.toToken! : state.fromToken!;
+                const amountToRemove = state.fromSymbol === "WETH" ? toAmount : fromAmount;
+                const amountToRemoveETH = state.fromSymbol === "WETH" ? fromAmount : toAmount;
+                const tx = await removeLiquidityETH(token, liquidity, amountToRemove, amountToRemoveETH, signer);
+                await tx.wait();
+            } else {
+                const tx = await removeLiquidity(
+                    state.fromToken!,
+                    state.toToken!,
+                    liquidity,
+                    fromAmount,
+                    toAmount,
+                    signer
+                );
+                await tx.wait();
+            }
+        }
+    };
+
     const onRemove = useCallback(async () => {
-        if (state.fromAmount && state.toAmount && state.selectedLPToken && state.amount && signer) {
+        if (
+            state.fromAmount &&
+            state.toAmount &&
+            state.selectedLPToken &&
+            state.amount &&
+            outputToken &&
+            provider &&
+            signer
+        ) {
             setRemoving(true);
             try {
-                const fromAmount = parseBalance(state.fromAmount, state.fromToken!.decimals);
-                const toAmount = parseBalance(state.toAmount, state.toToken!.decimals);
-                const liquidity = parseBalance(state.amount, state.selectedLPToken.decimals);
-                if (state.fromSymbol === "WETH" || state.toSymbol === "WETH") {
-                    const token = state.fromSymbol === "WETH" ? state.toToken! : state.fromToken!;
-                    const amountToRemove = state.fromSymbol === "WETH" ? toAmount : fromAmount;
-                    const amountToRemoveETH = state.fromSymbol === "WETH" ? fromAmount : toAmount;
-                    const tx = await removeLiquidityETH(token, liquidity, amountToRemove, amountToRemoveETH, signer);
-                    await tx.wait();
+                if (outputToken === state.selectedLPToken) {
+                    await removeFromRouter();
                 } else {
-                    const tx = await removeLiquidity(
-                        state.fromToken!,
-                        state.toToken!,
-                        liquidity,
-                        fromAmount,
-                        toAmount,
-                        signer
-                    );
-                    await tx.wait();
+                    const amount = parseBalance(state.amount, state.selectedLPToken.decimals);
+                    await zapOut(state.selectedLPToken, outputToken, amount, provider, signer);
                 }
                 await updateTokens();
                 await state.updateLPTokens();
@@ -111,11 +147,24 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
                 setRemoving(false);
             }
         }
-    }, [state.fromAmount, state.toAmount, state.selectedLPToken, state.amount, signer, state.updateLPTokens]);
+    }, [
+        state.fromAmount,
+        state.toAmount,
+        state.selectedLPToken,
+        state.amount,
+        state.updateLPTokens,
+        removeFromRouter,
+        updateTokens,
+        outputToken,
+        provider,
+        signer
+    ]);
 
     return {
         ...state,
         loading: state.loading || loading,
+        outputToken,
+        setOutputToken,
         onRemove,
         removing
     };

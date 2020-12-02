@@ -7,6 +7,8 @@ import Token from "../types/Token";
 import { deduct, getContract } from "../utils";
 import { logTransaction } from "../utils/analytics-utils";
 
+export const FEE = new Percent("3", "1000"); // 0.3%
+
 // tslint:disable-next-line:max-func-body-length
 const useSwapRouter = () => {
     const allowedSlippage = new Percent("50", "10000"); // 0.05%

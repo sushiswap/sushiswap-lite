@@ -63,6 +63,7 @@
     "@types/react-router-dom": "^5.1.5",
     "babel-plugin-inline-dotenv": "^1.6.0",
     "gh-pages": "^3.1.0",
+    "husky": "^4.3.0",
     "prettier": "^1.16.4",
     "tslint": "^6.1.0",
     "tslint-config-prettier": "^1.18.0",
@@ -71,6 +72,11 @@
     "tslint-react": "^4.0.0",
     "tslint-react-hooks": "^2.1.1",
     "typescript": "~3.9.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "bash ./scripts/pre-commit.sh"
+    }
   },
   "private": true
 }

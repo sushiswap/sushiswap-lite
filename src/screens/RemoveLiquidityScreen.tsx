@@ -1,30 +1,41 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
+import AmountMeta from "../components/AmountMeta";
 import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
+import CloseIcon from "../components/CloseIcon";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
 import FetchingButton from "../components/FetchingButton";
+import FlexView from "../components/FlexView";
 import Heading from "../components/Heading";
 import InfoBox from "../components/InfoBox";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
+import { ITEM_SEPARATOR_HEIGHT } from "../components/ItemSeparator";
 import LPTokenSelect, { LPTokenItem } from "../components/LPTokenSelect";
 import Meta from "../components/Meta";
+import Selectable from "../components/Selectable";
+import SelectIcon from "../components/SelectIcon";
 import Text from "../components/Text";
 import Title from "../components/Title";
 import TokenInput from "../components/TokenInput";
+import TokenLogo from "../components/TokenLogo";
+import TokenSymbol from "../components/TokenSymbol";
 import WebFooter from "../components/web/WebFooter";
 import { LiquiditySubMenu } from "../components/web/WebSubMenu";
 import { ROUTER } from "../constants/contracts";
-import { Spacing } from "../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import useRemoveLiquidityState, { RemoveLiquidityState } from "../hooks/useRemoveLiquidityState";
+import { FEE } from "../hooks/useSwapRouter";
+import LPToken from "../types/LPToken";
 import MetamaskError from "../types/MetamaskError";
-import { isEmptyValue, parseBalance } from "../utils";
+import Token from "../types/Token";
+import { deduct, formatBalance, isEmptyValue, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const RemoveLiquidityScreen = () => {
@@ -55,14 +66,100 @@ const RemoveLiquidity = () => {
                 Item={LPTokenItem}
             />
             <Border />
+            <OutputTokenSelect state={state} />
+            <Border />
             <AmountInput state={state} />
             <AmountInfo state={state} />
         </View>
     );
 };
 
-const AmountInput = ({ state }: { state: RemoveLiquidityState }) => {
+const OutputTokenSelect = ({ state }: { state: RemoveLiquidityState }) => {
     if (!state.selectedLPToken) {
+        return <Heading text={"Output Token(s)"} disabled={true} />;
+    }
+    const onSelectToken = (token: Token) => () => state.setOutputToken(state.outputToken ? undefined : token);
+    return (
+        <View>
+            <Heading text={"Output Token(s)"} />
+            <TokenOutputItem
+                token={state.selectedLPToken.tokenA}
+                otherToken={state.selectedLPToken.tokenB}
+                selected={state.outputToken === state.selectedLPToken.tokenA}
+                hidden={!!state.outputToken && state.outputToken !== state.selectedLPToken.tokenA}
+                onSelectToken={onSelectToken(state.selectedLPToken.tokenA)}
+            />
+            <TokenOutputItem
+                token={state.selectedLPToken.tokenB}
+                otherToken={state.selectedLPToken.tokenA}
+                selected={state.outputToken === state.selectedLPToken.tokenB}
+                hidden={!!state.outputToken && state.outputToken !== state.selectedLPToken.tokenB}
+                onSelectToken={onSelectToken(state.selectedLPToken.tokenB)}
+            />
+            <LPTokenOutputItem
+                token={state.selectedLPToken}
+                selected={state.outputToken === state.selectedLPToken}
+                hidden={!!state.outputToken && state.outputToken !== state.selectedLPToken}
+                onSelectToken={onSelectToken(state.selectedLPToken)}
+            />
+        </View>
+    );
+};
+
+const TokenOutputItem = (props: {
+    token: Token;
+    otherToken: Token;
+    selected: boolean;
+    hidden: boolean;
+    onSelectToken: () => void;
+}) => {
+    if (props.hidden) return <View />;
+    return (
+        <Selectable
+            selected={props.selected}
+            onPress={props.onSelectToken}
+            containerStyle={{
+                marginBottom: ITEM_SEPARATOR_HEIGHT
+            }}>
+            <FlexView style={{ alignItems: "center" }}>
+                <TokenLogo token={props.token} />
+                <TokenSymbol token={props.token} />
+                <Text note={true} style={{ flex: 1, marginLeft: Spacing.tiny }}>
+                    {IS_DESKTOP && props.otherToken.symbol + " will be converted to " + props.token.symbol}
+                </Text>
+                {props.selected ? <CloseIcon /> : <SelectIcon />}
+            </FlexView>
+        </Selectable>
+    );
+};
+
+export const LPTokenOutputItem = (props: {
+    token: LPToken;
+    selected: boolean;
+    hidden: boolean;
+    onSelectToken: () => void;
+}) => {
+    if (props.hidden) return <View />;
+    return (
+        <Selectable
+            selected={props.selected}
+            onPress={props.onSelectToken}
+            containerStyle={{ marginBottom: ITEM_SEPARATOR_HEIGHT }}>
+            <FlexView style={{ alignItems: "center" }}>
+                <TokenLogo token={props.token.tokenA} small={true} replaceWETH={true} />
+                <TokenLogo token={props.token.tokenB} small={true} replaceWETH={true} style={{ marginLeft: 4 }} />
+                <Text medium={true} caption={true} style={{ marginLeft: Spacing.tiny }}>
+                    {props.token.tokenA.symbol} + {props.token.tokenB.symbol}
+                </Text>
+                <View style={{ flex: 1 }} />
+                {props.selected ? <CloseIcon /> : <SelectIcon />}
+            </FlexView>
+        </Selectable>
+    );
+};
+
+const AmountInput = ({ state }: { state: RemoveLiquidityState }) => {
+    if (!state.selectedLPToken || !state.outputToken) {
         return <Heading text={"Amount of Tokens"} disabled={true} />;
     }
     return (
@@ -77,8 +174,20 @@ const AmountInput = ({ state }: { state: RemoveLiquidityState }) => {
 
 const AmountInfo = ({ state }: { state: RemoveLiquidityState }) => {
     const disabled = !state.selectedLPToken || !state.fromToken || !state.toToken;
+    const outputAmount = useMemo(() => {
+        if (state.fromToken && state.outputToken === state.fromToken) {
+            const amount = parseBalance(state.fromAmount, state.fromToken.decimals);
+            return formatBalance(amount.add(deduct(amount, FEE)), state.fromToken.decimals);
+        } else if (state.toToken && state.outputToken === state.toToken) {
+            const amount = parseBalance(state.toAmount, state.toToken.decimals);
+            return formatBalance(amount.add(deduct(amount, FEE)), state.toToken.decimals);
+        }
+    }, [state.outputToken, state.fromToken, state.toToken, state.fromAmount, state.toAmount]);
     return (
         <InfoBox>
+            {(state.outputToken === state.fromToken || state.outputToken === state.toToken) && (
+                <AmountMeta amount={outputAmount} suffix={state.outputToken?.symbol} disabled={disabled} />
+            )}
             <Meta
                 label={state.fromToken ? state.fromToken.symbol : "Token 1"}
                 text={state.fromAmount}
@@ -94,7 +203,7 @@ const AmountInfo = ({ state }: { state: RemoveLiquidityState }) => {
 const Controls = ({ state }: { state: RemoveLiquidityState }) => {
     const [error, setError] = useState<MetamaskError>({});
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
-    const approveRequired = !state.selectedLPTokenAllowed;
+    const approveRequired = state.outputToken === state.selectedLPToken && !state.selectedLPTokenAllowed;
     const disabled = approveRequired || isEmptyValue(state.amount);
     return (
         <View style={{ marginTop: Spacing.normal }}>

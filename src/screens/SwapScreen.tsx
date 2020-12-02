@@ -8,22 +8,17 @@ import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
-import CloseIcon from "../components/CloseIcon";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
-import Expandable from "../components/Expandable";
 import ExperimentalNotice from "../components/ExperimentalNotice";
 import FetchingButton from "../components/FetchingButton";
-import FlexView from "../components/FlexView";
 import Heading from "../components/Heading";
 import InfoBox from "../components/InfoBox";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
-import { ITEM_SEPARATOR_HEIGHT } from "../components/ItemSeparator";
 import Meta from "../components/Meta";
 import Notice from "../components/Notice";
-import Selectable from "../components/Selectable";
-import SelectIcon from "../components/SelectIcon";
+import Select, { Option } from "../components/Select";
 import Text from "../components/Text";
 import Title from "../components/Title";
 import TokenInput from "../components/TokenInput";
@@ -86,13 +81,18 @@ const Swap = () => {
 };
 
 const OrderTypeSelect = ({ state }: { state: SwapState }) => {
+    const options: Option[] = [
+        { key: "market", title: "Market Order", description: "Settle an order immediately" },
+        { key: "limit", title: "Limit Order", description: "Place an order with a desired price to be settled" }
+    ];
     return (
         <View>
-            <Expandable title={"Order Type"} expanded={!state.orderType} onExpand={() => state.setOrderType()}>
-                <OrderTypeItem state={state} orderType={"market"} />
-                <OrderTypeItem state={state} orderType={"limit"} />
-            </Expandable>
-            {state.orderType && <OrderTypeItem state={state} orderType={state.orderType} selectable={true} />}
+            <Select
+                title={"Order Type"}
+                options={options}
+                option={options.find(option => option.key === state.orderType)}
+                setOption={option => state.setOrderType(option?.key as OrderType | undefined)}
+            />
             {state.orderType === "limit" && (
                 <ExperimentalNotice
                     contractURL={
@@ -101,38 +101,6 @@ const OrderTypeSelect = ({ state }: { state: SwapState }) => {
                 />
             )}
         </View>
-    );
-};
-
-const OrderTypeItem = ({
-    state,
-    orderType,
-    selectable
-}: {
-    state: SwapState;
-    orderType: OrderType;
-    selectable?: boolean;
-}) => {
-    const selected = state.orderType === orderType;
-    const type = orderType === "market" ? "Market Order" : "Limit Order";
-    const desc =
-        orderType === "market" ? "Settle an order immediately" : "Place an order with a desired price to be settled";
-    const onPress = () => state.setOrderType(state.orderType === orderType ? undefined : orderType);
-    return (
-        <Selectable
-            containerStyle={{ marginBottom: ITEM_SEPARATOR_HEIGHT }}
-            style={{ paddingLeft: Spacing.small + Spacing.tiny, paddingRight: Spacing.small }}
-            selected={selected}
-            disabled={selectable}
-            onPress={onPress}>
-            <FlexView style={{ alignItems: "center" }}>
-                <View style={{ flex: 1 }}>
-                    <Text fontWeight={"regular"}>{type}</Text>
-                    <Text note={true}>{desc}</Text>
-                </View>
-                {selected ? <CloseIcon /> : <SelectIcon />}
-            </FlexView>
-        </Selectable>
     );
 };
 

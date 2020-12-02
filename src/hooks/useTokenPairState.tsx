@@ -6,7 +6,7 @@ import { ROUTER } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import Token from "../types/Token";
 import { parseBalance } from "../utils";
-import useSDK from "./useSDK";
+import useWeth from "./useWeth";
 
 export interface TokenPairState {
     fromSymbol: string;
@@ -33,7 +33,7 @@ export interface TokenPairState {
 // tslint:disable-next-line:max-func-body-length
 const useTokenPairState: () => TokenPairState = () => {
     const { signer, address, tokens, updateTokens, getTokenAllowance } = useContext(EthersContext);
-    const { wrapETH, unwrapETH } = useSDK();
+    const { wrapETH, unwrapETH } = useWeth();
     const [fromSymbol, setFromSymbol] = useState("");
     const [toSymbol, setToSymbol] = useState("");
     const [fromAmount, setFromAmount] = useState("");

@@ -7,7 +7,7 @@ import { MASTER_CHEF } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import { convertToken, parseBalance } from "../utils";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
-import useSDK from "./useSDK";
+import useMasterChef from "./useMasterChef";
 
 export interface FarmingState extends LPTokensState {
     onDeposit: () => Promise<void>;
@@ -20,7 +20,7 @@ export interface FarmingState extends LPTokensState {
 const useFarmingState: (myPools: boolean) => FarmingState = myPools => {
     const state = useLPTokensState(myPools ? "my-pools" : "pools");
     const { signer, getTokenAllowance } = useContext(EthersContext);
-    const { deposit, withdraw } = useSDK();
+    const { deposit, withdraw } = useMasterChef();
     const [loading, setLoading] = useState(false);
     const [depositing, setDepositing] = useState(false);
     const [withdrawing, setWithdrawing] = useState(false);

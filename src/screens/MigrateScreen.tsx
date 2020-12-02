@@ -6,21 +6,16 @@ import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
-import CloseIcon from "../components/CloseIcon";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
-import Expandable from "../components/Expandable";
 import FetchingButton from "../components/FetchingButton";
-import FlexView from "../components/FlexView";
 import Heading from "../components/Heading";
 import InfoBox from "../components/InfoBox";
 import InsufficientBalanceButton from "../components/InsufficientBalanceButton";
-import { ITEM_SEPARATOR_HEIGHT } from "../components/ItemSeparator";
 import LPTokenSelect, { LPTokenItem } from "../components/LPTokenSelect";
 import Meta from "../components/Meta";
-import Selectable from "../components/Selectable";
-import SelectIcon from "../components/SelectIcon";
+import Select, { Option } from "../components/Select";
 import Text from "../components/Text";
 import Title from "../components/Title";
 import TokenInput from "../components/TokenInput";
@@ -72,48 +67,25 @@ const Migrate = () => {
 };
 
 const MigrateModeSelect = ({ state }: { state: MigrateState }) => {
+    const options: Option[] = [
+        {
+            key: "permit",
+            title: "Non-hardware Wallet",
+            description: "Migration is done in one-click using your signature(permit)."
+        },
+        {
+            key: "approve",
+            title: "Hardware Wallet (Trezor, Ledger, etc.)",
+            description: "You need to first approve LP tokens and then migrate it."
+        }
+    ];
     return (
-        <View>
-            <Expandable title={"Wallet Type"} expanded={!state.mode} onExpand={() => state.setMode()}>
-                <MigrateModeItem state={state} mode={"permit"} />
-                <MigrateModeItem state={state} mode={"approve"} />
-            </Expandable>
-            {state.mode && <MigrateModeItem state={state} mode={state.mode} selectable={true} />}
-        </View>
-    );
-};
-
-const MigrateModeItem = ({
-    state,
-    mode,
-    selectable
-}: {
-    state: MigrateState;
-    mode: MigrateMode;
-    selectable?: boolean;
-}) => {
-    const selected = state.mode === mode;
-    const type = mode === "permit" ? "Non-hardware Wallet" : "Hardware Wallet (Trezor, Ledger, etc.)";
-    const desc =
-        mode === "permit"
-            ? "Migration in done in one-click using your signature(permit)."
-            : "You need to first approve LP tokens and then migrate it.";
-    const onPress = () => state.setMode(state.mode === mode ? undefined : mode);
-    return (
-        <Selectable
-            containerStyle={{ marginBottom: ITEM_SEPARATOR_HEIGHT }}
-            style={{ paddingLeft: Spacing.small + Spacing.tiny, paddingRight: Spacing.small }}
-            selected={selected}
-            disabled={selectable}
-            onPress={onPress}>
-            <FlexView style={{ alignItems: "center" }}>
-                <View style={{ flex: 1 }}>
-                    <Text fontWeight={"regular"}>{type}</Text>
-                    <Text note={true}>{desc}</Text>
-                </View>
-                {selected ? <CloseIcon /> : <SelectIcon />}
-            </FlexView>
-        </Selectable>
+        <Select
+            title={"Wallet Type"}
+            options={options}
+            option={options.find(option => option.key === state.mode)}
+            setOption={option => state.setMode(option?.key as MigrateMode | undefined)}
+        />
     );
 };
 

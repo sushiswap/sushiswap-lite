@@ -9,7 +9,8 @@ import { GlobalContext } from "../../context/GlobalContext";
 import useColors from "../../hooks/useColors";
 import DarkModeSwitch from "../DarkModeSwitch";
 import FlexView from "../FlexView";
-import SvgLogo from "../svg/SvgLogo";
+import SvgLogoDark from "../svg/SvgLogoDark";
+import SvgLogoLight from "../svg/SvgLogoLight";
 import Text from "../Text";
 
 export interface WebHeaderProps {
@@ -53,6 +54,7 @@ export const Title = () => {
     const { darkMode } = useContext(GlobalContext);
     const { textDark, white } = useColors();
     const color = darkMode ? white : textDark;
+    const SvgLogo = darkMode ? SvgLogoDark : SvgLogoLight;
     return (
         <FlexView style={{ alignSelf: "center", alignItems: "center" }}>
             <SvgLogo width={36} height={36} style={{ marginRight: 4 }} />

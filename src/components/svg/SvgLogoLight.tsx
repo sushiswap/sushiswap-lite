@@ -1,7 +1,7 @@
 import * as React from "react";
 import Svg, { Path, SvgProps } from "react-native-svg";
 
-function SvgLogo(props: SvgProps) {
+function SvgLogoLight(props: SvgProps) {
     return (
         <Svg
             viewBox="0 0 76 68"
@@ -34,4 +34,4 @@ function SvgLogo(props: SvgProps) {
     );
 }
 
-export default SvgLogo;
+export default SvgLogoLight;

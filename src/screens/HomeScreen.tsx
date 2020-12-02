@@ -2,6 +2,7 @@ import React, { FC, useCallback, useMemo } from "react";
 import { FlatList, Platform, TextStyle, TouchableHighlight, View } from "react-native";
 import { Icon } from "react-native-elements";
 
+import { ethers } from "ethers";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Container from "../components/Container";
@@ -93,9 +94,10 @@ const MyLPTokens = ({ state }: { state: HomeState }) => {
 };
 
 const Pools = ({ state }: { state: HomeState }) => {
+    const goToFarming = useLinker("/farming", "Farming");
     return (
         <View>
-            <Heading text={"Farms"} />
+            <Heading text={"Farms"} buttonText={"manage"} onPressButton={goToFarming} />
             {/* @ts-ignore */}
             <TokenList loading={state.loadingPools} tokens={state.pools} TokenItem={LPTokenItem} />
         </View>
@@ -198,11 +200,17 @@ const TokenValue = (props: { token: TokenWithValue; disabled?: boolean; style?: 
 };
 
 const ExternalIcon = ({ path }) => {
-    const { textDark } = useColors();
-    const onPress = () => window.open("https://sushiswapanalytics.com/" + path.toLowerCase());
+    const { textDark, disabled } = useColors();
+    const onPress = () => window.open("https://sushiswapanalytics.com/" + path.toLowerCase(), "_blank");
+    const isETH = path.endsWith(ethers.constants.AddressZero);
     return (
-        <TouchableHighlight onPress={onPress}>
-            <Icon type={"evilicon"} name={"external-link"} color={textDark} style={{ marginLeft: Spacing.tiny }} />
+        <TouchableHighlight onPress={onPress} disabled={isETH}>
+            <Icon
+                type={"evilicon"}
+                name={"external-link"}
+                color={isETH ? disabled : textDark}
+                style={{ marginLeft: Spacing.tiny }}
+            />
         </TouchableHighlight>
     );
 };

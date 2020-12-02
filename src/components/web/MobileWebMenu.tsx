@@ -32,7 +32,7 @@ const MobileWebMenu = ({ expanded, onCollapse }) => {
                         <DarkModeSwitch style={{ marginBottom: 4 }} />
                         <Status />
                         <View style={{ height: Spacing.large }} />
-                        <MobileWebMenuItem title={"Home"} path={"/home"} />
+                        <MobileWebMenuItem title={"Home"} path={"/"} />
                         <MobileWebMenuItem title={"Swap"} path={"/swap"} />
                         <MobileWebMenuItem title={"Liquidity"} path={"/liquidity"} />
                         <MobileWebMenuItem title={"Migrate"} path={"/migrate"} />

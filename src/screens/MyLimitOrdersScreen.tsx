@@ -26,7 +26,7 @@ import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import useColors from "../hooks/useColors";
 import useMyLimitOrdersState, { MyLimitOrdersState } from "../hooks/useMyLimitOrdersState";
-import { Order } from "../hooks/useSDK";
+import { Order } from "../hooks/useSettlement";
 import MetamaskError from "../types/MetamaskError";
 import { formatBalance } from "../utils";
 import Screen from "./Screen";

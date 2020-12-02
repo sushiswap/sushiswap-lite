@@ -2067,10 +2067,10 @@
   dependencies:
     "@sushiswap/core" "^1.2.1"
 
-"@sushiswap/sushi-data@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@sushiswap/sushi-data/-/sushi-data-0.0.7.tgz#95f1bc2c492bb36df439169ee2acb85e35a2feae"
-  integrity sha512-mJgQotUdjYeeQzNAlE5fDzgaayzzZCES1GkBehbVky0e7agjupdOUxOG+8Cde4PeqWFtbZLujmrtLR8lFcf9ew==
+"@sushiswap/sushi-data@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@sushiswap/sushi-data/-/sushi-data-0.0.8.tgz#45b8f4981cd3eba9e281ec4bcb8f420b78e0f08f"
+  integrity sha512-amTIcjkgmeuvcIQ3OP3bUXb4v+saAsswbfbQ23twfBSvkltbbFI1lsl8/ihPxq0wUOIa46UbLKKAreI4+gYS2Q==
   dependencies:
     commander "6.1.0"
     csv-stringify "5.3.3"

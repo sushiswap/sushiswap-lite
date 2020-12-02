@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useMemo } from "react";
-import { FlatList, Platform, TextStyle, View } from "react-native";
+import { FlatList, Platform, TextStyle, TouchableHighlight, View } from "react-native";
+import { Icon } from "react-native-elements";
 
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
@@ -16,6 +17,7 @@ import TokenName from "../components/TokenName";
 import TokenSymbol from "../components/TokenSymbol";
 import WebFooter from "../components/web/WebFooter";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
+import useColors from "../hooks/useColors";
 import useHomeState, { HomeState } from "../hooks/useHomeState";
 import useLinker from "../hooks/useLinker";
 import LPTokenWithValue from "../types/LPTokenWithValue";
@@ -155,6 +157,7 @@ const TokenItem = (props: TokenItemProps) => {
                     {IS_DESKTOP && <TokenSymbol token={props.token} disabled={props.disabled} />}
                 </FlexView>
             </View>
+            <ExternalIcon path={"/tokens/" + props.token.address} />
         </FlexView>
     );
 };
@@ -173,6 +176,7 @@ const LPTokenItem = (props: LPTokenItemProps) => {
                     <TokenAmount token={props.token} amount={props.token.amountDeposited} disabled={props.disabled} />
                 </FlexView>
             </View>
+            <ExternalIcon path={"/pairs/" + props.token.address} />
         </FlexView>
     );
 };
@@ -190,6 +194,16 @@ const TokenValue = (props: { token: TokenWithValue; disabled?: boolean; style?: 
         <Text note={true} fontWeight={"light"} disabled={props.disabled} style={props.style}>
             {formatUSD(props.token.valueUSD || 0, 4)}
         </Text>
+    );
+};
+
+const ExternalIcon = ({ path }) => {
+    const { textDark } = useColors();
+    const onPress = () => window.open("https://sushiswapanalytics.com/" + path.toLowerCase());
+    return (
+        <TouchableHighlight onPress={onPress}>
+            <Icon type={"evilicon"} name={"external-link"} color={textDark} style={{ marginLeft: Spacing.tiny }} />
+        </TouchableHighlight>
     );
 };
 

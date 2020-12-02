@@ -29,7 +29,7 @@ import TokenSymbol from "../components/TokenSymbol";
 import WebFooter from "../components/web/WebFooter";
 import { LiquiditySubMenu } from "../components/web/WebSubMenu";
 import { ROUTER } from "../constants/contracts";
-import { Spacing } from "../constants/dimension";
+import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import useRemoveLiquidityState, { RemoveLiquidityState } from "../hooks/useRemoveLiquidityState";
 import { FEE } from "../hooks/useSwapRouter";
 import LPToken from "../types/LPToken";
@@ -125,7 +125,7 @@ const TokenOutputItem = (props: {
                 <TokenLogo token={props.token} />
                 <TokenSymbol token={props.token} />
                 <Text note={true} style={{ flex: 1, marginLeft: Spacing.tiny }}>
-                    ({props.otherToken.symbol} will be converted to {props.token.symbol})
+                    {IS_DESKTOP && props.otherToken.symbol + " will be converted to " + props.token.symbol}
                 </Text>
                 {props.selected ? <CloseIcon /> : <SelectIcon />}
             </FlexView>

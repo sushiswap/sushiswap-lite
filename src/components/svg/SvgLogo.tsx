@@ -2,7 +2,7 @@ import * as React from "react";
 import Svg, { ClipPath, G, Path, SvgProps } from "react-native-svg";
 
 // tslint:disable-next-line:max-func-body-length
-function SvgLogoDark(props: SvgProps) {
+function SvgLogo(props: SvgProps) {
     return (
         <Svg
             viewBox="0 0 76 68"
@@ -64,4 +64,4 @@ function SvgLogoDark(props: SvgProps) {
     );
 }
 
-export default SvgLogoDark;
+export default SvgLogo;

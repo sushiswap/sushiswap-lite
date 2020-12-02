@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 import { LP_TOKEN_SCANNER, MASTER_CHEF, ORDER_BOOK, SETTLEMENT } from "../constants/contracts";
 import { ETH } from "../constants/tokens";
 import { ALCHEMY_PROVIDER } from "../context/EthersContext";
-import { Order, OrderStatus } from "../hooks/useSDK";
+import { Order, OrderStatus } from "../hooks/useSettlement";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
 import { getContract, parseBalance, pow10 } from "./index";

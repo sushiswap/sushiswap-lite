@@ -6,7 +6,7 @@ import { ROUTER } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import { convertToken, formatBalance, parseBalance, parseCurrencyAmount } from "../utils";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
-import useSDK from "./useSDK";
+import useSwapRouter from "./useSwapRouter";
 
 export interface RemoveLiquidityState extends LPTokensState {
     onRemove: () => Promise<void>;
@@ -17,7 +17,7 @@ export interface RemoveLiquidityState extends LPTokensState {
 const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
     const state = useLPTokensState("my-lp-tokens");
     const { signer, getTokenAllowance, updateTokens } = useContext(EthersContext);
-    const { removeLiquidity, removeLiquidityETH } = useSDK();
+    const { removeLiquidity, removeLiquidityETH } = useSwapRouter();
     const [loading, setLoading] = useState(false);
     const [removing, setRemoving] = useState(false);
 

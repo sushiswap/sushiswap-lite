@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import { EthersContext } from "../context/EthersContext";
 import { fetchMyCanceledLimitOrderHashes, fetchMyLimitOrders } from "../utils/fetch-utils";
-import useSDK, { Order } from "./useSDK";
+import useSettlement, { Order } from "./useSettlement";
 
 export interface MyLimitOrdersState {
     lastTimeRefreshed: number;
@@ -19,7 +19,7 @@ export interface MyLimitOrdersState {
 
 // tslint:disable-next-line:max-func-body-length
 const useMyLimitOrdersState = () => {
-    const { cancelOrder, queryOrderFilledEvents } = useSDK();
+    const { cancelOrder, queryOrderFilledEvents } = useSettlement();
     const { provider, signer, kovanSigner, address, tokens } = useContext(EthersContext);
     const [lastTimeRefreshed, setLastTimeRefreshed] = useState(0);
     const [myOrders, setMyOrders] = useState<Order[]>();

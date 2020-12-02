@@ -6,7 +6,7 @@ import { SUSHI_ROLL } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import { parseBalance } from "../utils";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
-import useSDK from "./useSDK";
+import useSushiRoll from "./useSushiRoll";
 
 export type MigrateMode = "permit" | "approve";
 
@@ -22,7 +22,7 @@ const useMigrateState: () => MigrateState = () => {
     const { ethereum } = useContext(EthersContext);
     const state = useLPTokensState("my-uniswap-lp-tokens");
     const { provider, signer, getTokenAllowance, updateTokens } = useContext(EthersContext);
-    const { migrate, migrateWithPermit } = useSDK();
+    const { migrate, migrateWithPermit } = useSushiRoll();
     const [loading, setLoading] = useState(false);
     const [mode, setMode] = useState<MigrateMode>();
     const [migrating, setMigrating] = useState(false);

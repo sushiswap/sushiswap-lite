@@ -1,31 +1,7 @@
-import ERC20 from "@sushiswap/core/build/contracts/ERC20.json";
-import IUniswapV2Factory from "@sushiswap/core/build/contracts/IUniswapV2Factory.json";
-import IUniswapV2Pair from "@sushiswap/core/build/contracts/IUniswapV2Pair.json";
-import IUniswapV2Router02 from "@sushiswap/core/build/contracts/IUniswapV2Router02.json";
-import IWETH from "@sushiswap/core/build/contracts/IWETH.json";
-import MasterChef from "@sushiswap/core/build/contracts/MasterChef.json";
-import SushiBar from "@sushiswap/core/build/contracts/SushiBar.json";
-import SushiRoll from "@sushiswap/core/build/contracts/SushiRoll.json";
-import { ChainId, CurrencyAmount, Token as SDKToken, TokenAmount, WETH } from "@sushiswap/sdk";
-import OrderBook from "@sushiswap/settlement/deployments/kovan/OrderBook.json";
-import Settlement from "@sushiswap/settlement/deployments/mainnet/Settlement.json";
+import { ChainId, CurrencyAmount, Percent, Token as SDKToken, TokenAmount, WETH } from "@sushiswap/sdk";
 import { ethers } from "ethers";
-import LPTokenScanner from "../constants/abi/LPTokenScanner.json";
 import Token from "../types/Token";
-
-const CONTRACTS = {
-    ERC20,
-    IUniswapV2Factory,
-    IUniswapV2Pair,
-    IUniswapV2Router02,
-    IWETH,
-    MasterChef,
-    SushiBar,
-    SushiRoll,
-    OrderBook,
-    Settlement,
-    LPTokenScanner: { abi: LPTokenScanner }
-};
+import getContract from "./getContract";
 
 export const formatUSD = (value: number, maxFraction = 0) => {
     const formatter = new Intl.NumberFormat("en-US", {
@@ -80,13 +56,8 @@ export const parseCurrencyAmount = (value: CurrencyAmount, decimals = 18) => {
     return ethers.BigNumber.from(parseBalance(value.toExact(), decimals));
 };
 
-export const getContract = (
-    name: string,
-    address: string,
-    signerOrProvider: ethers.Signer | ethers.providers.Provider
-) => {
-    const contract = CONTRACTS[name];
-    return new ethers.Contract(address, contract.abi, signerOrProvider);
+export const deduct = (amount: ethers.BigNumber, percent: Percent) => {
+    return amount.sub(amount.mul(percent.numerator.toString()).div(percent.denominator.toString()));
 };
 
 export const pow10 = (exp: ethers.BigNumberish) => {
@@ -96,3 +67,5 @@ export const pow10 = (exp: ethers.BigNumberish) => {
 export const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-US") + " " + date.toLocaleTimeString("en-US");
 };
+
+export { getContract };

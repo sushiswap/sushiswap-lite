@@ -10,6 +10,8 @@ import { formatBalance, isEmptyValue, parseBalance, pow10 } from "../utils";
 import useDelayedEffect from "./useDelayedEffect";
 import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useSDK from "./useSDK";
+import useSettlement from "./useSettlement";
+import useSwapRouter from "./useSwapRouter";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";
 
 export type OrderType = "market" | "limit";
@@ -37,14 +39,10 @@ export interface SwapState extends TokenPairState {
 const useSwapState: () => SwapState = () => {
     const state = useTokenPairState();
     const { chainId, provider, signer, kovanSigner, updateTokens } = useContext(EthersContext);
-    const {
-        getTrade,
-        swap,
-        createOrder,
-        calculateSwapFee,
-        calculateLimitOrderFee,
-        calculateLimitOrderReturn
-    } = useSDK();
+    const { getTrade } = useSDK();
+    const { swap, calculateSwapFee } = useSwapRouter();
+    const { calculateLimitOrderFee, calculateLimitOrderReturn } = useSettlement();
+    const { createOrder } = useSettlement();
     const [loading, setLoading] = useState(true);
     const [orderType, setOrderType] = useState<OrderType>();
     const [priceInETH, setPriceInETH] = useState<ethers.BigNumber | null>();

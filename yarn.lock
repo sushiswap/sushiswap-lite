@@ -2081,6 +2081,13 @@
     subscriptions-transport-ws "0.9.16"
     ws "7.2.0"
 
+"@sushiswap/zapper@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@sushiswap/zapper/-/zapper-0.2.1.tgz#bbe902e361a9049d9640e9476703e5205cd11b6c"
+  integrity sha512-49za1vlt6M+GbqxYogrFXnsJqV/ILma2a6rka3iUDb0IuaKE5KjBySnPijd3EtLMUcazF3Jd+dnHxdXki37fRQ==
+  dependencies:
+    "@sushiswap/core" "^1.4.1"
+
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@szmarczak/http-timer/-/http-timer-1.1.2.tgz#b1665e2c461a2cd92f4c1bbf50d5454de0d4b421"

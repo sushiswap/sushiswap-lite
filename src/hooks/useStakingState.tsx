@@ -6,7 +6,7 @@ import { SUSHI_BAR } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import Token from "../types/Token";
 import { getContract, parseBalance } from "../utils";
-import useSDK from "./useSDK";
+import useSushiBar from "./useSushiBar";
 
 export type StakeAction = "sushi-balance" | "stake";
 export type UnstakeAction = "xsushi-balance" | "unstake";
@@ -33,7 +33,7 @@ export interface StakingState {
 // tslint:disable-next-line:max-func-body-length
 const useStakingState: () => StakingState = () => {
     const { signer, address, getTokenAllowance, tokens, updateTokens } = useContext(EthersContext);
-    const { enterSushiBar, leaveSushiBar } = useSDK();
+    const { enter, leave } = useSushiBar();
     const [sushiStaked, setSushiStaked] = useState<ethers.BigNumber>();
     const [sushiSupply, setSushiSupply] = useState<ethers.BigNumber>();
     const [xSushiSupply, setXSushiSupply] = useState<ethers.BigNumber>();
@@ -81,7 +81,7 @@ const useStakingState: () => StakingState = () => {
             setEntering(true);
             try {
                 const parsed = parseBalance(amount, sushi.decimals);
-                const tx = await enterSushiBar(parsed, signer);
+                const tx = await enter(parsed, signer);
                 if (tx) {
                     await tx.wait();
                     await updateTokens();
@@ -98,7 +98,7 @@ const useStakingState: () => StakingState = () => {
             setLeaving(true);
             try {
                 const parsed = parseBalance(amount, xSushi.decimals);
-                const tx = await leaveSushiBar(parsed, signer);
+                const tx = await leave(parsed, signer);
                 if (tx) {
                     await tx.wait();
                     await updateTokens();

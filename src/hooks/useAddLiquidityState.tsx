@@ -1,13 +1,19 @@
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 import { Pair } from "@sushiswap/sdk";
 import { EthersContext } from "../context/EthersContext";
 import { parseBalance } from "../utils";
 import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useSDK from "./useSDK";
+import useSwapRouter from "./useSwapRouter";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";
+import useZapper from "./useZapper";
+
+export type AddLiquidityMode = "normal" | "zapper";
 
 export interface AddLiquidityState extends TokenPairState {
+    mode?: AddLiquidityMode;
+    setMode: (mode?: AddLiquidityMode) => void;
     pair?: Pair;
     onAdd: () => Promise<void>;
     adding: boolean;
@@ -18,9 +24,17 @@ const useAddLiquidityState: () => AddLiquidityState = () => {
     const state = useTokenPairState();
     const { provider, signer, updateTokens } = useContext(EthersContext);
     const [loading, setLoading] = useState(false);
+    const [mode, setMode] = useState<AddLiquidityMode>();
     const [pair, setPair] = useState<Pair>();
     const [adding, setAdding] = useState(false);
-    const { getPair, addLiquidity, addLiquidityETH } = useSDK();
+    const { getPair } = useSDK();
+    const { addLiquidity, addLiquidityETH } = useSwapRouter();
+    const { zapIn } = useZapper();
+
+    useEffect(() => {
+        setPair(undefined);
+        state.setFromSymbol("");
+    }, [mode]);
 
     useDelayedOnBlockEffect(
         async block => {
@@ -45,12 +59,15 @@ const useAddLiquidityState: () => AddLiquidityState = () => {
     );
 
     const onAdd = useCallback(async () => {
-        if (state.fromToken && state.toToken && state.fromAmount && state.toAmount && signer) {
+        if (state.fromToken && state.toToken && state.fromAmount && state.toAmount && provider && signer) {
             setAdding(true);
             try {
                 const fromAmount = parseBalance(state.fromAmount, state.fromToken.decimals);
                 const toAmount = parseBalance(state.toAmount, state.toToken.decimals);
-                if (state.fromSymbol === "ETH" || state.toSymbol === "ETH") {
+                if (mode === "zapper") {
+                    const tx = await zapIn(state.fromToken, state.toToken, fromAmount, provider, signer);
+                    await tx.wait();
+                } else if (state.fromSymbol === "ETH" || state.toSymbol === "ETH") {
                     const [token, amount, amountETH] =
                         state.fromSymbol === "ETH"
                             ? [state.toToken, toAmount, fromAmount]
@@ -67,11 +84,13 @@ const useAddLiquidityState: () => AddLiquidityState = () => {
                 setAdding(false);
             }
         }
-    }, [state.fromToken, state.toToken, state.fromAmount, state.toAmount, signer]);
+    }, [state.fromToken, state.toToken, state.fromAmount, state.toAmount, provider, signer]);
 
     return {
         ...state,
         loading: loading || state.loading,
+        mode,
+        setMode,
         pair,
         onAdd,
         adding

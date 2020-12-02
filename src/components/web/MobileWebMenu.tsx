@@ -11,6 +11,7 @@ import DarkModeSwitch from "../DarkModeSwitch";
 import FlexView from "../FlexView";
 import Text from "../Text";
 
+// tslint:disable-next-line:max-func-body-length
 const MobileWebMenu = ({ expanded, onCollapse }) => {
     const { overlay } = useColors();
     return (
@@ -37,7 +38,7 @@ const MobileWebMenu = ({ expanded, onCollapse }) => {
                         <MobileWebMenuItem title={"Liquidity"} path={"/liquidity"} />
                         <MobileWebMenuItem title={"Migrate"} path={"/migrate"} />
                         <MobileWebMenuItem title={"Stake"} path={"/staking"} />
-                        {/*<MobileWebMenuItem title={"Farm"} path={"/farming"} />*/}
+                        <MobileWebMenuItem title={"Farm"} path={"/farming"} />
                     </View>
                 </View>
             </TouchableWithoutFeedback>

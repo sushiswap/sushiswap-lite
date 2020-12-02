@@ -54,7 +54,7 @@ const Harvest = () => {
     const emptyText = "You don't have any LP tokens deposited.";
     return (
         <View style={{ marginTop: Spacing.large }}>
-            <LPTokenSelect state={state} title={"My Pools"} emptyText={emptyText} Item={TokenItem} />
+            <LPTokenSelect state={state} title={"My Farms"} emptyText={emptyText} Item={TokenItem} />
             <Border />
             <Withdraw state={state} />
             <WithdrawInfo state={state} />
@@ -117,14 +117,14 @@ const WithdrawInfo = ({ state }: { state: FarmingState }) => {
                 suffix={"SUSHI"}
                 disabled={disabled || isEmptyValue(state.amount)}
             />
-            <Meta label={"Deposited LP Token"} text={total ? formatBalance(total) : ""} disabled={disabled} />
+            <Meta label={"Planted LP Token"} text={total ? formatBalance(total) : ""} disabled={disabled} />
             <Meta
-                label={"Deposited " + (state.selectedLPToken ? state.selectedLPToken.tokenA.symbol : "Token 1")}
+                label={"Planted " + (state.selectedLPToken ? state.selectedLPToken.tokenA.symbol : "Token 1")}
                 text={state.fromAmount}
                 disabled={disabled}
             />
             <Meta
-                label={"Deposited " + (state.selectedLPToken ? state.selectedLPToken.tokenB.symbol : "Token 2")}
+                label={"Planted " + (state.selectedLPToken ? state.selectedLPToken.tokenB.symbol : "Token 2")}
                 text={state.toAmount}
                 disabled={disabled}
             />

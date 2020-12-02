@@ -59,7 +59,7 @@ const Farming = () => {
     const emptyText = "Temporarily unable to load pools.";
     return (
         <View style={{ marginTop: Spacing.large }}>
-            <LPTokenSelect state={state} title={"Active Pools"} emptyText={emptyText} Item={TokenItem} />
+            <LPTokenSelect state={state} title={"Active Farms"} emptyText={emptyText} Item={TokenItem} />
             <Border />
             <Deposit state={state} />
             <DepositInfo state={state} />
@@ -92,7 +92,7 @@ const TokenItem: FC<LPTokenItemProps> = props => {
                 <Text medium={true} caption={true} style={{ marginLeft: Spacing.tiny }}>
                     {props.token.tokenA.symbol}-{props.token.tokenB.symbol}
                 </Text>
-                <View style={{ flex: 1, alignItems: "flex-end" }}>
+                <View style={{ flex: 1, alignItems: "flex-end", marginRight: 4 }}>
                     <Text note={true}>
                         {multiplier > 1 ? "✨" : ""}
                         {multiplier.toFixed(2) || "1.00"}x APY

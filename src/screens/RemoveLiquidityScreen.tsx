@@ -159,7 +159,7 @@ export const LPTokenOutputItem = (props: {
 };
 
 const AmountInput = ({ state }: { state: RemoveLiquidityState }) => {
-    if (!state.selectedLPToken) {
+    if (!state.selectedLPToken || !state.outputToken) {
         return <Heading text={"Amount of Tokens"} disabled={true} />;
     }
     return (

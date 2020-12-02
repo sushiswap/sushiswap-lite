@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useState } from "react";
 import { Platform, View } from "react-native";
 
 import { TokenAmount } from "@sushiswap/sdk";
+import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import AmountMeta from "../components/AmountMeta";
 import ApproveButton from "../components/ApproveButton";
@@ -26,7 +27,7 @@ import TokenSelect from "../components/TokenSelect";
 import UnsupportedButton from "../components/UnsupportedButton";
 import WebFooter from "../components/web/WebFooter";
 import { LiquiditySubMenu } from "../components/web/WebSubMenu";
-import { ROUTER } from "../constants/contracts";
+import { ROUTER, ZAP_IN } from "../constants/contracts";
 import { Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import { EthersContext } from "../context/EthersContext";
@@ -35,6 +36,7 @@ import useColors from "../hooks/useColors";
 import useLinker from "../hooks/useLinker";
 import useSDK from "../hooks/useSDK";
 import MetamaskError from "../types/MetamaskError";
+import Token from "../types/Token";
 import { convertAmount, convertToken, formatBalance, isEmptyValue, parseBalance } from "../utils";
 import Screen from "./Screen";
 
@@ -184,11 +186,11 @@ const ZapNotice = ({ state }: { state: AddLiquidityState }) => {
         <Notice
             clear={true}
             text={
-                "⚠️ 1/2 of " +
+                "☘️ 1/2 of " +
                 state.fromSymbol +
                 " will automatically be swapped to " +
                 state.toSymbol +
-                " and then both tokens will be added to the liquidity."
+                " and both tokens will be added to the liquidity in a single transaction."
             }
             style={{ marginTop: Spacing.small }}
         />
@@ -204,23 +206,28 @@ const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
 };
 
 const FirstProviderInfo = ({ state }: { state: AddLiquidityState }) => {
-    const { green } = useColors();
+    const { red, green } = useColors();
     const noAmount = isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount);
     const initialPrice = Fraction.from(
         parseBalance(state.toAmount, state.toToken!.decimals),
         parseBalance(state.fromAmount, state.fromToken!.decimals)
     ).toString(8);
+    const zap = state.mode === "zapper";
     return (
         <View>
-            <InfoBox style={{ marginTop: Spacing.normal }}>
-                <PriceMeta state={state} price={initialPrice} disabled={noAmount} />
-            </InfoBox>
+            {!zap && (
+                <InfoBox style={{ marginTop: Spacing.normal }}>
+                    <PriceMeta state={state} price={initialPrice} disabled={noAmount} />
+                </InfoBox>
+            )}
             <Notice
                 text={
                     "You are the first liquidity provider.\n" +
-                    "The ratio of tokens you add will set the price of this pool."
+                    (zap
+                        ? "1-Click Zap is not supported when you're the first provider."
+                        : "The ratio of tokens you add will set the price of this pool.")
                 }
-                color={green}
+                color={zap ? red : green}
                 style={{ marginTop: Spacing.small }}
             />
         </View>
@@ -277,22 +284,20 @@ const PriceMeta = ({ state, price, disabled }) => (
 // tslint:disable-next-line:max-func-body-length
 const Controls = ({ state }: { state: AddLiquidityState }) => {
     const [error, setError] = useState<MetamaskError>({});
+    const { allowed, setAllowed, loading } = useZapTokenAllowance(state.fromToken);
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
-    const fromApproveRequired = state.fromSymbol !== "ETH" && !state.fromTokenAllowed;
-    const toApproveRequired = state.toSymbol !== "ETH" && !state.toTokenAllowed;
+    const zap = state.mode === "zapper";
+    const fromApproveRequired = state.fromSymbol !== "ETH" && ((zap && !allowed) || !state.fromTokenAllowed);
+    const toApproveRequired = state.toSymbol !== "ETH" && !zap && !state.toTokenAllowed;
     const disabled =
         fromApproveRequired ||
         isEmptyValue(state.fromAmount) ||
-        (state.mode === "normal" && (toApproveRequired || isEmptyValue(state.toAmount)));
+        (!zap && (toApproveRequired || isEmptyValue(state.toAmount)));
     return (
         <View style={{ marginTop: Spacing.normal }}>
-            {!state.fromToken ||
-            !state.toToken ||
-            state.loading ||
-            isEmptyValue(state.fromAmount) ||
-            isEmptyValue(state.toAmount) ? (
+            {!state.fromToken || !state.toToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount) ? (
                 <SupplyButton state={state} onError={setError} disabled={true} />
-            ) : state.loading || !state.pair ? (
+            ) : state.loading || loading || !state.pair ? (
                 <FetchingButton />
             ) : parseBalance(state.fromAmount, state.fromToken.decimals).gt(state.fromToken.balance) ? (
                 <InsufficientBalanceButton symbol={state.fromSymbol} />
@@ -306,8 +311,8 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
                 <>
                     <ApproveButton
                         token={state.fromToken}
-                        spender={ROUTER}
-                        onSuccess={() => state.setFromTokenAllowed(true)}
+                        spender={zap ? ZAP_IN : ROUTER}
+                        onSuccess={() => (zap ? setAllowed(true) : state.setFromTokenAllowed(true))}
                         onError={setError}
                         hidden={!fromApproveRequired}
                     />
@@ -316,7 +321,7 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
                         spender={ROUTER}
                         onSuccess={() => state.setToTokenAllowed(true)}
                         onError={setError}
-                        hidden={state.mode === "zapper" || !toApproveRequired}
+                        hidden={!toApproveRequired}
                     />
                     <SupplyButton state={state} onError={setError} disabled={disabled} />
                 </>
@@ -324,6 +329,30 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
             {error.message && error.code !== 4001 && <ErrorMessage error={error} />}
         </View>
     );
+};
+
+const useZapTokenAllowance = (zapToken?: Token) => {
+    const { signer, getTokenAllowance } = useContext(EthersContext);
+    const [allowed, setAllowed] = useState(false);
+    const [loading, setLoading] = useState(false);
+    useAsyncEffect(async () => {
+        setAllowed(false);
+        if (zapToken && signer) {
+            setLoading(true);
+            try {
+                const minAllowance = ethers.BigNumber.from(2)
+                    .pow(96)
+                    .sub(1);
+                if (zapToken.symbol !== "ETH") {
+                    const fromAllowance = await getTokenAllowance(zapToken.address, ZAP_IN);
+                    setAllowed(ethers.BigNumber.from(fromAllowance).gte(minAllowance));
+                }
+            } finally {
+                setLoading(false);
+            }
+        }
+    }, [zapToken, signer]);
+    return { allowed, setAllowed, loading };
 };
 
 const SupplyButton = ({

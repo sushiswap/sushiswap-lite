@@ -138,7 +138,8 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
                     await removeFromRouter();
                 } else {
                     const amount = parseBalance(state.amount, state.selectedLPToken.decimals);
-                    await zapOut(state.selectedLPToken, outputToken, amount, provider, signer);
+                    const tx = await zapOut(state.selectedLPToken, outputToken, amount, provider, signer);
+                    await tx.wait();
                 }
                 await updateTokens();
                 await state.updateLPTokens();
@@ -154,6 +155,7 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
         state.amount,
         state.updateLPTokens,
         removeFromRouter,
+        zapOut,
         updateTokens,
         outputToken,
         provider,

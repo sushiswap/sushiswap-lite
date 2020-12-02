@@ -11,7 +11,6 @@ import Token from "../types/Token";
 import { getContract, parseBalance, pow10 } from "./index";
 
 const blocksPerDay = 6500;
-const sushiPerBlock = 80;
 
 export const fetchTokens = async (account: string, customTokens?: Token[]) => {
     const response = await fetch("https://lite.sushiswap.fi/tokens.json");
@@ -44,41 +43,49 @@ export const fetchPools = async (account: string, tokens: Token[], provider: eth
     const info = await sushiData.sushi.info();
     const masterchefInfo = await sushiData.masterchef.info();
     const pools = await sushiData.masterchef.pools();
+    const reduce = await sushiData.masterchef.pool({ poolId: "45" });
+    if (!reduce) return undefined;
+    const sushiPerBlock = Math.floor(100 - 100 * (reduce.allocPoint / masterchefInfo.totalAllocPoint));
     const balances = await fetchTokenBalances(
         account,
-        pools.map(pool => pool.lpToken)
+        pools.map(pool => pool.pair)
     );
     // tslint:disable-next-line:max-func-body-length
     const fetchPool = async (pool, i): Promise<LPToken | null> => {
+        if (pool.slpBalance === 0) return null;
         try {
             const result = await Promise.all([
-                fetchStakedValue(pool.lpToken),
-                fetchPairTokens(pool.lpToken, tokens, provider)
+                fetchStakedValue(pool.pair),
+                fetchPairTokens(pool.pair, tokens, provider)
             ]);
-            if (result[0].length === 0) return null;
+            if (!result[0]) return null;
             const apy = calcAPY(
-                info[0].derivedETH,
+                info.derivedETH,
+                sushiPerBlock,
                 pool.allocPoint,
-                masterchefInfo[0].totalAllocPoint,
-                result[0][0].totalValueETH
+                masterchefInfo.totalAllocPoint,
+                result[0].totalValueETH,
+                pool.slpBalance,
+                result[0].totalSupply
             );
             if (apy === 0) return null;
             return {
                 ...pool,
                 apy,
-                address: pool.lpToken,
+                address: pool.pair,
                 decimals: 18,
                 tokenA: result[1].tokenA,
                 tokenB: result[1].tokenB,
                 symbol: result[1].tokenA.symbol + "-" + result[1].tokenB.symbol + " LP",
                 balance: ethers.BigNumber.from(balances[i] || 0),
                 sushiRewardedPerYear: calcSushiRewardedPerYear(
+                    sushiPerBlock,
                     pool.allocPoint,
-                    masterchefInfo[0].totalAllocPoint,
-                    result[0][0].totalSupply
+                    masterchefInfo.totalAllocPoint,
+                    result[0].totalSupply
                 ),
-                totalSupply: parseBalance(String(result[0][0].totalSupply), 18),
-                totalValueUSD: result[0][0].totalValueUSD,
+                totalSupply: parseBalance(String(result[0].totalSupply), 18),
+                totalValueUSD: result[0].totalValueUSD,
                 multiplier: pool.allocPoint / 1000
             };
         } catch (e) {
@@ -95,12 +102,12 @@ export const fetchMyPools = async (account: string, tokens: Token[], provider: e
             const myStake = await fetchMyStake(pool.id, account, provider);
             if (myStake.amountDeposited.isZero()) return null;
             const result = await Promise.all([
-                fetchStakedValue(pool.lpToken),
-                fetchPairTokens(pool.lpToken, tokens, provider)
+                fetchStakedValue(pool.pair),
+                fetchPairTokens(pool.pair, tokens, provider)
             ]);
             return {
                 ...pool,
-                address: pool.lpToken,
+                address: pool.pair,
                 decimals: 18,
                 tokenA: result[1].tokenA,
                 tokenB: result[1].tokenB,
@@ -108,7 +115,7 @@ export const fetchMyPools = async (account: string, tokens: Token[], provider: e
                 balance: ethers.constants.Zero,
                 amountDeposited: myStake.amountDeposited,
                 pendingSushi: myStake.pendingSushi,
-                totalSupply: parseBalance(String(result[0][0].totalSupply), 18)
+                totalSupply: parseBalance(String(result[0].totalSupply), 18)
             };
         } catch (e) {
             return null;
@@ -117,11 +124,14 @@ export const fetchMyPools = async (account: string, tokens: Token[], provider: e
     return (await Promise.all(pools.map(fetchMyPool))).filter(pool => !!pool) as LPToken[];
 };
 
-const calcAPY = (derivedETH, allocPoint, totalAllocPoint, totalValueETH) => {
-    return (derivedETH * blocksPerDay * sushiPerBlock * 3 * 365 * (allocPoint / totalAllocPoint)) / totalValueETH;
+const calcAPY = (derivedETH, sushiPerBlock, allocPoint, totalAllocPoint, totalValueETH, slpBalance, totalSupply) => {
+    return (
+        (derivedETH * blocksPerDay * sushiPerBlock * 3 * 365 * (allocPoint / totalAllocPoint)) /
+        (totalValueETH * (slpBalance / totalSupply))
+    );
 };
 
-const calcSushiRewardedPerYear = (allocPoint, totalAllocPoint, totalSupply) => {
+const calcSushiRewardedPerYear = (sushiPerBlock, allocPoint, totalAllocPoint, totalSupply) => {
     return ethers.BigNumber.from(blocksPerDay * sushiPerBlock * 3 * 365 * allocPoint)
         .mul(pow10(36))
         .div(totalAllocPoint)
@@ -139,8 +149,8 @@ const fetchMyStake = async (poolId: number, account: string, provider: ethers.pr
     return { amountDeposited, pendingSushi };
 };
 
-const fetchPairTokens = async (lpToken: string, tokens: Token[], provider: ethers.providers.JsonRpcProvider) => {
-    const contract = getContract("IUniswapV2Pair", lpToken, provider);
+const fetchPairTokens = async (pair: string, tokens: Token[], provider: ethers.providers.JsonRpcProvider) => {
+    const contract = getContract("IUniswapV2Pair", pair, provider);
     const tokenA = await findOrFetchToken(await contract.token0(), provider, tokens);
     const tokenB = await findOrFetchToken(await contract.token1(), provider, tokens);
     return { tokenA, tokenB };

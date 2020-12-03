@@ -132,8 +132,9 @@ const ToTokenSelect = ({ state }: { state: SwapState }) => {
     if (!state.orderType || !state.fromSymbol) {
         return <Heading text={"Token To Buy"} disabled={true} />;
     }
+    const limit = state.orderType === "limit";
     const onChangeSymbol = (symbol: string) => {
-        state.setToSymbol(symbol === "ETH" ? "WETH" : symbol);
+        state.setToSymbol(limit && symbol === "ETH" ? "WETH" : symbol);
     };
     return (
         <View>
@@ -141,7 +142,7 @@ const ToTokenSelect = ({ state }: { state: SwapState }) => {
                 title={"Token To Buy"}
                 symbol={state.toSymbol}
                 onChangeSymbol={onChangeSymbol}
-                hidden={token => token.symbol === state.fromSymbol || (state.orderType === "limit" && isETH(token))}
+                hidden={token => token.symbol === state.fromSymbol || (limit && isETH(token))}
             />
             {state.orderType === "limit" && !state.toSymbol && <LimitOrderUnsupportedNotice />}
         </View>

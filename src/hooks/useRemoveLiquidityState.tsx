@@ -5,7 +5,7 @@ import useAsyncEffect from "use-async-effect";
 import { ROUTER } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import Token from "../types/Token";
-import { convertToken, formatBalance, parseBalance, parseCurrencyAmount } from "../utils";
+import { convertToken, formatBalance, isWETH, parseBalance, parseCurrencyAmount } from "../utils";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
 import useSwapRouter from "./useSwapRouter";
 import useZapper from "./useZapper";
@@ -102,10 +102,10 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
             const fromAmount = parseBalance(state.fromAmount, state.fromToken!.decimals);
             const toAmount = parseBalance(state.toAmount, state.toToken!.decimals);
             const liquidity = parseBalance(state.amount, state.selectedLPToken.decimals);
-            if (state.fromSymbol === "WETH" || state.toSymbol === "WETH") {
-                const token = state.fromSymbol === "WETH" ? state.toToken! : state.fromToken!;
-                const amountToRemove = state.fromSymbol === "WETH" ? toAmount : fromAmount;
-                const amountToRemoveETH = state.fromSymbol === "WETH" ? fromAmount : toAmount;
+            if (isWETH(state.fromToken) || isWETH(state.toToken)) {
+                const token = isWETH(state.fromToken) ? state.toToken! : state.fromToken!;
+                const amountToRemove = isWETH(state.fromToken) ? toAmount : fromAmount;
+                const amountToRemoveETH = isWETH(state.fromToken) ? fromAmount : toAmount;
                 const tx = await removeLiquidityETH(token, liquidity, amountToRemove, amountToRemoveETH, signer);
                 await tx.wait();
             } else {

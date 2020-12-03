@@ -3,6 +3,7 @@ import { Image, View, ViewStyle } from "react-native";
 
 import useColors from "../hooks/useColors";
 import Token from "../types/Token";
+import { isWETH } from "../utils";
 
 const TokenLogo = (props: {
     token: Token;
@@ -16,7 +17,7 @@ const TokenLogo = (props: {
     const size = props.small ? 22 : 27;
     const placeholder = require("../../assets/empty-token.png");
     const ETH = require("../../assets/ETH.png");
-    const source = props.replaceWETH && props.token.symbol === "WETH" ? ETH : { uri: props.token.logoURI };
+    const source = props.replaceWETH && isWETH(props.token) ? ETH : { uri: props.token.logoURI };
     return (
         <View
             style={[

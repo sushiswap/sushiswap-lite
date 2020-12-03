@@ -49,6 +49,10 @@ export const isETH = (token?: Token) => token?.address.toLowerCase() === ETH.add
 
 export const isWETH = (token?: Token) => token?.address.toLowerCase() === WETH[1].address.toLowerCase();
 
+export const isETHWETHPair = (fromToken?: Token, toToken?: Token) => {
+    return (isETH(fromToken) && isWETH(toToken)) || (isWETH(fromToken) && isETH(toToken));
+};
+
 export const convertToken = (token: Token) => {
     return token.symbol === "ETH" ? WETH["1"] : new SDKToken(ChainId.MAINNET, token.address, token.decimals);
 };

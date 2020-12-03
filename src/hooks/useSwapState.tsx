@@ -6,7 +6,7 @@ import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import Fraction from "../constants/Fraction";
 import { EthersContext } from "../context/EthersContext";
-import { formatBalance, isEmptyValue, parseBalance, pow10 } from "../utils";
+import { formatBalance, isEmptyValue, isETH, isWETH, parseBalance, pow10 } from "../utils";
 import useDelayedEffect from "./useDelayedEffect";
 import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useSDK from "./useSDK";
@@ -66,7 +66,7 @@ const useSwapState: () => SwapState = () => {
     useAsyncEffect(async () => {
         setPriceInETH(undefined);
         if (provider && state.fromToken) {
-            if (state.fromToken.symbol === "WETH") {
+            if (isWETH(state.fromToken)) {
                 setPriceInETH(ethers.constants.WeiPerEther);
             } else {
                 try {
@@ -213,7 +213,7 @@ const useSwapState: () => SwapState = () => {
         limitOrderReturn,
         onSwap,
         swapping,
-        limitOrderUnsupported: orderType === "limit" && (state.fromSymbol === "ETH" || state.toSymbol === "ETH"),
+        limitOrderUnsupported: orderType === "limit" && (isETH(state.fromToken) || isETH(state.toToken)),
         onCreateOrder,
         creatingOrder
     };

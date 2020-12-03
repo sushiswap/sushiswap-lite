@@ -4,13 +4,12 @@ import { Pair } from "@sushiswap/sdk";
 import sushiData from "@sushiswap/sushi-data";
 import useAsyncEffect from "use-async-effect";
 import Fraction from "../constants/Fraction";
-import { ETH } from "../constants/tokens";
 import { EthersContext } from "../context/EthersContext";
 import LPToken from "../types/LPToken";
 import LPTokenWithValue from "../types/LPTokenWithValue";
 import Token from "../types/Token";
 import TokenWithValue from "../types/TokenWithValue";
-import { convertToken, formatBalance, parseBalance, parseCurrencyAmount, pow10 } from "../utils";
+import { convertToken, formatBalance, isETH, isWETH, parseBalance, parseCurrencyAmount, pow10 } from "../utils";
 import { fetchMyLPTokens, fetchMyPools } from "../utils/fetch-utils";
 import useSDK from "./useSDK";
 
@@ -47,7 +46,7 @@ const useHomeState = () => {
 
     // Load Tokens
     useAsyncEffect(async () => {
-        const weth = list.find(t => t.symbol === "WETH");
+        const weth = list.find(t => isWETH(t));
         if (provider && weth && list.length > 0) {
             setLoading(true);
             CACHE.splice(0, CACHE.length);
@@ -66,7 +65,7 @@ const useHomeState = () => {
 
     // Load Liquidity
     useAsyncEffect(async () => {
-        const weth = list.find(t => t.symbol === "WETH");
+        const weth = list.find(t => isWETH(t));
         if (provider && signer && weth && tokens && tokens.length > 0) {
             setLoadingLPTokens(true);
             const wethPriceUSD = Fraction.parse(String(await sushiData.weth.price()));
@@ -85,7 +84,7 @@ const useHomeState = () => {
 
     // Load Farming
     useAsyncEffect(async () => {
-        const weth = list.find(t => t.symbol === "WETH");
+        const weth = list.find(t => isWETH(t));
         if (provider && signer && weth && tokens && tokens.length > 0 && lpTokens) {
             setLoadingPools(true);
             const wethPriceUSD = Fraction.parse(String(await sushiData.weth.price()));
@@ -116,7 +115,7 @@ const fetchTokenWithValue = async (token: Token, weth: Token, wethPriceUSD: Frac
     const cached = CACHE.find(t => t.address === token.address);
     if (cached) return cached;
     let fetched: TokenWithValue;
-    if (token.symbol === "ETH" || token.symbol === "WETH") {
+    if (isETH(token) || isWETH(token)) {
         fetched = {
             ...token,
             priceUSD: Number(wethPriceUSD.toString()),

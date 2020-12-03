@@ -7,7 +7,7 @@ import { ROUTER, ZAP_IN, ZAP_OUT } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
-import { convertToken, deduct, getContract, parseCurrencyAmount } from "../utils";
+import { convertToken, deduct, getContract, isETH, parseCurrencyAmount } from "../utils";
 import { logTransaction } from "../utils/analytics-utils";
 import useSDK from "./useSDK";
 import useSwapRouter from "./useSwapRouter";
@@ -61,7 +61,7 @@ const useZapper = () => {
                 ROUTER,
                 await populateSwapData(fromToken, toToken, fromAmount.div(2), provider, signer)
             ];
-            const value = fromToken.symbol === "ETH" ? fromAmount : ethers.constants.Zero;
+            const value = isETH(fromToken) ? fromAmount : ethers.constants.Zero;
             const gasLimit = await contract.estimateGas.ZapIn(...args, { value });
             const tx = await contract.ZapIn(...args, {
                 value,

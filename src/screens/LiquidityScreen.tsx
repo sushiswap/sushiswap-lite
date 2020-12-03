@@ -37,7 +37,7 @@ import useLinker from "../hooks/useLinker";
 import useSDK from "../hooks/useSDK";
 import MetamaskError from "../types/MetamaskError";
 import Token from "../types/Token";
-import { convertAmount, convertToken, formatBalance, isEmptyValue, isETH, isWETH, parseBalance } from "../utils";
+import { convertAmount, convertToken, formatBalance, isEmptyValue, isETH, isETHWETHPair, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const LiquidityScreen = () => {
@@ -221,16 +221,18 @@ const FirstProviderInfo = ({ state }: { state: AddLiquidityState }) => {
                     <FirstProviderControls state={state} />
                 </InfoBox>
             )}
-            <Notice
-                text={
-                    "You are the first liquidity provider.\n" +
-                    (zap
-                        ? "1-Click Zap is not supported when you're the first provider."
-                        : "The ratio of tokens you add will set the price of this pool.")
-                }
-                color={zap ? red : green}
-                style={{ marginTop: Spacing.small }}
-            />
+            {!isETHWETHPair(state.fromToken, state.toToken) && (
+                <Notice
+                    text={
+                        "You are the first liquidity provider.\n" +
+                        (zap
+                            ? "1-Click Zap is not supported when you're the first provider."
+                            : "The ratio of tokens you add will set the price of this pool.")
+                    }
+                    color={zap ? red : green}
+                    style={{ marginTop: Spacing.small }}
+                />
+            )}
         </View>
     );
 };
@@ -245,7 +247,9 @@ const FirstProviderControls = ({ state }: { state: AddLiquidityState }) => {
         fromApproveRequired || isEmptyValue(state.fromAmount) || toApproveRequired || isEmptyValue(state.toAmount);
     return (
         <View style={{ marginTop: Spacing.normal }}>
-            {!state.fromToken || !state.toToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount) ? (
+            {isETHWETHPair(state.fromToken, state.toToken) ? (
+                <UnsupportedButton state={state} />
+            ) : !state.fromToken || !state.toToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount) ? (
                 <SupplyButton state={state} onError={setError} disabled={true} />
             ) : state.loading ? (
                 <FetchingButton />
@@ -253,8 +257,6 @@ const FirstProviderControls = ({ state }: { state: AddLiquidityState }) => {
                 <InsufficientBalanceButton symbol={state.fromSymbol} />
             ) : parseBalance(state.toAmount, state.toToken.decimals).gt(state.toToken.balance) ? (
                 <InsufficientBalanceButton symbol={state.toSymbol} />
-            ) : isETH(state.fromToken) || isWETH(state.fromToken) || isETH(state.toToken) || isWETH(state.toToken) ? (
-                <UnsupportedButton state={state} />
             ) : (
                 <>
                     <ApproveButton
@@ -340,7 +342,9 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
         (!zap && (toApproveRequired || isEmptyValue(state.toAmount)));
     return (
         <View style={{ marginTop: Spacing.normal }}>
-            {!state.fromToken || !state.toToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount) ? (
+            {isETHWETHPair(state.fromToken, state.toToken) ? (
+                <UnsupportedButton state={state} />
+            ) : !state.fromToken || !state.toToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount) ? (
                 <SupplyButton state={state} onError={setError} disabled={true} />
             ) : state.loading || loading || !state.pair ? (
                 <FetchingButton />
@@ -349,9 +353,6 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
             ) : state.mode === "normal" &&
               parseBalance(state.toAmount, state.toToken.decimals).gt(state.toToken.balance) ? (
                 <InsufficientBalanceButton symbol={state.toSymbol} />
-            ) : (state.fromSymbol === "ETH" && state.toSymbol === "WETH") ||
-              (state.fromSymbol === "WETH" && state.toSymbol === "ETH") ? (
-                <UnsupportedButton state={state} />
             ) : (
                 <>
                     <ApproveButton

@@ -2,10 +2,9 @@ import { useCallback, useContext } from "react";
 
 import { Currency, CurrencyAmount, Fetcher, Pair, TokenAmount, Trade } from "@sushiswap/sdk";
 import { ethers } from "ethers";
-import { ETH } from "../constants/tokens";
 import { EthersContext } from "../context/EthersContext";
 import Token from "../types/Token";
-import { convertToken } from "../utils";
+import { convertToken, isETH } from "../utils";
 import useAllCommonPairs from "./useAllCommonPairs";
 
 // tslint:disable-next-line:max-func-body-length
@@ -21,11 +20,11 @@ const useSDK = () => {
             provider: ethers.providers.BaseProvider
         ) => {
             if (provider) {
-                const isETH = fromToken.symbol === "ETH";
+                const eth = isETH(fromToken);
                 const from = convertToken(fromToken);
-                const to = toToken.symbol === "ETH" ? Currency.ETHER : convertToken(toToken);
+                const to = isETH(toToken) ? Currency.ETHER : convertToken(toToken);
                 const pairs = await loadAllCommonPairs(from, to, provider);
-                const amount = isETH
+                const amount = eth
                     ? CurrencyAmount.ether(fromAmount.toString())
                     : new TokenAmount(from, fromAmount.toString());
                 return Trade.bestTradeExactIn(pairs, amount, to, { maxHops: 3, maxNumResults: 1 })[0];

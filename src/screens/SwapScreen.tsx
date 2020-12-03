@@ -36,7 +36,7 @@ import useLinker from "../hooks/useLinker";
 import useSwapState, { OrderType, SwapState } from "../hooks/useSwapState";
 import MetamaskError from "../types/MetamaskError";
 import Token from "../types/Token";
-import { formatBalance, isEmptyValue, parseBalance } from "../utils";
+import { formatBalance, isEmptyValue, isETH, isETHWETHPair, isWETH, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const SwapScreen = () => {
@@ -109,7 +109,7 @@ const FromTokenSelect = ({ state }: { state: SwapState }) => {
     if (!state.orderType) {
         return <Heading text={"Token To Sell"} disabled={true} />;
     }
-    const ETH = tokens ? tokens.find(token => token.symbol === "ETH") : null;
+    const ETH = tokens ? tokens.find(token => isETH(token)) : null;
     return (
         <View>
             <TokenSelect
@@ -118,7 +118,7 @@ const FromTokenSelect = ({ state }: { state: SwapState }) => {
                 onChangeSymbol={state.setFromSymbol}
                 hidden={token =>
                     (!customTokens.find(t => t.address === token.address) && token.balance.isZero()) ||
-                    (state.orderType === "limit" && token.symbol === "ETH")
+                    (state.orderType === "limit" && isETH(token))
                 }
             />
             {state.orderType === "limit" && !state.fromSymbol && ETH && !ETH.balance.isZero() && (
@@ -132,15 +132,16 @@ const ToTokenSelect = ({ state }: { state: SwapState }) => {
     if (!state.orderType || !state.fromSymbol) {
         return <Heading text={"Token To Buy"} disabled={true} />;
     }
+    const onChangeSymbol = (symbol: string) => {
+        state.setToSymbol(symbol === "ETH" ? "WETH" : symbol);
+    };
     return (
         <View>
             <TokenSelect
                 title={"Token To Buy"}
                 symbol={state.toSymbol}
-                onChangeSymbol={state.setToSymbol}
-                hidden={token =>
-                    token.symbol === state.fromSymbol || (state.orderType === "limit" && token.symbol === "ETH")
-                }
+                onChangeSymbol={onChangeSymbol}
+                hidden={token => token.symbol === state.fromSymbol || (state.orderType === "limit" && isETH(token))}
             />
             {state.orderType === "limit" && !state.toSymbol && <LimitOrderUnsupportedNotice />}
         </View>
@@ -238,17 +239,14 @@ const NoPairNotice = ({ state }: { state: SwapState }) => {
 };
 
 const TradeInfo = ({ state }: { state: SwapState }) => {
-    if (
-        (state.fromSymbol === "ETH" && state.toSymbol === "WETH") ||
-        (state.fromSymbol === "WETH" && state.toSymbol === "ETH")
-    ) {
+    if (isETHWETHPair(state.fromToken, state.toToken)) {
         return <WrapInfo state={state} />;
     }
     const disabled =
         state.fromSymbol === "" ||
         state.toSymbol === "" ||
         isEmptyValue(state.fromAmount) ||
-        (state.orderType === "limit" && state.fromSymbol === "ETH") ||
+        (state.orderType === "limit" && isETH(state.fromToken)) ||
         (!state.loading && !state.trade);
     return (
         <InfoBox>
@@ -307,9 +305,9 @@ const SwapControls = ({ state }: { state: SwapState }) => {
                 <SwapButton state={state} onError={setError} disabled={true} />
             ) : parseBalance(state.fromAmount, state.fromToken.decimals).gt(state.fromToken.balance) ? (
                 <InsufficientBalanceButton symbol={state.fromSymbol} />
-            ) : state.fromSymbol === "WETH" && state.toSymbol === "ETH" ? (
+            ) : isWETH(state.fromToken) && isETH(state.toToken) ? (
                 <UnwrapButton state={state} onError={setError} />
-            ) : state.fromSymbol === "ETH" && state.toSymbol === "WETH" ? (
+            ) : isETH(state.fromToken) && isWETH(state.toToken) ? (
                 <WrapButton state={state} onError={setError} />
             ) : state.unsupported ? (
                 <UnsupportedButton state={state} />

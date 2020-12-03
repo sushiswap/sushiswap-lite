@@ -199,11 +199,11 @@ const PriceInput = ({ state }: { state: SwapState }) => {
     }
     const marketPrice =
         state.toToken && state.trade
-            ? parseBalance(state.trade.executionPrice.toFixed(state.toToken.decimals), state.toToken.decimals)
+            ? parseBalance(state.trade.executionPrice.invert().toFixed(state.toToken.decimals), state.toToken.decimals)
             : ethers.constants.Zero;
     return (
         <TokenInput
-            title={"Minimum Price (" + state.toSymbol + "/" + state.fromSymbol + ")"}
+            title={"Minimum Price (" + state.fromSymbol + "/" + state.toSymbol + ")"}
             token={
                 {
                     ...state.toToken,
@@ -373,7 +373,7 @@ const LimitOrderInfo = ({ state }: { state: SwapState }) => {
             </Text>
             <Meta
                 label={"Market Price"}
-                text={state.trade?.executionPrice?.toFixed(8) || undefined}
+                text={state.trade?.executionPrice?.invert().toFixed(8) || undefined}
                 suffix={state.toSymbol + " / " + state.fromSymbol + ""}
                 disabled={d}
             />

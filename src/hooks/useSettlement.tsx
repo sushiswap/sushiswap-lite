@@ -60,11 +60,14 @@ const useSettlement = () => {
         fromAmount: ethers.BigNumber,
         price: string
     ) => {
-        const toAmount = Fraction.parse(price)
-            .apply(pow10(fromToken.decimals + toToken.decimals))
-            .div(fromAmount);
-        const limitOrderFeeDeducted = toAmount.sub(calculateLimitOrderFee(toAmount));
-        return limitOrderFeeDeducted.sub(calculateSwapFee(limitOrderFeeDeducted));
+        const limitOrderFeeDeducted = fromAmount.sub(calculateLimitOrderFee(fromAmount));
+        const swapFeeDeducted = limitOrderFeeDeducted.sub(calculateSwapFee(limitOrderFeeDeducted));
+        const fraction = Fraction.parse(price);
+        return swapFeeDeducted
+            .mul(pow10(toToken.decimals))
+            .mul(fraction.denominator)
+            .div(fraction.numerator)
+            .div(pow10(fromToken.decimals));
     };
 
     return { createOrder, cancelOrder, queryOrderFilledEvents, calculateLimitOrderFee, calculateLimitOrderReturn };

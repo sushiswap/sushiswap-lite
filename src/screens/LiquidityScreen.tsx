@@ -287,7 +287,7 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
     const { allowed, setAllowed, loading } = useZapTokenAllowance(state.fromToken);
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
     const zap = state.mode === "zapper";
-    const fromApproveRequired = state.fromSymbol !== "ETH" && ((zap && !allowed) || !state.fromTokenAllowed);
+    const fromApproveRequired = state.fromSymbol !== "ETH" && ((zap && !allowed) || (!zap && !state.fromTokenAllowed));
     const toApproveRequired = state.toSymbol !== "ETH" && !zap && !state.toTokenAllowed;
     const disabled =
         fromApproveRequired ||

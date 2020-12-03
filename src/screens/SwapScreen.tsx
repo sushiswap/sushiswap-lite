@@ -374,7 +374,7 @@ const LimitOrderInfo = ({ state }: { state: SwapState }) => {
             <Meta
                 label={"Market Price"}
                 text={state.trade?.executionPrice?.invert().toFixed(8) || undefined}
-                suffix={state.toSymbol + " / " + state.fromSymbol + ""}
+                suffix={state.fromSymbol + " / " + state.toSymbol}
                 disabled={d}
             />
             <Meta label={"Relayer Fee (0.20%)"} text={state.limitOrderFee} suffix={state.fromSymbol} disabled={d} />

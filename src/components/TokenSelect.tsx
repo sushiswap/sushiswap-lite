@@ -5,6 +5,7 @@ import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
 import useDelayedEffect from "../hooks/useDelayedEffect";
 import Token from "../types/Token";
+import TokenWithValue from "../types/TokenWithValue";
 import CloseIcon from "./CloseIcon";
 import Expandable from "./Expandable";
 import FlexView from "./FlexView";
@@ -16,8 +17,10 @@ import Text from "./Text";
 import TokenAmount from "./TokenAmount";
 import TokenLogo from "./TokenLogo";
 import TokenName from "./TokenName";
+import TokenPrice from "./TokenPrice";
 import TokenSearch from "./TokenSearch";
 import TokenSymbol from "./TokenSymbol";
+import TokenValue from "./TokenValue";
 
 export interface TokenSelectProps {
     title: string;
@@ -60,7 +63,6 @@ const TokenSelect: FC<TokenSelectProps> = props => {
     );
 };
 
-// tslint:disable-next-line:max-func-body-length
 const TokenList = (props: {
     onSelectToken: (token: Token) => void;
     disabled?: (token: Token) => boolean;
@@ -82,15 +84,7 @@ const TokenList = (props: {
         [props.onSelectToken, props.disabled]
     );
     const data = useMemo(
-        () =>
-            tokens
-                .filter(token => (props.hidden ? !props.hidden(token) : true))
-                .sort(
-                    (t1, t2) =>
-                        (t2.balance.isZero() ? 0 : 10000000000) -
-                        (t1.balance.isZero() ? 0 : 10000000000) +
-                        t1.symbol.localeCompare(t2.symbol)
-                ),
+        () => tokens.filter(token => (props.hidden ? !props.hidden(token) : true)).sort(compareTokens),
         [tokens, props.hidden]
     );
     return loadingTokens ? (
@@ -112,8 +106,9 @@ const EmptyList = () => {
     );
 };
 
+// tslint:disable-next-line:max-func-body-length
 const TokenItem = (props: {
-    token: Token;
+    token: TokenWithValue;
     selected: boolean;
     onSelectToken: (token: Token) => void;
     disabled?: boolean;
@@ -132,13 +127,45 @@ const TokenItem = (props: {
             }}>
             <FlexView style={{ alignItems: "center" }}>
                 <TokenLogo token={props.token} disabled={props.disabled} />
-                <TokenName token={props.token} disabled={props.disabled} />
-                <TokenAmount token={props.token} disabled={props.disabled} style={{ flex: 1, textAlign: "right" }} />
-                {IS_DESKTOP && <TokenSymbol token={props.token} disabled={props.disabled} />}
+                <View>
+                    {props.token.priceUSD !== null && (
+                        <TokenPrice
+                            token={props.token}
+                            disabled={props.disabled}
+                            style={{ marginLeft: Spacing.small }}
+                        />
+                    )}
+                    <TokenName token={props.token} disabled={props.disabled} />
+                </View>
+                <View style={{ flex: 1, alignItems: "flex-end" }}>
+                    {props.token.valueUSD !== null && <TokenValue token={props.token} disabled={props.disabled} />}
+                    <FlexView>
+                        <TokenAmount
+                            token={props.token}
+                            disabled={props.disabled}
+                            style={{ flex: 1, textAlign: "right" }}
+                        />
+                        {IS_DESKTOP && <TokenSymbol token={props.token} disabled={props.disabled} />}
+                    </FlexView>
+                </View>
                 {props.selected ? <CloseIcon /> : <SelectIcon />}
             </FlexView>
         </Selectable>
     );
+};
+
+const compareTokens = (t1: TokenWithValue, t2: TokenWithValue) => {
+    if (t2.balance.isZero() && t1.balance.isZero()) return (t2?.priceUSD || 0) - (t1?.priceUSD || 0);
+    const value2 = t2?.valueUSD || 0;
+    const value1 = t1?.valueUSD || 1;
+    if (value2 === value1) {
+        return (
+            (t2.balance.isZero() ? 0 : 10000000000) -
+            (t1.balance.isZero() ? 0 : 10000000000) +
+            t1.symbol.localeCompare(t2.symbol)
+        );
+    }
+    return value2 - value1;
 };
 
 export default TokenSelect;

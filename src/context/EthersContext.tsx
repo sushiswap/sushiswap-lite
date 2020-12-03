@@ -3,14 +3,18 @@ import React, { useCallback, useEffect, useState } from "react";
 import * as Analytics from "expo-firebase-analytics";
 
 import AsyncStorage from "@react-native-community/async-storage";
+import sushiData from "@sushiswap/sushi-data";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
+import Fraction from "../constants/Fraction";
 import { ETH } from "../constants/tokens";
+import useSDK from "../hooks/useSDK";
 import Ethereum from "../types/Ethereum";
 import Token from "../types/Token";
-import { getContract } from "../utils";
+import TokenWithValue from "../types/TokenWithValue";
+import { getContract, isWETH } from "../utils";
 import { logTransaction } from "../utils/analytics-utils";
-import { fetchTokens } from "../utils/fetch-utils";
+import { fetchTokens, fetchTokenWithValue } from "../utils/fetch-utils";
 
 export type OnBlockListener = (block?: number) => void | Promise<void>;
 
@@ -35,7 +39,7 @@ export const EthersContext = React.createContext({
     ensName: null as string | null,
     addOnBlockListener: (_name: string, _listener: OnBlockListener) => {},
     removeOnBlockListener: (_name: string) => {},
-    tokens: [ETH] as Token[],
+    tokens: [ETH] as TokenWithValue[],
     updateTokens: async () => {},
     loadingTokens: false,
     customTokens: [ETH] as Token[],
@@ -57,6 +61,7 @@ export const EthersContext = React.createContext({
 
 // tslint:disable-next-line:max-func-body-length
 export const EthersContextProvider = ({ children }) => {
+    const { getPair } = useSDK();
     const [ethereum, setEthereum] = useState<Ethereum | undefined>(window.ethereum);
     const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
@@ -65,7 +70,7 @@ export const EthersContextProvider = ({ children }) => {
     const [address, setAddress] = useState<string | null>(null);
     const [ensName, setENSName] = useState<string | null>(null);
     const [onBlockListeners, setOnBlockListeners] = useState<{ [name: string]: OnBlockListener }>({});
-    const [tokens, setTokens] = useState<Token[]>([]);
+    const [tokens, setTokens] = useState<TokenWithValue[]>([]);
     const [customTokens, setCustomTokens] = useState<Token[]>([]);
     const [loadingTokens, setLoadingTokens] = useState(true);
 
@@ -125,9 +130,17 @@ export const EthersContextProvider = ({ children }) => {
     const updateTokens = async () => {
         if (address && customTokens) {
             try {
-                const data = await fetchTokens(address, customTokens);
-                if (data) {
-                    await setTokens(data);
+                const list = await fetchTokens(address, customTokens);
+                const weth = list.find(t => isWETH(t));
+                if (list?.length > 0 && weth && provider) {
+                    const wethPriceUSD = Fraction.parse(String(await sushiData.weth.price()));
+                    setTokens(
+                        await Promise.all(
+                            list.map(
+                                async token => await fetchTokenWithValue(token, weth, wethPriceUSD, getPair, provider)
+                            )
+                        )
+                    );
                 }
             } finally {
                 setLoadingTokens(false);

@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useMemo } from "react";
-import { FlatList, Platform, TextStyle, TouchableHighlight, View } from "react-native";
+import React, { FC, useCallback, useContext, useMemo } from "react";
+import { FlatList, Platform, TouchableHighlight, View } from "react-native";
 import { Icon } from "react-native-elements";
 
 import { ethers } from "ethers";
@@ -15,9 +15,12 @@ import Title from "../components/Title";
 import TokenAmount from "../components/TokenAmount";
 import TokenLogo from "../components/TokenLogo";
 import TokenName from "../components/TokenName";
+import TokenPrice from "../components/TokenPrice";
 import TokenSymbol from "../components/TokenSymbol";
+import TokenValue from "../components/TokenValue";
 import WebFooter from "../components/web/WebFooter";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
+import { EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
 import useHomeState, { HomeState } from "../hooks/useHomeState";
 import useLinker from "../hooks/useLinker";
@@ -38,7 +41,8 @@ interface LPTokenItemProps {
 
 const HomeScreen = () => {
     const state = useHomeState();
-    const loading = state.loadingTokens || state.loadingLPTokens || state.loadingPools;
+    const { loadingTokens } = useContext(EthersContext);
+    const loading = loadingTokens || state.loadingLPTokens || state.loadingPools;
     const totalValue = sum(state.tokens) + sum(state.lpTokens) + sum(state.pools);
     return (
         <Screen>
@@ -73,11 +77,12 @@ const Home = ({ state }: { state: HomeState }) => {
 };
 
 const MyTokens = ({ state }: { state: HomeState }) => {
+    const { loadingTokens, tokens } = useContext(EthersContext);
     const goToSwap = useLinker("/swap", "Swap");
     return (
         <View>
             <Heading text={"Tokens"} buttonText={"Manage"} onPressButton={goToSwap} />
-            <TokenList loading={state.loadingTokens} tokens={state.tokens} TokenItem={TokenItem} />
+            <TokenList loading={loadingTokens} tokens={tokens} TokenItem={TokenItem} />
         </View>
     );
 };
@@ -97,7 +102,7 @@ const Pools = ({ state }: { state: HomeState }) => {
     const goToFarming = useLinker("/farming", "Farming");
     return (
         <View>
-            <Heading text={"Farms"} buttonText={"manage"} onPressButton={goToFarming} />
+            <Heading text={"Farms"} buttonText={"Manage"} onPressButton={goToFarming} />
             {/* @ts-ignore */}
             <TokenList loading={state.loadingPools} tokens={state.pools} TokenItem={LPTokenItem} />
         </View>
@@ -180,22 +185,6 @@ const LPTokenItem = (props: LPTokenItemProps) => {
             </View>
             <ExternalIcon path={"/pairs/" + props.token.address} />
         </FlexView>
-    );
-};
-
-const TokenPrice = (props: { token: TokenWithValue; disabled?: boolean; style?: TextStyle }) => {
-    return (
-        <Text note={true} fontWeight={"light"} disabled={props.disabled} style={props.style}>
-            {formatUSD(props.token.priceUSD || 0, 4)}
-        </Text>
-    );
-};
-
-const TokenValue = (props: { token: TokenWithValue; disabled?: boolean; style?: TextStyle }) => {
-    return (
-        <Text note={true} fontWeight={"light"} disabled={props.disabled} style={props.style}>
-            {formatUSD(props.token.valueUSD || 0, 4)}
-        </Text>
     );
 };
 

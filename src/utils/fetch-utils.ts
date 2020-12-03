@@ -1,14 +1,25 @@
-import { FACTORY_ADDRESS as SUSHISWAP_FACTORY } from "@sushiswap/sdk";
+import { FACTORY_ADDRESS as SUSHISWAP_FACTORY, Pair } from "@sushiswap/sdk";
 import sushiData from "@sushiswap/sushi-data";
 import { FACTORY_ADDRESS as UNISWAP_FACTORY } from "@uniswap/sdk";
 import { ethers } from "ethers";
 import { LP_TOKEN_SCANNER, MASTER_CHEF, ORDER_BOOK, SETTLEMENT } from "../constants/contracts";
+import Fraction from "../constants/Fraction";
 import { ETH } from "../constants/tokens";
 import { ALCHEMY_PROVIDER } from "../context/EthersContext";
 import { Order, OrderStatus } from "../hooks/useSettlement";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
-import { getContract, parseBalance, pow10 } from "./index";
+import TokenWithValue from "../types/TokenWithValue";
+import {
+    convertToken,
+    formatBalance,
+    getContract,
+    isETH,
+    isWETH,
+    parseBalance,
+    parseCurrencyAmount,
+    pow10
+} from "./index";
 
 const blocksPerDay = 6500;
 
@@ -30,12 +41,38 @@ export const fetchTokens = async (account: string, customTokens?: Token[]) => {
             ...token,
             balance: ethers.BigNumber.from(balances[i] || 0)
         }))
-    ].sort((t1, t2) => {
-        return t2.balance
-            .sub(t1.balance)
-            .div(ethers.BigNumber.from(10).pow(10))
-            .toNumber();
-    });
+    ];
+};
+
+export const fetchTokenWithValue = async (
+    token: Token,
+    weth: Token,
+    wethPriceUSD: Fraction,
+    getPair: (fromToken: Token, toToken: Token, provider: ethers.providers.BaseProvider) => Promise<Pair>,
+    provider: ethers.providers.BaseProvider
+) => {
+    let fetched: TokenWithValue;
+    if (isETH(token) || isWETH(token)) {
+        fetched = {
+            ...token,
+            priceUSD: Number(wethPriceUSD.toString()),
+            valueUSD: Number(formatBalance(wethPriceUSD.apply(token.balance)))
+        } as TokenWithValue;
+    } else {
+        try {
+            const pair = await getPair(token, weth, provider);
+            const priceETH = Fraction.convert(pair.priceOf(convertToken(token)));
+            const priceUSD = priceETH.apply(wethPriceUSD.numerator).div(pow10(18 - token.decimals));
+            fetched = {
+                ...token,
+                priceUSD: Number(formatBalance(priceUSD)),
+                valueUSD: Number(formatBalance(priceUSD.mul(token.balance).div(pow10(token.decimals))))
+            } as TokenWithValue;
+        } catch (e) {
+            fetched = { ...token, priceUSD: null, valueUSD: null } as TokenWithValue;
+        }
+    }
+    return fetched;
 };
 
 // tslint:disable-next-line:max-func-body-length
@@ -257,6 +294,38 @@ const fetchTokenMeta = async (address: string, provider: ethers.providers.JsonRp
         decimals: data[2],
         logoURI: ""
     };
+};
+
+export const fetchLPTokenWithValue = async (
+    lpToken: LPToken,
+    weth: Token,
+    wethPriceUSD: Fraction,
+    getPair: (fromToken: Token, toToken: Token, provider: ethers.providers.BaseProvider) => Promise<Pair>,
+    provider: ethers.providers.BaseProvider
+) => {
+    const pair = await getPair(lpToken.tokenA, lpToken.tokenB, provider);
+    const values = await Promise.all([
+        await fetchTotalValue(lpToken.tokenA, pair, weth, wethPriceUSD, getPair, provider),
+        await fetchTotalValue(lpToken.tokenB, pair, weth, wethPriceUSD, getPair, provider)
+    ]);
+    const priceUSD = values[0]
+        .add(values[1])
+        .mul(pow10(18))
+        .div(lpToken.totalSupply);
+    return {
+        ...lpToken,
+        priceUSD: Number(formatBalance(priceUSD)),
+        valueUSD: Number(
+            formatBalance(priceUSD.mul(lpToken.amountDeposited || lpToken.balance).div(pow10(lpToken.decimals)))
+        )
+    };
+};
+
+const fetchTotalValue = async (token: Token, lpPair: Pair, weth: Token, wethPriceUSD: Fraction, getPair, provider) => {
+    const tokenWithValue = await fetchTokenWithValue(token, weth, wethPriceUSD, getPair, provider);
+    const tokenReserve = parseCurrencyAmount(lpPair.reserveOf(convertToken(token)), token.decimals);
+    const tokenPrice = parseBalance(String(tokenWithValue.priceUSD || 0));
+    return tokenReserve.mul(tokenPrice).div(pow10(token.decimals));
 };
 
 const fetchTokenBalances = async (account: string, addresses: string[]) => {

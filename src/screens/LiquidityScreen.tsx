@@ -37,7 +37,7 @@ import useLinker from "../hooks/useLinker";
 import useSDK from "../hooks/useSDK";
 import MetamaskError from "../types/MetamaskError";
 import Token from "../types/Token";
-import { convertAmount, convertToken, formatBalance, isEmptyValue, parseBalance } from "../utils";
+import { convertAmount, convertToken, formatBalance, isEmptyValue, isETH, isWETH, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const LiquidityScreen = () => {
@@ -218,6 +218,7 @@ const FirstProviderInfo = ({ state }: { state: AddLiquidityState }) => {
             {!zap && (
                 <InfoBox style={{ marginTop: Spacing.normal }}>
                     <PriceMeta state={state} price={initialPrice} disabled={noAmount} />
+                    <FirstProviderControls state={state} />
                 </InfoBox>
             )}
             <Notice
@@ -230,6 +231,50 @@ const FirstProviderInfo = ({ state }: { state: AddLiquidityState }) => {
                 color={zap ? red : green}
                 style={{ marginTop: Spacing.small }}
             />
+        </View>
+    );
+};
+
+// tslint:disable-next-line:max-func-body-length
+const FirstProviderControls = ({ state }: { state: AddLiquidityState }) => {
+    const [error, setError] = useState<MetamaskError>({});
+    useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
+    const fromApproveRequired = !isETH(state.fromToken) && !state.fromTokenAllowed;
+    const toApproveRequired = !isETH(state.toToken) && !state.toTokenAllowed;
+    const disabled =
+        fromApproveRequired || isEmptyValue(state.fromAmount) || toApproveRequired || isEmptyValue(state.toAmount);
+    return (
+        <View style={{ marginTop: Spacing.normal }}>
+            {!state.fromToken || !state.toToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount) ? (
+                <SupplyButton state={state} onError={setError} disabled={true} />
+            ) : state.loading ? (
+                <FetchingButton />
+            ) : parseBalance(state.fromAmount, state.fromToken.decimals).gt(state.fromToken.balance) ? (
+                <InsufficientBalanceButton symbol={state.fromSymbol} />
+            ) : parseBalance(state.toAmount, state.toToken.decimals).gt(state.toToken.balance) ? (
+                <InsufficientBalanceButton symbol={state.toSymbol} />
+            ) : isETH(state.fromToken) || isWETH(state.fromToken) || isETH(state.toToken) || isWETH(state.toToken) ? (
+                <UnsupportedButton state={state} />
+            ) : (
+                <>
+                    <ApproveButton
+                        token={state.fromToken}
+                        spender={ROUTER}
+                        onSuccess={() => state.setFromTokenAllowed(true)}
+                        onError={setError}
+                        hidden={!fromApproveRequired}
+                    />
+                    <ApproveButton
+                        token={state.toToken}
+                        spender={ROUTER}
+                        onSuccess={() => state.setToTokenAllowed(true)}
+                        onError={setError}
+                        hidden={!toApproveRequired}
+                    />
+                    <SupplyButton state={state} onError={setError} disabled={disabled} />
+                </>
+            )}
+            {error.message && error.code !== 4001 && <ErrorMessage error={error} />}
         </View>
     );
 };
@@ -287,8 +332,8 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
     const { allowed, setAllowed, loading } = useZapTokenAllowance(state.fromToken);
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
     const zap = state.mode === "zapper";
-    const fromApproveRequired = state.fromSymbol !== "ETH" && ((zap && !allowed) || (!zap && !state.fromTokenAllowed));
-    const toApproveRequired = state.toSymbol !== "ETH" && !zap && !state.toTokenAllowed;
+    const fromApproveRequired = !isETH(state.fromToken) && ((zap && !allowed) || (!zap && !state.fromTokenAllowed));
+    const toApproveRequired = !isETH(state.toToken) && !zap && !state.toTokenAllowed;
     const disabled =
         fromApproveRequired ||
         isEmptyValue(state.fromAmount) ||

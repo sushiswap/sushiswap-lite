@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 
 import { Pair } from "@sushiswap/sdk";
 import { EthersContext } from "../context/EthersContext";
-import { parseBalance } from "../utils";
+import { isETH, parseBalance } from "../utils";
 import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useSDK from "./useSDK";
 import useSwapRouter from "./useSwapRouter";
@@ -67,11 +67,10 @@ const useAddLiquidityState: () => AddLiquidityState = () => {
                 if (mode === "zapper") {
                     const tx = await zapIn(state.fromToken, state.toToken, fromAmount, provider, signer);
                     await tx.wait();
-                } else if (state.fromSymbol === "ETH" || state.toSymbol === "ETH") {
-                    const [token, amount, amountETH] =
-                        state.fromSymbol === "ETH"
-                            ? [state.toToken, toAmount, fromAmount]
-                            : [state.fromToken, fromAmount, toAmount];
+                } else if (isETH(state.fromToken) || isETH(state.toToken)) {
+                    const [token, amount, amountETH] = isETH(state.fromToken)
+                        ? [state.toToken, toAmount, fromAmount]
+                        : [state.fromToken, fromAmount, toAmount];
                     const tx = await addLiquidityETH(token, amount, amountETH, signer);
                     await tx.wait();
                 } else {

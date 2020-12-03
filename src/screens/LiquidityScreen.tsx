@@ -37,7 +37,7 @@ import useLinker from "../hooks/useLinker";
 import useSDK from "../hooks/useSDK";
 import MetamaskError from "../types/MetamaskError";
 import Token from "../types/Token";
-import { convertAmount, convertToken, formatBalance, isEmptyValue, parseBalance } from "../utils";
+import { convertAmount, convertToken, formatBalance, isEmptyValue, isETH, isETHWETHPair, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const LiquidityScreen = () => {
@@ -218,18 +218,65 @@ const FirstProviderInfo = ({ state }: { state: AddLiquidityState }) => {
             {!zap && (
                 <InfoBox style={{ marginTop: Spacing.normal }}>
                     <PriceMeta state={state} price={initialPrice} disabled={noAmount} />
+                    <FirstProviderControls state={state} />
                 </InfoBox>
             )}
-            <Notice
-                text={
-                    "You are the first liquidity provider.\n" +
-                    (zap
-                        ? "1-Click Zap is not supported when you're the first provider."
-                        : "The ratio of tokens you add will set the price of this pool.")
-                }
-                color={zap ? red : green}
-                style={{ marginTop: Spacing.small }}
-            />
+            {!isETHWETHPair(state.fromToken, state.toToken) && (
+                <Notice
+                    text={
+                        "You are the first liquidity provider.\n" +
+                        (zap
+                            ? "1-Click Zap is not supported when you're the first provider."
+                            : "The ratio of tokens you add will set the price of this pool.")
+                    }
+                    color={zap ? red : green}
+                    style={{ marginTop: Spacing.small }}
+                />
+            )}
+        </View>
+    );
+};
+
+// tslint:disable-next-line:max-func-body-length
+const FirstProviderControls = ({ state }: { state: AddLiquidityState }) => {
+    const [error, setError] = useState<MetamaskError>({});
+    useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
+    const fromApproveRequired = !isETH(state.fromToken) && !state.fromTokenAllowed;
+    const toApproveRequired = !isETH(state.toToken) && !state.toTokenAllowed;
+    const disabled =
+        fromApproveRequired || isEmptyValue(state.fromAmount) || toApproveRequired || isEmptyValue(state.toAmount);
+    return (
+        <View style={{ marginTop: Spacing.normal }}>
+            {isETHWETHPair(state.fromToken, state.toToken) ? (
+                <UnsupportedButton state={state} />
+            ) : !state.fromToken || !state.toToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount) ? (
+                <SupplyButton state={state} onError={setError} disabled={true} />
+            ) : state.loading ? (
+                <FetchingButton />
+            ) : parseBalance(state.fromAmount, state.fromToken.decimals).gt(state.fromToken.balance) ? (
+                <InsufficientBalanceButton symbol={state.fromSymbol} />
+            ) : parseBalance(state.toAmount, state.toToken.decimals).gt(state.toToken.balance) ? (
+                <InsufficientBalanceButton symbol={state.toSymbol} />
+            ) : (
+                <>
+                    <ApproveButton
+                        token={state.fromToken}
+                        spender={ROUTER}
+                        onSuccess={() => state.setFromTokenAllowed(true)}
+                        onError={setError}
+                        hidden={!fromApproveRequired}
+                    />
+                    <ApproveButton
+                        token={state.toToken}
+                        spender={ROUTER}
+                        onSuccess={() => state.setToTokenAllowed(true)}
+                        onError={setError}
+                        hidden={!toApproveRequired}
+                    />
+                    <SupplyButton state={state} onError={setError} disabled={disabled} />
+                </>
+            )}
+            {error.message && error.code !== 4001 && <ErrorMessage error={error} />}
         </View>
     );
 };
@@ -287,15 +334,17 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
     const { allowed, setAllowed, loading } = useZapTokenAllowance(state.fromToken);
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
     const zap = state.mode === "zapper";
-    const fromApproveRequired = state.fromSymbol !== "ETH" && ((zap && !allowed) || (!zap && !state.fromTokenAllowed));
-    const toApproveRequired = state.toSymbol !== "ETH" && !zap && !state.toTokenAllowed;
+    const fromApproveRequired = !isETH(state.fromToken) && ((zap && !allowed) || (!zap && !state.fromTokenAllowed));
+    const toApproveRequired = !isETH(state.toToken) && !zap && !state.toTokenAllowed;
     const disabled =
         fromApproveRequired ||
         isEmptyValue(state.fromAmount) ||
         (!zap && (toApproveRequired || isEmptyValue(state.toAmount)));
     return (
         <View style={{ marginTop: Spacing.normal }}>
-            {!state.fromToken || !state.toToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount) ? (
+            {isETHWETHPair(state.fromToken, state.toToken) ? (
+                <UnsupportedButton state={state} />
+            ) : !state.fromToken || !state.toToken || isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount) ? (
                 <SupplyButton state={state} onError={setError} disabled={true} />
             ) : state.loading || loading || !state.pair ? (
                 <FetchingButton />
@@ -304,9 +353,6 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
             ) : state.mode === "normal" &&
               parseBalance(state.toAmount, state.toToken.decimals).gt(state.toToken.balance) ? (
                 <InsufficientBalanceButton symbol={state.toSymbol} />
-            ) : (state.fromSymbol === "ETH" && state.toSymbol === "WETH") ||
-              (state.fromSymbol === "WETH" && state.toSymbol === "ETH") ? (
-                <UnsupportedButton state={state} />
             ) : (
                 <>
                     <ApproveButton

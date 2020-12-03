@@ -1,5 +1,6 @@
 import { ChainId, CurrencyAmount, Percent, Token as SDKToken, TokenAmount, WETH } from "@sushiswap/sdk";
 import { ethers } from "ethers";
+import { ETH } from "../constants/tokens";
 import Token from "../types/Token";
 import getContract from "./getContract";
 
@@ -43,6 +44,14 @@ export const isEmptyValue = (text: string) =>
     ethers.BigNumber.isBigNumber(text)
         ? ethers.BigNumber.from(text).isZero()
         : text === "" || text.replace(/0/g, "").replace(/\./, "") === "";
+
+export const isETH = (token?: Token) => token?.address.toLowerCase() === ETH.address.toLowerCase();
+
+export const isWETH = (token?: Token) => token?.address.toLowerCase() === WETH[1].address.toLowerCase();
+
+export const isETHWETHPair = (fromToken?: Token, toToken?: Token) => {
+    return (isETH(fromToken) && isWETH(toToken)) || (isWETH(fromToken) && isETH(toToken));
+};
 
 export const convertToken = (token: Token) => {
     return token.symbol === "ETH" ? WETH["1"] : new SDKToken(ChainId.MAINNET, token.address, token.decimals);

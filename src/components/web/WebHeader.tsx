@@ -9,7 +9,8 @@ import { GlobalContext } from "../../context/GlobalContext";
 import useColors from "../../hooks/useColors";
 import DarkModeSwitch from "../DarkModeSwitch";
 import FlexView from "../FlexView";
-import SvgLogo from "../svg/SvgLogo";
+import SvgLogoDark from "../svg/SvgLogoDark";
+import SvgLogoLight from "../svg/SvgLogoLight";
 import Text from "../Text";
 
 export interface WebHeaderProps {
@@ -51,18 +52,13 @@ const WebHeader: FC<WebHeaderProps> = props => {
 
 export const Title = () => {
     const { darkMode } = useContext(GlobalContext);
-    const { textDark, white } = useColors();
-    const color = darkMode ? white : textDark;
+    const SvgLogo = darkMode ? SvgLogoDark : SvgLogoLight;
     return (
-        <FlexView style={{ alignSelf: "center", alignItems: "center" }}>
-            <SvgLogo width={32} height={32} style={{ marginRight: 8 }} />
+        <View style={{ alignSelf: "center" }}>
             <Link to={"/"} style={{ textDecoration: "none" }}>
-                <Text style={{ fontSize: 28, color }}>SushiSwap</Text>
-                <Text fontWeight={"light"} style={{ fontSize: 28, color, marginLeft: 4 }}>
-                    lite
-                </Text>
+                <SvgLogo width={259} height={45} style={{ marginTop: 8 }} />
             </Link>
-        </FlexView>
+        </View>
     );
 };
 

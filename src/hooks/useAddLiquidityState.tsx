@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 
 import { Pair } from "@sushiswap/sdk";
 import { EthersContext } from "../context/EthersContext";
-import { isETH, parseBalance } from "../utils";
+import { convertToken, isETH, parseBalance } from "../utils";
 import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useSDK from "./useSDK";
 import useSwapRouter from "./useSwapRouter";
@@ -15,6 +15,7 @@ export interface AddLiquidityState extends TokenPairState {
     mode?: AddLiquidityMode;
     setMode: (mode?: AddLiquidityMode) => void;
     pair?: Pair;
+    priceDetermined: boolean;
     onAdd: () => Promise<void>;
     adding: boolean;
 }
@@ -30,6 +31,13 @@ const useAddLiquidityState: () => AddLiquidityState = () => {
     const { getPair } = useSDK();
     const { addLiquidity, addLiquidityETH } = useSwapRouter();
     const { zapIn } = useZapper();
+    const priceDetermined =
+        !!pair &&
+        !!state.toToken &&
+        !pair
+            .priceOf(convertToken(state.toToken))
+            .denominator.toString()
+            .startsWith("0");
 
     useEffect(() => {
         setPair(undefined);
@@ -91,6 +99,7 @@ const useAddLiquidityState: () => AddLiquidityState = () => {
         mode,
         setMode,
         pair,
+        priceDetermined,
         onAdd,
         adding
     };

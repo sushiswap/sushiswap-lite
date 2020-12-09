@@ -69,6 +69,7 @@ const Menu = () => {
                 height: "100%",
                 alignItems: "center"
             }}>
+            <MenuItem title={"Home"} path={"/"} />
             <MenuItem title={"Swap"} path={"/swap"} />
             <MenuItem title={"Liquidity"} path={"/liquidity"} />
             <MenuItem title={"Migrate"} path={"/migrate"} />

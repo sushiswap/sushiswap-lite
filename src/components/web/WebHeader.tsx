@@ -84,7 +84,7 @@ const Menu = () => {
 const MenuItem = ({ title, path }) => {
     const { textDark, textLight } = useColors();
     const match = useRouteMatch(path);
-    const active = match?.path?.startsWith(path);
+    const active = (path === "/" ? match?.isExact : true) && match?.path?.startsWith(path);
     return (
         <Link to={path} style={{ marginLeft: Spacing.tiny, textDecoration: "none" }}>
             <Text

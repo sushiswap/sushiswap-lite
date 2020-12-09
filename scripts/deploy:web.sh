@@ -1,5 +1,7 @@
 #!/bin/bash
 
+git stash push -m "deploying"
+
 BRANCH=$(git branch --show-current)
 
 if [ -z $BRANCH ] || [ $BRANCH != "dev" ]; then
@@ -15,3 +17,5 @@ git merge dev --no-edit
 git push origin master
 
 git checkout dev
+
+git stash apply

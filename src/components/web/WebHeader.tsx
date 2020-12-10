@@ -56,7 +56,7 @@ export const Title = () => {
     return (
         <View style={{ alignSelf: "center" }}>
             <Link to={"/"} style={{ textDecoration: "none" }}>
-                <SvgLogo width={259} height={45} style={{ marginTop: 8 }} />
+                <SvgLogo width={259} height={45} style={{ marginTop: 8, marginLeft: -16 }} />
             </Link>
         </View>
     );

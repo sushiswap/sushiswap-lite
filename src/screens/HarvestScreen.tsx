@@ -27,19 +27,21 @@ import WebFooter from "../components/web/WebFooter";
 import { FarmingSubMenu } from "../components/web/WebSubMenu";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import useFarmingState, { FarmingState } from "../hooks/useFarmingState";
+import useTranslation from "../hooks/useTranslation";
 import MetamaskError from "../types/MetamaskError";
 import Token from "../types/Token";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const HarvestScreen = () => {
+    const t = useTranslation();
     return (
         <Screen>
             <Container>
                 <BackgroundImage />
                 <Content>
-                    <Title text={"Harvest SUSHI"} />
-                    <Text light={true}>Withdraw your LP tokens to harvest SUSHI rewards.</Text>
+                    <Title text={t("harvest-sushi")} />
+                    <Text light={true}>{t("harvest-sushi-desc")}</Text>
                     <Harvest />
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
@@ -50,11 +52,16 @@ const HarvestScreen = () => {
 };
 
 const Harvest = () => {
+    const t = useTranslation();
     const state = useFarmingState(true);
-    const emptyText = "You don't have any LP tokens deposited.";
     return (
         <View style={{ marginTop: Spacing.large }}>
-            <LPTokenSelect state={state} title={"My Farms"} emptyText={emptyText} Item={TokenItem} />
+            <LPTokenSelect
+                state={state}
+                title={"My Farms"}
+                emptyText={t("you-dont-have-lp-tokens-deposited")}
+                Item={TokenItem}
+            />
             <Border />
             <Withdraw state={state} />
             <WithdrawInfo state={state} />
@@ -89,8 +96,9 @@ const TokenItem: FC<LPTokenItemProps> = props => {
 };
 
 const Withdraw = ({ state }: { state: FarmingState }) => {
+    const t = useTranslation();
     if (!state.selectedLPToken) {
-        return <Heading text={"Amount"} disabled={true} />;
+        return <Heading text={t("amount")} disabled={true} />;
     }
     // This enables MAX button
     const token = {
@@ -99,17 +107,24 @@ const Withdraw = ({ state }: { state: FarmingState }) => {
     } as Token;
     return (
         <View>
-            <Heading text={state.selectedLPToken.symbol + " Amount"} />
+            <Heading text={state.selectedLPToken.symbol + " " + t("amount")} />
             <TokenInput token={token} amount={state.amount} onAmountChanged={state.setAmount} autoFocus={IS_DESKTOP} />
         </View>
     );
 };
 
 const WithdrawInfo = ({ state }: { state: FarmingState }) => {
+    const t = useTranslation();
     const amount = parseBalance(state.amount);
     const total = state.selectedLPToken?.amountDeposited;
     const sushi = total && amount.lte(total) ? state.selectedLPToken!.pendingSushi?.mul(amount).div(total) : null;
     const disabled = !state.pair || !state.selectedLPToken;
+    const label1 = state.selectedLPToken
+        ? t("deposited-", { symbol: state.selectedLPToken.tokenA.symbol })
+        : t("deposited-token-1");
+    const label2 = state.selectedLPToken
+        ? t("deposited-", { symbol: state.selectedLPToken.tokenB.symbol })
+        : t("deposited-token-2");
     return (
         <InfoBox>
             <AmountMeta
@@ -117,23 +132,16 @@ const WithdrawInfo = ({ state }: { state: FarmingState }) => {
                 suffix={"SUSHI"}
                 disabled={disabled || isEmptyValue(state.amount)}
             />
-            <Meta label={"Planted LP Token"} text={total ? formatBalance(total) : ""} disabled={disabled} />
-            <Meta
-                label={"Planted " + (state.selectedLPToken ? state.selectedLPToken.tokenA.symbol : "Token 1")}
-                text={state.fromAmount}
-                disabled={disabled}
-            />
-            <Meta
-                label={"Planted " + (state.selectedLPToken ? state.selectedLPToken.tokenB.symbol : "Token 2")}
-                text={state.toAmount}
-                disabled={disabled}
-            />
+            <Meta label={t("deposited-lp-token")} text={total ? formatBalance(total) : ""} disabled={disabled} />
+            <Meta label={label1} text={state.fromAmount} disabled={disabled} />
+            <Meta label={label2} text={state.toAmount} disabled={disabled} />
             <WithdrawControls state={state} />
         </InfoBox>
     );
 };
 
 const WithdrawControls = ({ state }: { state: FarmingState }) => {
+    const t = useTranslation();
     const [error, setError] = useState<MetamaskError>({});
     useAsyncEffect(() => setError({}), [state.selectedLPToken]);
     const disabled = isEmptyValue(state.amount);
@@ -144,7 +152,7 @@ const WithdrawControls = ({ state }: { state: FarmingState }) => {
             ) : parseBalance(state.amount, state.selectedLPToken!.decimals).gt(
                   state.selectedLPToken!.amountDeposited!
               ) ? (
-                <Button title={"Insufficient Amount"} disabled={true} />
+                <Button title={t("insufficient-amount")} disabled={true} />
             ) : state.loading ? (
                 <FetchingButton />
             ) : (
@@ -164,11 +172,12 @@ const WithdrawButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
+    const t = useTranslation();
     const onPress = useCallback(() => {
         onError({});
         state.onWithdraw().catch(onError);
     }, [state.onWithdraw, onError]);
-    return <Button title={"Withdraw"} disabled={disabled} loading={state.withdrawing} onPress={onPress} />;
+    return <Button title={t("withdraw")} disabled={disabled} loading={state.withdrawing} onPress={onPress} />;
 };
 
 export default HarvestScreen;

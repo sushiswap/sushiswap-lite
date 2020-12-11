@@ -24,18 +24,20 @@ import { SUSHI_BAR } from "../constants/contracts";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
 import useStakingState, { StakingState } from "../hooks/useStakingState";
+import useTranslation from "../hooks/useTranslation";
 import MetamaskError from "../types/MetamaskError";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const StakeScreen = () => {
+    const t = useTranslation();
     return (
         <Screen>
             <Container>
                 <BackgroundImage />
                 <Content>
-                    <Title text={"Stake"} />
-                    <Text light={true}>Earn recurring income by staking your SUSHI.</Text>
+                    <Title text={t("stake")} />
+                    <Text light={true}>{t("stake-desc")}</Text>
                     <Staking />
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
@@ -46,6 +48,7 @@ const StakeScreen = () => {
 };
 
 const Staking = () => {
+    const t = useTranslation();
     const state = useStakingState();
     return (
         <View style={{ marginTop: Spacing.large }}>
@@ -53,7 +56,7 @@ const Staking = () => {
             <Border />
             <AmountInput state={state} />
             {state.sushi && state.sushi.balance.isZero() && (
-                <Notice text={"You don't have any SUSHI."} color={"orange"} style={{ marginTop: Spacing.small }} />
+                <Notice text={t("you-dont-have-sushi")} color={"orange"} style={{ marginTop: Spacing.small }} />
             )}
             <StakeInfo state={state} />
         </View>
@@ -61,9 +64,10 @@ const Staking = () => {
 };
 
 const SushiBalance = ({ state }: { state: StakingState }) => {
+    const t = useTranslation();
     return (
         <View>
-            <Heading text={"Your SUSHI"} />
+            <Heading text={t("your-sushi")} />
             <AmountMeta
                 amount={state.sushi ? formatBalance(state.sushi.balance, state.sushi.decimals) : ""}
                 suffix={"SUSHI"}
@@ -74,12 +78,13 @@ const SushiBalance = ({ state }: { state: StakingState }) => {
 };
 
 const AmountInput = ({ state }: { state: StakingState }) => {
+    const t = useTranslation();
     if (!state.sushi || state.sushi.balance.isZero()) {
-        return <Heading text={"Amount To Stake"} disabled={true} />;
+        return <Heading text={t("amount-to-stake")} disabled={true} />;
     }
     return (
         <View>
-            <Heading text={"Amount To Stake"} />
+            <Heading text={t("amount-to-stake")} />
             <TokenInput
                 token={state.sushi}
                 amount={state.amount}
@@ -92,6 +97,7 @@ const AmountInput = ({ state }: { state: StakingState }) => {
 
 // tslint:disable-next-line:max-func-body-length
 const StakeInfo = ({ state }: { state: StakingState }) => {
+    const t = useTranslation();
     const disabled =
         !state.sushi ||
         state.sushi.balance.isZero() ||
@@ -116,8 +122,8 @@ const StakeInfo = ({ state }: { state: StakingState }) => {
                 suffix={"xSUSHI"}
                 disabled={disabled}
             />
-            <Meta label={"xSUSHI Share"} text={share} suffix={"%"} disabled={disabled} />
-            <Meta label={"Total xSUSHI"} text={xSushiTotal} disabled={disabled} />
+            <Meta label={t("xsushi-share")} text={share} suffix={"%"} disabled={disabled} />
+            <Meta label={t("total-xsushi")} text={xSushiTotal} disabled={disabled} />
             <Controls state={state} />
         </InfoBox>
     );
@@ -159,6 +165,7 @@ const StakeButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
+    const t = useTranslation();
     const onPress = async () => {
         onError({});
         try {
@@ -168,7 +175,7 @@ const StakeButton = ({
             onError(e);
         }
     };
-    return <Button title={"Stake"} loading={state.entering} onPress={onPress} disabled={disabled} />;
+    return <Button title={t("stake")} loading={state.entering} onPress={onPress} disabled={disabled} />;
 };
 
 export default StakeScreen;

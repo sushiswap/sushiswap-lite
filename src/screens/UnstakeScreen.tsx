@@ -20,18 +20,20 @@ import WebFooter from "../components/web/WebFooter";
 import { StakingSubMenu } from "../components/web/WebSubMenu";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import useStakingState, { StakingState } from "../hooks/useStakingState";
+import useTranslation from "../hooks/useTranslation";
 import MetamaskError from "../types/MetamaskError";
 import { formatBalance, isEmptyValue, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const UnstakeScreen = () => {
+    const t = useTranslation();
     return (
         <Screen>
             <Container>
                 <BackgroundImage />
                 <Content>
-                    <Title text={"Unstake"} />
-                    <Text light={true}>Convert your xSUSHI to SUSHI.</Text>
+                    <Title text={t("unstake")} />
+                    <Text light={true}>{t("unstake-desc")}</Text>
                     <Staking />
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
@@ -42,6 +44,7 @@ const UnstakeScreen = () => {
 };
 
 const Staking = () => {
+    const t = useTranslation();
     const state = useStakingState();
     return (
         <View style={{ marginTop: Spacing.large }}>
@@ -49,7 +52,7 @@ const Staking = () => {
             <Border />
             <AmountInput state={state} />
             {state.xSushi && state.xSushi.balance.isZero() && (
-                <Notice text={"You don't have any xSUSHI."} color={"orange"} style={{ marginTop: Spacing.small }} />
+                <Notice text={t("you-dont-have-xsushi")} color={"orange"} style={{ marginTop: Spacing.small }} />
             )}
             <UnstakeInfo state={state} />
         </View>
@@ -57,9 +60,10 @@ const Staking = () => {
 };
 
 const XSushiBalance = ({ state }: { state: StakingState }) => {
+    const t = useTranslation();
     return (
         <View>
-            <Heading text={"Your xSUSHI"} />
+            <Heading text={t("your-xsushi")} />
             <AmountMeta
                 amount={state.xSushi ? formatBalance(state.xSushi.balance, state.xSushi.decimals) : ""}
                 suffix={"xSUSHI"}
@@ -70,12 +74,13 @@ const XSushiBalance = ({ state }: { state: StakingState }) => {
 };
 
 const AmountInput = ({ state }: { state: StakingState }) => {
+    const t = useTranslation();
     if (!state.xSushi || state.xSushi.balance.isZero()) {
-        return <Heading text={"Amount To Unstake"} disabled={true} />;
+        return <Heading text={t("amount-to-unstake")} disabled={true} />;
     }
     return (
         <View>
-            <Heading text={"Amount To Unstake"} />
+            <Heading text={t("amount-to-unstake")} />
             <TokenInput
                 token={state.xSushi}
                 amount={state.amount}
@@ -96,9 +101,11 @@ const UnstakeInfo = ({ state }: { state: StakingState }) => {
               .div(state.xSushiSupply!);
     return (
         <InfoBox>
-            <Text disabled={disabled} style={{ fontSize: IS_DESKTOP ? 28 : 20 }}>
-                {!sushiAmount ? "N/A" : formatBalance(sushiAmount, state.sushi!.decimals, 8) + " SUSHI"}
-            </Text>
+            <AmountMeta
+                amount={sushiAmount ? formatBalance(sushiAmount, state.sushi!.decimals, 8) : ""}
+                suffix={"SUSHI"}
+                disabled={disabled}
+            />
             <Controls state={state} />
         </InfoBox>
     );
@@ -131,6 +138,7 @@ const UnstakeButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
+    const t = useTranslation();
     const onPress = async () => {
         onError({});
         try {
@@ -140,7 +148,7 @@ const UnstakeButton = ({
             onError(e);
         }
     };
-    return <Button title={"Unstake"} loading={state.leaving} onPress={onPress} disabled={disabled} />;
+    return <Button title={t("unstake")} loading={state.leaving} onPress={onPress} disabled={disabled} />;
 };
 
 export default UnstakeScreen;

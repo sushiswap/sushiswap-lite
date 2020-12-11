@@ -3,16 +3,16 @@ import { View } from "react-native";
 
 import { Spacing } from "../constants/dimension";
 import useLinker from "../hooks/useLinker";
+import useTranslation from "../hooks/useTranslation";
 import Notice from "./Notice";
 
 const ExperimentalNotice = (props: { contractURL: string }) => {
+    const t = useTranslation();
     const onPressContract = useLinker(props.contractURL, "", "_blank");
     return (
         <View style={{ marginVertical: Spacing.tiny }}>
             <Notice
-                text={
-                    "This feature is in beta and contracts are unaudited. Read the contract yourself and use it at your own risk."
-                }
+                text={t("experimental-notice")}
                 color={"orange"}
                 buttonText={"View Contract"}
                 onPressButton={onPressContract}

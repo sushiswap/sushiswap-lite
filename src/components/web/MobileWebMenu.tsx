@@ -7,12 +7,14 @@ import Modal from "modal-react-native-web";
 import { Spacing } from "../../constants/dimension";
 import { EthersContext } from "../../context/EthersContext";
 import useColors from "../../hooks/useColors";
+import useTranslation from "../../hooks/useTranslation";
 import DarkModeSwitch from "../DarkModeSwitch";
 import FlexView from "../FlexView";
 import Text from "../Text";
 
 // tslint:disable-next-line:max-func-body-length
 const MobileWebMenu = ({ expanded, onCollapse }) => {
+    const t = useTranslation();
     const { overlay } = useColors();
     return (
         <Modal animationType="slide" transparent={true} visible={expanded}>
@@ -33,12 +35,12 @@ const MobileWebMenu = ({ expanded, onCollapse }) => {
                         <DarkModeSwitch style={{ marginBottom: 4 }} />
                         <Status />
                         <View style={{ height: Spacing.large }} />
-                        <MobileWebMenuItem title={"Home"} path={"/"} />
-                        <MobileWebMenuItem title={"Swap"} path={"/swap"} />
-                        <MobileWebMenuItem title={"Liquidity"} path={"/liquidity"} />
-                        <MobileWebMenuItem title={"Migrate"} path={"/migrate"} />
-                        <MobileWebMenuItem title={"Stake"} path={"/staking"} />
-                        <MobileWebMenuItem title={"Farm"} path={"/farming"} />
+                        <MobileWebMenuItem title={t("menu.home")} path={"/"} />
+                        <MobileWebMenuItem title={t("menu.swap")} path={"/swap"} />
+                        <MobileWebMenuItem title={t("menu.liquidity")} path={"/liquidity"} />
+                        <MobileWebMenuItem title={t("menu.migrate")} path={"/migrate"} />
+                        <MobileWebMenuItem title={t("menu.stake")} path={"/staking"} />
+                        <MobileWebMenuItem title={t("menu.farm")} path={"/farming"} />
                     </View>
                 </View>
             </TouchableWithoutFeedback>
@@ -70,12 +72,13 @@ const MobileWebMenuItem = ({ title, path }) => {
 };
 
 const Status = () => {
+    const t = useTranslation();
     const { textLight, green, accent } = useColors();
     const { ethereum, chainId, address, ensName } = useContext(EthersContext);
     const connected = chainId === 1 && address;
     const title = connected
         ? ensName || address!.substring(0, 6) + "..." + address!.substring(address!.length - 4, address!.length)
-        : "Not connected";
+        : t("menu.not-connected");
     const color = connected ? green : textLight;
     const onPress = () => {
         ethereum?.disconnect?.();
@@ -88,12 +91,7 @@ const Status = () => {
             </FlexView>
             {ethereum?.isWalletConnect && (
                 <Text
-                    style={{
-                        fontFamily: "regular",
-                        fontSize: 15,
-                        color: accent,
-                        alignSelf: "flex-end"
-                    }}
+                    style={{ fontFamily: "regular", fontSize: 15, color: accent, alignSelf: "flex-end" }}
                     onPress={onPress}>
                     Disconnect
                 </Text>

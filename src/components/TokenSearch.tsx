@@ -7,6 +7,7 @@ import { EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
 import useDelayedEffect from "../hooks/useDelayedEffect";
 import useStyles from "../hooks/useStyles";
+import useTranslation from "../hooks/useTranslation";
 import Token from "../types/Token";
 import { findOrFetchToken } from "../utils/fetch-utils";
 import Button from "./Button";
@@ -26,11 +27,12 @@ export interface TokenSearchProps {
 
 // tslint:disable-next-line:max-func-body-length
 const TokenSearch: FC<TokenSearchProps> = props => {
+    const t = useTranslation();
     const { border } = useStyles();
     const { provider, tokens } = useContext(EthersContext);
     const [tokenToAdd, setTokenToAdd] = useState<Token>();
     const [loading, setLoading] = useState(false);
-    const duplicate = !!tokenToAdd && tokens.findIndex(t => t.address === tokenToAdd.address) !== -1;
+    const duplicate = !!tokenToAdd && tokens.findIndex(tk => tk.address === tokenToAdd.address) !== -1;
     if (!props.tokens) return <View />;
     useEffect(() => {
         if (props.text === "") {
@@ -62,7 +64,7 @@ const TokenSearch: FC<TokenSearchProps> = props => {
                 <Input
                     value={props.text}
                     onChangeText={props.onChangeText}
-                    placeholder={"Token name, symbol or address"}
+                    placeholder={t("token-name-symbol-or-address")}
                     autoFocus={IS_DESKTOP}
                     inputStyle={{ marginHorizontal: Spacing.tiny, fontSize: props.text ? 20 : 16 }}
                     inputContainerStyle={{ borderBottomWidth: 0, marginRight: loading ? 32 : 0 }}
@@ -91,6 +93,7 @@ const TokenItem = (props: {
     onSelectToken: (token: Token) => void;
     duplicate: boolean;
 }) => {
+    const t = useTranslation();
     const { accent } = useColors();
     const onPress = useCallback(() => {
         props.onSelectToken(props.token);
@@ -111,7 +114,7 @@ const TokenItem = (props: {
                     type={"clear"}
                     size={"small"}
                     color={accent}
-                    title={props.duplicate ? "Already Added" : "ADD " + props.token.symbol}
+                    title={props.duplicate ? t("already-added") : t("-add-") + " " + props.token.symbol}
                     fontWeight={"bold"}
                     onPress={onPress}
                     disabled={props.duplicate}

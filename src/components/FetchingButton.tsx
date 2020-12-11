@@ -1,8 +1,10 @@
 import React from "react";
 
+import useTranslation from "../hooks/useTranslation";
 import Button from "./Button";
 
 const FetchingButton = () => {
-    return <Button title={"Fetching…"} disabled={true} />;
+    const t = useTranslation();
+    return <Button title={t("fetching")} disabled={true} />;
 };
 export default FetchingButton;

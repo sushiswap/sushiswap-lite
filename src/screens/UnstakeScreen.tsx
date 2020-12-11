@@ -67,7 +67,6 @@ const XSushiBalance = ({ state }: { state: StakingState }) => {
             <AmountMeta
                 amount={state.xSushi ? formatBalance(state.xSushi.balance, state.xSushi.decimals) : ""}
                 suffix={"xSUSHI"}
-                disabled={!state.xSushi}
             />
         </View>
     );

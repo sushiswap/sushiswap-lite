@@ -1,8 +1,10 @@
 import React from "react";
 
+import useTranslation from "../hooks/useTranslation";
 import Button from "./Button";
 
 const InsufficientBalanceButton = ({ symbol }: { symbol: string }) => {
-    return <Button title={"Insufficient " + (symbol ? symbol : "Balance")} disabled={true} />;
+    const t = useTranslation();
+    return <Button title={symbol ? t("insufficient-", { symbol }) : t("insufficient-balance")} disabled={true} />;
 };
 export default InsufficientBalanceButton;

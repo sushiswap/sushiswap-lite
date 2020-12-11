@@ -3,6 +3,7 @@ import { View } from "react-native";
 
 import { Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
+import useTranslation from "../hooks/useTranslation";
 import Token from "../types/Token";
 import Button from "./Button";
 
@@ -15,6 +16,7 @@ export interface ApproveButtonProps {
 }
 
 const ApproveButton: FC<ApproveButtonProps> = props => {
+    const t = useTranslation();
     const { approveToken } = useContext(EthersContext);
     const [loading, setLoading] = useState(false);
     const onPress = useCallback(async () => {
@@ -37,7 +39,7 @@ const ApproveButton: FC<ApproveButtonProps> = props => {
     if (props.hidden) return <View />;
     return (
         <Button
-            title={"Approve " + (props.token?.symbol || "")}
+            title={t("approve") + " " + (props.token?.symbol || "")}
             onPress={onPress}
             loading={loading}
             containerStyle={{ marginBottom: Spacing.tiny }}

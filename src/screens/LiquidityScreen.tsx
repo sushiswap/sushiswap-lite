@@ -35,19 +35,21 @@ import useAddLiquidityState, { AddLiquidityMode, AddLiquidityState } from "../ho
 import useColors from "../hooks/useColors";
 import useLinker from "../hooks/useLinker";
 import useSDK from "../hooks/useSDK";
+import useTranslation from "../hooks/useTranslation";
 import MetamaskError from "../types/MetamaskError";
 import Token from "../types/Token";
 import { convertAmount, convertToken, formatBalance, isEmptyValue, isETH, isETHWETHPair, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const LiquidityScreen = () => {
+    const t = useTranslation();
     return (
         <Screen>
             <Container>
                 <BackgroundImage />
                 <Content>
-                    <Title text={"Add Liquidity"} />
-                    <Text light={true}>Add liquidity to a pool and get LP tokens of the pair.</Text>
+                    <Title text={t("add-liquidity")} />
+                    <Text light={true}>{t("add-liquidity-desc")}</Text>
                     <AddLiquidity />
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
@@ -82,17 +84,18 @@ const AddLiquidity = () => {
 };
 
 const ModeSelect = ({ state }: { state: AddLiquidityState }) => {
+    const t = useTranslation();
     const options: Option[] = [
         {
             key: "zapper",
-            title: "1-Click Zap",
-            description: "Add liquidity with 1 token within a single transaction"
+            title: t("1-click-zap"),
+            description: t("1-click-zap-desc")
         },
-        { key: "normal", title: "Normal", description: "Add liquidity with 2 tokens that have balances" }
+        { key: "normal", title: t("normal"), description: t("normal-desc") }
     ];
     return (
         <Select
-            title={"Mode"}
+            title={t("mode")}
             options={options}
             option={options.find(option => option.key === state.mode)}
             setOption={option => state.setMode(option?.key as AddLiquidityMode | undefined)}
@@ -101,34 +104,36 @@ const ModeSelect = ({ state }: { state: AddLiquidityState }) => {
 };
 
 const FromTokenSelect = ({ state }: { state: AddLiquidityState }) => {
+    const t = useTranslation();
     const { customTokens } = useContext(EthersContext);
     if (!state.mode) {
-        return <Heading text={"1st Token"} disabled={true} />;
+        return <Heading text={t("1st-token")} disabled={true} />;
     }
     return (
         <TokenSelect
-            title={"1st Token"}
+            title={t("1st-token")}
             symbol={state.fromSymbol}
             onChangeSymbol={state.setFromSymbol}
-            hidden={token => !customTokens.find(t => t.address === token.address) && token.balance.isZero()}
+            hidden={token => !customTokens.find(tk => tk.address === token.address) && token.balance.isZero()}
         />
     );
 };
 
 const ToTokenSelect = ({ state }: { state: AddLiquidityState }) => {
+    const t = useTranslation();
     const { customTokens } = useContext(EthersContext);
     if (!state.fromSymbol) {
-        return <Heading text={"2nd Token"} disabled={true} />;
+        return <Heading text={t("2nd-token")} disabled={true} />;
     }
     return (
         <View>
             <TokenSelect
-                title={"2nd Token"}
+                title={t("2nd-token")}
                 symbol={state.toSymbol}
                 onChangeSymbol={state.setToSymbol}
                 hidden={token =>
                     token.symbol === state.fromSymbol ||
-                    (!customTokens.find(t => t.address === token.address) && token.balance.isZero())
+                    (!customTokens.find(tk => tk.address === token.address) && token.balance.isZero())
                 }
             />
         </View>
@@ -136,8 +141,9 @@ const ToTokenSelect = ({ state }: { state: AddLiquidityState }) => {
 };
 
 const FromTokenInput = ({ state }: { state: AddLiquidityState }) => {
+    const t = useTranslation();
     if (!state.fromSymbol || !state.toSymbol) {
-        return <Heading text={"Amount of Tokens"} disabled={true} />;
+        return <Heading text={t("amount-of-tokens")} disabled={true} />;
     }
     const onAmountChanged = (newAmount: string) => {
         state.setFromAmount(newAmount);
@@ -149,7 +155,7 @@ const FromTokenInput = ({ state }: { state: AddLiquidityState }) => {
     };
     return (
         <TokenInput
-            title={state.mode === "zapper" ? "Amount of " + state.fromSymbol : "Amount of Tokens"}
+            title={state.mode === "zapper" ? t("amount-of-", { symbol: state.fromSymbol }) : t("amount-of-tokens")}
             token={state.fromToken}
             amount={state.fromAmount}
             onAmountChanged={onAmountChanged}
@@ -159,9 +165,7 @@ const FromTokenInput = ({ state }: { state: AddLiquidityState }) => {
 };
 
 const ToTokenInput = ({ state }: { state: AddLiquidityState }) => {
-    if (!state.fromSymbol || !state.toSymbol) {
-        return <View />;
-    }
+    if (!state.fromSymbol || !state.toSymbol) return <View />;
     const onAmountChanged = (newAmount: string) => {
         state.setToAmount(newAmount);
         if (state.pair && state.toToken && state.priceDetermined) {
@@ -181,17 +185,12 @@ const ToTokenInput = ({ state }: { state: AddLiquidityState }) => {
 };
 
 const ZapNotice = ({ state }: { state: AddLiquidityState }) => {
+    const t = useTranslation();
     if (!state.fromSymbol || !state.toSymbol || !state.pair) return <View />;
     return (
         <Notice
             clear={true}
-            text={
-                "☘️ 1/2 of " +
-                state.fromSymbol +
-                " will automatically be swapped to " +
-                state.toSymbol +
-                " and both tokens will be added to the liquidity in a single transaction."
-            }
+            text={t("zap-notice", { fromSymbol: state.fromSymbol, toSymbol: state.toSymbol })}
             style={{ marginTop: Spacing.small }}
         />
     );
@@ -206,6 +205,7 @@ const PriceInfo = ({ state }: { state: AddLiquidityState }) => {
 };
 
 const FirstProviderInfo = ({ state }: { state: AddLiquidityState }) => {
+    const t = useTranslation();
     const { red, green } = useColors();
     const noAmount = isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount);
     const initialPrice = Fraction.from(
@@ -224,10 +224,7 @@ const FirstProviderInfo = ({ state }: { state: AddLiquidityState }) => {
             {!isETHWETHPair(state.fromToken, state.toToken) && (
                 <Notice
                     text={
-                        "You are the first liquidity provider.\n" +
-                        (zap
-                            ? "1-Click Zap is not supported when you're the first provider."
-                            : "The ratio of tokens you add will set the price of this pool.")
+                        t("first-provider-desc-1") + (zap ? t("first-provider-desc-zap") : t("first-provider-desc-2"))
                     }
                     color={zap ? red : green}
                     style={{ marginTop: Spacing.small }}
@@ -282,6 +279,7 @@ const FirstProviderControls = ({ state }: { state: AddLiquidityState }) => {
 };
 
 const PairPriceInfo = ({ state }: { state: AddLiquidityState }) => {
+    const t = useTranslation();
     const { fromAmount, toAmount, lpTokenAmount } = useAmountCalculator(state);
     const disabled = isEmptyValue(state.fromAmount) || isEmptyValue(state.toAmount);
     const price =
@@ -292,8 +290,8 @@ const PairPriceInfo = ({ state }: { state: AddLiquidityState }) => {
     return (
         <InfoBox>
             <AmountMeta amount={lpTokenAmount} suffix={symbol} disabled={disabled} />
-            <Meta text={fromAmount?.toFixed()} label={state.fromSymbol || "1st Token"} disabled={disabled} />
-            <Meta text={toAmount?.toFixed()} label={state.toSymbol || "2nd Token"} disabled={disabled} />
+            <Meta text={fromAmount?.toFixed()} label={state.fromSymbol || t("1st-token")} disabled={disabled} />
+            <Meta text={toAmount?.toFixed()} label={state.toSymbol || t("2nd-token")} disabled={disabled} />
             <PriceMeta state={state} price={price} disabled={!state.fromSymbol || !state.toSymbol} />
             <Controls state={state} />
         </InfoBox>
@@ -332,9 +330,17 @@ const useAmountCalculator = (state: AddLiquidityState) => {
     return { fromAmount, toAmount, lpTokenAmount: amount };
 };
 
-const PriceMeta = ({ state, price, disabled }) => (
-    <Meta label={"Ratio"} text={price} suffix={state.toSymbol + " = 1 " + state.fromSymbol} disabled={disabled} />
-);
+const PriceMeta = ({ state, price, disabled }) => {
+    const t = useTranslation();
+    return (
+        <Meta
+            label={t("ratio")}
+            text={price}
+            suffix={state.toSymbol + " = 1 " + state.fromSymbol}
+            disabled={disabled}
+        />
+    );
+};
 
 // tslint:disable-next-line:max-func-body-length
 const Controls = ({ state }: { state: AddLiquidityState }) => {
@@ -397,7 +403,7 @@ const useZapTokenAllowance = (zapToken?: Token) => {
                 const minAllowance = ethers.BigNumber.from(2)
                     .pow(96)
                     .sub(1);
-                if (zapToken.symbol !== "ETH") {
+                if (isETH(zapToken)) {
                     const fromAllowance = await getTokenAllowance(zapToken.address, ZAP_IN);
                     setAllowed(ethers.BigNumber.from(fromAllowance).gte(minAllowance));
                 }
@@ -418,6 +424,7 @@ const SupplyButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
+    const t = useTranslation();
     const goToRemoveLiquidity = useLinker("/liquidity/remove", "RemoveLiquidity");
     const onPress = useCallback(async () => {
         onError({});
@@ -430,7 +437,9 @@ const SupplyButton = ({
     }, [state.onAdd, onError]);
     return (
         <Button
-            title={state.fromSymbol && state.toSymbol ? "Supply " + state.fromSymbol + "-" + state.toSymbol : "Supply"}
+            title={
+                t("supply") + (state.fromSymbol && state.toSymbol ? " " + state.fromSymbol + "-" + state.toSymbol : "")
+            }
             disabled={disabled}
             loading={state.adding}
             onPress={onPress}

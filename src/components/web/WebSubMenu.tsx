@@ -4,6 +4,7 @@ import { Link, useRouteMatch } from "react-router-dom";
 
 import { HEADER_WIDTH, IS_DESKTOP, Spacing, SUB_MENU_HEIGHT } from "../../constants/dimension";
 import useColors from "../../hooks/useColors";
+import useTranslation from "../../hooks/useTranslation";
 import FlexView from "../FlexView";
 import Text from "../Text";
 
@@ -16,76 +17,91 @@ export interface WebSubMenuProps {
     items: WebSubMenuItem[];
 }
 
-export const SwapSubMenu = () => (
-    <WebSubMenu
-        items={[
-            {
-                title: "New Order",
-                path: "/swap"
-            },
-            {
-                title: "My Orders",
-                path: "/swap/my-orders"
-            }
-        ]}
-    />
-);
+export const SwapSubMenu = () => {
+    const t = useTranslation();
+    return (
+        <WebSubMenu
+            items={[
+                {
+                    title: t("new-order"),
+                    path: "/swap"
+                },
+                {
+                    title: t("my-orders"),
+                    path: "/swap/my-orders"
+                }
+            ]}
+        />
+    );
+};
 
-export const LiquiditySubMenu = () => (
-    <WebSubMenu
-        items={[
-            {
-                title: "Add Liquidity",
-                path: "/liquidity"
-            },
-            {
-                title: "Remove Liquidity",
-                path: "/liquidity/remove"
-            }
-        ]}
-    />
-);
+export const LiquiditySubMenu = () => {
+    const t = useTranslation();
+    return (
+        <WebSubMenu
+            items={[
+                {
+                    title: t("add-liquidity"),
+                    path: "/liquidity"
+                },
+                {
+                    title: t("remove-liquidity"),
+                    path: "/liquidity/remove"
+                }
+            ]}
+        />
+    );
+};
 
-export const MigrateSubMenu = () => (
-    <WebSubMenu
-        items={[
-            {
-                title: "Migrate Liquidity",
-                path: "/migrate"
-            }
-        ]}
-    />
-);
+export const MigrateSubMenu = () => {
+    const t = useTranslation();
+    return (
+        <WebSubMenu
+            items={[
+                {
+                    title: t("migrate-liquidity"),
+                    path: "/migrate"
+                }
+            ]}
+        />
+    );
+};
 
-export const StakingSubMenu = () => (
-    <WebSubMenu
-        items={[
-            {
-                title: "Stake",
-                path: "/staking"
-            },
-            {
-                title: "Unstake",
-                path: "/staking/unstake"
-            }
-        ]}
-    />
-);
+export const StakingSubMenu = () => {
+    const t = useTranslation();
+    return (
+        <WebSubMenu
+            items={[
+                {
+                    title: t("stake"),
+                    path: "/staking"
+                },
+                {
+                    title: t("unstake"),
+                    path: "/staking/unstake"
+                }
+            ]}
+        />
+    );
+};
 
-export const FarmingSubMenu = () => (
-    <WebSubMenu
-        items={[
-            {
-                title: "Plant LP Tokens",
-                path: "/farming"
-            },
-            {
-                title: "Harvest SUSHI",
-                path: "/farming/harvest"
-            }
-        ]}
-    />
-);
+export const FarmingSubMenu = () => {
+    const t = useTranslation();
+    return (
+        <WebSubMenu
+            items={[
+                {
+                    title: t("plant-lp-tokens"),
+                    path: "/farming"
+                },
+                {
+                    title: t("harvest-sushi"),
+                    path: "/farming/harvest"
+                }
+            ]}
+        />
+    );
+};
 
 const WebSubMenu: FC<WebSubMenuProps> = props => {
     const { submenu } = useColors();

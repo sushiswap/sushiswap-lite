@@ -26,18 +26,20 @@ import { Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
 import useLinker from "../hooks/useLinker";
 import useMigrateState, { MigrateMode, MigrateState } from "../hooks/useMigrateState";
+import useTranslation from "../hooks/useTranslation";
 import MetamaskError from "../types/MetamaskError";
 import { isEmptyValue, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const MigrateScreen = () => {
+    const t = useTranslation();
     return (
         <Screen>
             <Container>
                 <BackgroundImage />
                 <Content>
-                    <Title text={"Migrate Liquidity"} />
-                    <Text light={true}>Migrate your Uniswap LP tokens to SushiSwap LP tokens.</Text>
+                    <Title text={t("migrate-liquidity")} />
+                    <Text light={true}>{t("migrate-liquidity-desc")}</Text>
                     <Migrate />
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
@@ -67,21 +69,22 @@ const Migrate = () => {
 };
 
 const MigrateModeSelect = ({ state }: { state: MigrateState }) => {
+    const t = useTranslation();
     const options: Option[] = [
         {
             key: "permit",
-            title: "Non-hardware Wallet",
-            description: "Migration is done in one-click using your signature(permit)."
+            title: t("non-hardware-wallet"),
+            description: t("non-hardware-wallet-desc")
         },
         {
             key: "approve",
-            title: "Hardware Wallet (Trezor, Ledger, etc.)",
-            description: "You need to first approve LP tokens and then migrate it."
+            title: t("hardware-wallet"),
+            description: t("hardware-wallet-desc")
         }
     ];
     return (
         <Select
-            title={"Wallet Type"}
+            title={t("wallet-type")}
             options={options}
             option={options.find(option => option.key === state.mode)}
             setOption={option => state.setMode(option?.key as MigrateMode | undefined)}
@@ -90,13 +93,14 @@ const MigrateModeSelect = ({ state }: { state: MigrateState }) => {
 };
 
 const UniswapLiquidityScreen = ({ state }: { state: MigrateState }) => {
+    const t = useTranslation();
     if (!state.mode) {
-        return <Heading text={"Your Uniswap Liquidity"} disabled={true} />;
+        return <Heading text={t("your-uniswap-liquidity")} disabled={true} />;
     }
     return (
         <LPTokenSelect
             state={state}
-            title={"Your Uniswap Liquidity"}
+            title={t("your-uniswap-liquidity")}
             emptyText={"You don't have any liquidity on Uniswap."}
             Item={LPTokenItem}
         />
@@ -104,12 +108,13 @@ const UniswapLiquidityScreen = ({ state }: { state: MigrateState }) => {
 };
 
 const AmountInput = ({ state }: { state: MigrateState }) => {
+    const t = useTranslation();
     if (!state.selectedLPToken) {
-        return <Heading text={"Amount of Tokens"} disabled={true} />;
+        return <Heading text={t("amount-of-tokens")} disabled={true} />;
     }
     return (
         <TokenInput
-            title={"Amount of Tokens"}
+            title={t("amount-of-tokens")}
             token={state.selectedLPToken}
             amount={state.amount}
             onAmountChanged={state.setAmount}
@@ -169,6 +174,7 @@ const MigrateButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
+    const t = useTranslation();
     const goToFarm = useLinker("/farming", "Farming");
     const onPress = async () => {
         onError({});
@@ -179,7 +185,7 @@ const MigrateButton = ({
             onError(e);
         }
     };
-    return <Button title={"Migrate Liquidity"} loading={state.migrating} onPress={onPress} disabled={disabled} />;
+    return <Button title={t("migrate-liquidity")} loading={state.migrating} onPress={onPress} disabled={disabled} />;
 };
 
 export default MigrateScreen;

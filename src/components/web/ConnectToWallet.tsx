@@ -6,6 +6,7 @@ import { IS_DESKTOP, Spacing } from "../../constants/dimension";
 import { EthersContext } from "../../context/EthersContext";
 import { GlobalContext } from "../../context/GlobalContext";
 import useColors from "../../hooks/useColors";
+import useTranslation from "../../hooks/useTranslation";
 import Button from "../Button";
 
 const ConnectWallet = () => {
@@ -29,6 +30,7 @@ const ConnectWallet = () => {
 };
 
 const ConnectButton = () => {
+    const t = useTranslation();
     const { primary } = useColors();
     const { setEthereum } = useContext(EthersContext);
     const onPress = async () => {
@@ -36,7 +38,7 @@ const ConnectButton = () => {
             await window.ethereum.request({ method: "eth_requestAccounts" });
             setEthereum(window.ethereum);
         } else {
-            alert("No ethereum provider found.");
+            alert(t("no-ethereum-provider-found"));
         }
     };
     const metaMask = window.ethereum?.isMetaMask || false;
@@ -45,7 +47,7 @@ const ConnectButton = () => {
             size={"large"}
             color={metaMask ? "#e2761b" : primary}
             onPress={onPress}
-            title={metaMask ? "MetaMask" : "Connect"}
+            title={metaMask ? "MetaMask" : t("connect")}
             containerStyle={{ width: IS_DESKTOP ? 440 : "100%" }}
             style={{ marginTop: Spacing.small, marginHorizontal: Spacing.normal }}
         />

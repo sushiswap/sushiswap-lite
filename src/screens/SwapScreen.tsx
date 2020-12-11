@@ -34,19 +34,21 @@ import useColors from "../hooks/useColors";
 import useDelayedEffect from "../hooks/useDelayedEffect";
 import useLinker from "../hooks/useLinker";
 import useSwapState, { OrderType, SwapState } from "../hooks/useSwapState";
+import useTranslation from "../hooks/useTranslation";
 import MetamaskError from "../types/MetamaskError";
 import Token from "../types/Token";
 import { formatBalance, isEmptyValue, isETH, isETHWETHPair, isWETH, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const SwapScreen = () => {
+    const t = useTranslation();
     return (
         <Screen>
             <Container>
                 <BackgroundImage />
                 <Content>
-                    <Title text={"New Order"} />
-                    <Text light={true}>Swap now or place a limit order with a desired price.</Text>
+                    <Title text={t("new-order")} />
+                    <Text light={true}>{t("new-order-desc")}</Text>
                     <Swap />
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
@@ -68,7 +70,7 @@ const Swap = () => {
             <Border />
             <AmountInput state={state} />
             {state.orderType === "limit" && (
-                <View>
+                <View style={{ marginTop: Spacing.small }}>
                     <AmountNotice state={state} />
                     <Border />
                     <PriceInput state={state} />
@@ -81,14 +83,15 @@ const Swap = () => {
 };
 
 const OrderTypeSelect = ({ state }: { state: SwapState }) => {
+    const t = useTranslation();
     const options: Option[] = [
-        { key: "market", title: "Market Order", description: "Settle an order immediately" },
-        { key: "limit", title: "Limit Order", description: "Place an order with a desired price to be settled" }
+        { key: "market", title: t("market-order"), description: t("market-order-desc") },
+        { key: "limit", title: t("limit-order"), description: t("limit-order-desc") }
     ];
     return (
         <View>
             <Select
-                title={"Order Type"}
+                title={t("order-type")}
                 options={options}
                 option={options.find(option => option.key === state.orderType)}
                 setOption={option => state.setOrderType(option?.key as OrderType | undefined)}
@@ -105,19 +108,20 @@ const OrderTypeSelect = ({ state }: { state: SwapState }) => {
 };
 
 const FromTokenSelect = ({ state }: { state: SwapState }) => {
+    const t = useTranslation();
     const { tokens, customTokens } = useContext(EthersContext);
     if (!state.orderType) {
-        return <Heading text={"Token To Sell"} disabled={true} />;
+        return <Heading text={t("token-to-sell")} disabled={true} />;
     }
     const ETH = tokens ? tokens.find(token => isETH(token)) : null;
     return (
         <View>
             <TokenSelect
-                title={"Token To Sell"}
+                title={t("token-to-sell")}
                 symbol={state.fromSymbol}
                 onChangeSymbol={state.setFromSymbol}
                 hidden={token =>
-                    (!customTokens.find(t => t.address === token.address) && token.balance.isZero()) ||
+                    (!customTokens.find(tk => tk.address === token.address) && token.balance.isZero()) ||
                     (state.orderType === "limit" && isETH(token))
                 }
             />
@@ -129,8 +133,9 @@ const FromTokenSelect = ({ state }: { state: SwapState }) => {
 };
 
 const ToTokenSelect = ({ state }: { state: SwapState }) => {
+    const t = useTranslation();
     if (!state.orderType || !state.fromSymbol) {
-        return <Heading text={"Token To Buy"} disabled={true} />;
+        return <Heading text={t("token-to-buy")} disabled={true} />;
     }
     const limit = state.orderType === "limit";
     const onChangeSymbol = (symbol: string) => {
@@ -139,7 +144,7 @@ const ToTokenSelect = ({ state }: { state: SwapState }) => {
     return (
         <View>
             <TokenSelect
-                title={"Token To Buy"}
+                title={t("token-to-buy")}
                 symbol={state.toSymbol}
                 onChangeSymbol={onChangeSymbol}
                 hidden={token => token.symbol === state.fromSymbol || (limit && isETH(token))}
@@ -150,12 +155,13 @@ const ToTokenSelect = ({ state }: { state: SwapState }) => {
 };
 
 const AmountInput = ({ state }: { state: SwapState }) => {
+    const t = useTranslation();
     if (!state.fromSymbol || !state.toSymbol) {
-        return <Heading text={"Amount"} disabled={true} />;
+        return <Heading text={t("amount")} disabled={true} />;
     }
     return (
         <View>
-            <Heading text={state.fromSymbol + " Amount"} />
+            <Heading text={state.fromSymbol + " " + t("amount")} />
             <TokenInput
                 token={state.fromToken}
                 amount={state.fromAmount}
@@ -167,6 +173,7 @@ const AmountInput = ({ state }: { state: SwapState }) => {
 };
 
 const AmountNotice = ({ state }: { state: SwapState }) => {
+    const t = useTranslation();
     if (
         state.priceInETH === undefined ||
         isEmptyValue(state.fromAmount) ||
@@ -176,16 +183,15 @@ const AmountNotice = ({ state }: { state: SwapState }) => {
         return <View />;
     }
     return (
-        <View style={{ marginTop: Spacing.small }}>
+        <View>
             <Notice
                 text={
                     state.priceInETH === null
-                        ? "This token is not supported in beta."
-                        : "Maximum allowed amount in beta is " +
-                          formatBalance(state.priceInETH.mul(10), state.fromToken!.decimals) +
-                          " " +
-                          state.fromSymbol +
-                          " (≈ 10 ETH)."
+                        ? t("token-not-supported-in-beta")
+                        : t("maximum-allowed-amount-in-beta", {
+                              amount: formatBalance(state.priceInETH.mul(10), state.fromToken!.decimals),
+                              symbol: state.fromSymbol
+                          })
                 }
                 color={"red"}
             />
@@ -194,8 +200,9 @@ const AmountNotice = ({ state }: { state: SwapState }) => {
 };
 
 const PriceInput = ({ state }: { state: SwapState }) => {
+    const t = useTranslation();
     if (!state.fromSymbol || !state.toSymbol) {
-        return <Heading text={"Minimum Price"} disabled={true} />;
+        return <Heading text={t("minimum-price")} disabled={true} />;
     }
     const marketPrice =
         state.toToken && state.trade
@@ -203,7 +210,7 @@ const PriceInput = ({ state }: { state: SwapState }) => {
             : ethers.constants.Zero;
     return (
         <TokenInput
-            title={"Minimum Price (" + state.fromSymbol + "/" + state.toSymbol + ")"}
+            title={t("minimum-price") + " (" + state.fromSymbol + "/" + state.toSymbol + ")"}
             token={
                 {
                     ...state.toToken,
@@ -212,16 +219,17 @@ const PriceInput = ({ state }: { state: SwapState }) => {
             }
             amount={state.limitOrderPrice}
             onAmountChanged={state.setLimitOrderPrice}
-            maxButtonText={"MARKET"}
+            maxButtonText={t("-market-")}
         />
     );
 };
 
 const LimitOrderUnsupportedNotice = () => {
     const { placeholder } = useColors();
+    const t = useTranslation();
     return (
         <Notice
-            text={"⚠️ ETH not supported for limit orders. Use WETH instead."}
+            text={t("eth-not-supported-for-limit-orders")}
             color={placeholder}
             clear={true}
             style={{ marginVertical: Spacing.small, marginHorizontal: Spacing.tiny }}
@@ -230,9 +238,10 @@ const LimitOrderUnsupportedNotice = () => {
 };
 
 const NoPairNotice = ({ state }: { state: SwapState }) => {
+    const t = useTranslation();
     return (
         <Notice
-            text={state.fromSymbol + "-" + state.toSymbol + " pair hasn't been created yet."}
+            text={t("pair-not-created", { fromSymbol: state.fromSymbol, toSymbol: state.toSymbol })}
             color={"red"}
             style={{ marginTop: Spacing.normal }}
         />
@@ -273,6 +282,7 @@ const WrapInfo = ({ state }: { state: SwapState }) => {
 };
 
 const SwapInfo = ({ state, disabled }: { state: SwapState; disabled: boolean }) => {
+    const t = useTranslation();
     const amount = state.trade?.outputAmount?.toFixed();
     const price = state.trade?.executionPrice?.toFixed();
     const impact = state.trade?.priceImpact?.toFixed(2);
@@ -280,13 +290,13 @@ const SwapInfo = ({ state, disabled }: { state: SwapState; disabled: boolean }) 
         <View>
             <AmountMeta amount={amount} suffix={state.toSymbol} disabled={disabled} />
             <Meta
-                label={"Price"}
+                label={t("price")}
                 text={price}
                 suffix={state.toSymbol + "  = 1 " + state.fromSymbol}
                 disabled={disabled}
             />
-            <Meta label={"Price Impact"} text={impact} suffix={"%"} disabled={disabled} />
-            <Meta label={"Fee (0.30%)"} text={state.swapFee} suffix={state.fromSymbol} disabled={disabled} />
+            <Meta label={t("price-impact")} text={impact} suffix={"%"} disabled={disabled} />
+            <Meta label={t("fee-amount")} text={state.swapFee} suffix={state.fromSymbol} disabled={disabled} />
             <SwapControls state={state} />
         </View>
     );
@@ -296,7 +306,7 @@ const SwapInfo = ({ state, disabled }: { state: SwapState; disabled: boolean }) 
 const SwapControls = ({ state }: { state: SwapState }) => {
     const [error, setError] = useState<MetamaskError>({});
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
-    const approveRequired = state.fromSymbol !== "ETH" && !state.fromTokenAllowed;
+    const approveRequired = !isETH(state.fromToken) && !state.fromTokenAllowed;
     return (
         <View style={{ marginTop: Spacing.normal }}>
             {!state.fromToken ||
@@ -332,13 +342,16 @@ const SwapControls = ({ state }: { state: SwapState }) => {
 };
 
 const SwapButton = ({ state, onError, disabled }: { state: SwapState; onError: (e) => void; disabled: boolean }) => {
+    const t = useTranslation();
     const onPress = useCallback(() => {
         onError({});
         state.onSwap().catch(onError);
     }, [state.onSwap, onError]);
     return (
         <Button
-            title={state.fromSymbol && state.toSymbol ? "Swap " + state.fromSymbol + "-" + state.toSymbol : "Swap"}
+            title={
+                t("swap") + (state.fromSymbol && state.toSymbol ? " " + state.fromSymbol + "-" + state.toSymbol : "")
+            }
             disabled={disabled}
             loading={state.swapping}
             onPress={onPress}
@@ -347,22 +360,25 @@ const SwapButton = ({ state, onError, disabled }: { state: SwapState; onError: (
 };
 
 const WrapButton = ({ state, onError }: { state: SwapState; onError: (e) => void }) => {
+    const t = useTranslation();
     const onPress = useCallback(async () => {
         onError({});
         state.onWrap().catch(onError);
     }, []);
-    return <Button title={"Wrap"} loading={state.wrapping} onPress={onPress} />;
+    return <Button title={t("wrap")} loading={state.wrapping} onPress={onPress} />;
 };
 
 const UnwrapButton = ({ state, onError }: { state: SwapState; onError: (e) => void }) => {
+    const t = useTranslation();
     const onPress = useCallback(async () => {
         onError({});
         state.onUnwrap().catch(onError);
     }, []);
-    return <Button title={"Unwrap"} loading={state.unwrapping} onPress={onPress} />;
+    return <Button title={t("unwrap")} loading={state.unwrapping} onPress={onPress} />;
 };
 
 const LimitOrderInfo = ({ state }: { state: SwapState }) => {
+    const t = useTranslation();
     const d = !state.trade?.executionPrice;
     return (
         <View>
@@ -372,14 +388,14 @@ const LimitOrderInfo = ({ state }: { state: SwapState }) => {
                 {isEmptyValue(state.limitOrderReturn) ? "N/A" : state.limitOrderReturn + " " + state.toSymbol}
             </Text>
             <Meta
-                label={"Market Price"}
+                label={t("market-price")}
                 text={state.trade?.executionPrice?.invert().toFixed(8) || undefined}
                 suffix={state.fromSymbol + " / " + state.toSymbol}
                 disabled={d}
             />
-            <Meta label={"Relayer Fee (0.20%)"} text={state.limitOrderFee} suffix={state.fromSymbol} disabled={d} />
-            <Meta label={"Swap Fee (0.30%)"} text={state.limitOrderSwapFee} suffix={state.fromSymbol} disabled={d} />
-            <Meta label={"Expiration"} text={"24 Hours From Now"} disabled={d} />
+            <Meta label={t("relayer-fee-amount")} text={state.limitOrderFee} suffix={state.fromSymbol} disabled={d} />
+            <Meta label={t("swap-fee-amount")} text={state.limitOrderSwapFee} suffix={state.fromSymbol} disabled={d} />
+            <Meta label={t("expiration")} text={t("24-hours-from-now")} disabled={d} />
             <LimitOrderControls state={state} />
         </View>
     );
@@ -444,7 +460,8 @@ const LimitOrderControls = ({ state }: { state: SwapState }) => {
 };
 
 const PriceTooLowButton = () => {
-    return <Button title={"Set Price Greater Than Market"} disabled={true} />;
+    const t = useTranslation();
+    return <Button title={t("set-price-greater-than-market")} disabled={true} />;
 };
 
 const PlaceOrderButton = ({
@@ -456,6 +473,7 @@ const PlaceOrderButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
+    const t = useTranslation();
     const goToLimitOrders = useLinker("/swap/my-orders", "LimitOrders");
     const onPress = useCallback(async () => {
         onError({});
@@ -466,7 +484,9 @@ const PlaceOrderButton = ({
             onError(e);
         }
     }, [state.onCreateOrder, goToLimitOrders, onError]);
-    return <Button title={"Place Limit Order"} disabled={disabled} loading={state.creatingOrder} onPress={onPress} />;
+    return (
+        <Button title={t("place-limit-order")} disabled={disabled} loading={state.creatingOrder} onPress={onPress} />
+    );
 };
 
 export default SwapScreen;

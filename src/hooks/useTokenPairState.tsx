@@ -5,7 +5,7 @@ import useAsyncEffect from "use-async-effect";
 import { ROUTER } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import Token from "../types/Token";
-import { parseBalance } from "../utils";
+import { isETH, parseBalance } from "../utils";
 import useWeth from "./useWeth";
 
 export interface TokenPairState {
@@ -68,11 +68,11 @@ const useTokenPairState: () => TokenPairState = () => {
                 const minAllowance = ethers.BigNumber.from(2)
                     .pow(96)
                     .sub(1);
-                if (fromToken.symbol !== "ETH") {
+                if (!isETH(fromToken)) {
                     const fromAllowance = await getTokenAllowance(fromToken.address, ROUTER);
                     setFromTokenAllowed(ethers.BigNumber.from(fromAllowance).gte(minAllowance));
                 }
-                if (toToken.symbol !== "ETH") {
+                if (!isETH(toToken)) {
                     const toAllowance = await getTokenAllowance(toToken.address, ROUTER);
                     setToTokenAllowed(ethers.BigNumber.from(toAllowance).gte(minAllowance));
                 }

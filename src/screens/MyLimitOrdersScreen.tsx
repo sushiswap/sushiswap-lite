@@ -27,17 +27,19 @@ import Fraction from "../constants/Fraction";
 import useColors from "../hooks/useColors";
 import useMyLimitOrdersState, { MyLimitOrdersState } from "../hooks/useMyLimitOrdersState";
 import { Order } from "../hooks/useSettlement";
+import useTranslation from "../hooks/useTranslation";
 import MetamaskError from "../types/MetamaskError";
 import { formatBalance } from "../utils";
 import Screen from "./Screen";
 
 const MyLimitOrdersScreen = () => {
+    const t = useTranslation();
     return (
         <Screen>
             <Container>
                 <BackgroundImage />
                 <Content>
-                    <Title text={"My Orders"} />
+                    <Title text={t("my-orders")} />
                     <Text light={true}>Scan limit orders you've placed and cancel them if needed.</Text>
                     <MyLimitOrders />
                 </Content>
@@ -59,10 +61,11 @@ const MyLimitOrders = () => {
 };
 
 const OrderSelect = (props: { state: MyLimitOrdersState }) => {
+    const t = useTranslation();
     return (
         <View>
             <Expandable
-                title={"Limit Orders"}
+                title={t("limit-orders")}
                 expanded={!props.state.selectedOrder}
                 onExpand={() => props.state.setSelectedOrder()}>
                 <OrderList state={props.state} />
@@ -97,16 +100,18 @@ const OrderList = ({ state }: { state: MyLimitOrdersState }) => {
 };
 
 const EmptyList = () => {
+    const t = useTranslation();
     return (
         <View style={{ margin: Spacing.normal }}>
             <Text disabled={true} style={{ textAlign: "center", width: "100%" }}>
-                {"You don't have any limit orders placed."}
+                {t("you-dont-have-limit-orders")}
             </Text>
         </View>
     );
 };
 
 const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (order: Order) => void }) => {
+    const t = useTranslation();
     const { amountIn, amountOutMin, fromToken, toToken } = props.order;
     const status = props.order.status();
     const disabled = status !== "Open";
@@ -126,8 +131,8 @@ const OrderItem = (props: { order: Order; selected: boolean; onSelectOrder: (ord
                     <Token token={toToken} amount={amountOutMin} disabled={disabled} buy={true} />
                 </View>
                 <Field
-                    label={"Price"}
-                    value={props.order.canceled ? "Canceled" : price.toString(8)}
+                    label={t("price")}
+                    value={props.order.canceled ? t("canceled") : price.toString(8)}
                     disabled={disabled}
                     minWidth={0}
                 />
@@ -171,6 +176,7 @@ const Field = ({ label, value, disabled, minWidth }) => {
 };
 
 const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
+    const t = useTranslation();
     const order = state.selectedOrder;
     const amountIn = order ? formatBalance(order.amountIn, order.fromToken.decimals) : undefined;
     const amountOutMin = order ? formatBalance(order.amountOutMin, order.toToken.decimals) : undefined;
@@ -186,11 +192,16 @@ const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
     const disabled = !state.selectedOrder;
     return (
         <InfoBox>
-            <Meta label={"Status"} text={order?.status()} disabled={disabled} />
-            <Meta label={"Amount Filled"} text={filledAmountIn} suffix={order?.fromToken?.symbol} disabled={disabled} />
-            <Meta label={"Amount To Sell"} text={amountIn} suffix={order?.fromToken?.symbol} disabled={disabled} />
-            <Meta label={"Amount To Buy"} text={amountOutMin} suffix={order?.toToken?.symbol} disabled={disabled} />
-            {expiry && <Meta label={"Expiration"} text={expiry} disabled={disabled} />}
+            <Meta label={t("status")} text={order?.status()} disabled={disabled} />
+            <Meta
+                label={t("amount-filled")}
+                text={filledAmountIn}
+                suffix={order?.fromToken?.symbol}
+                disabled={disabled}
+            />
+            <Meta label={t("amount-to-sell")} text={amountIn} suffix={order?.fromToken?.symbol} disabled={disabled} />
+            <Meta label={t("amount-to-buy")} text={amountOutMin} suffix={order?.toToken?.symbol} disabled={disabled} />
+            {expiry && <Meta label={t("expiration")} text={expiry} disabled={disabled} />}
             <FilledEvents state={state} />
             <Controls state={state} />
         </InfoBox>
@@ -198,6 +209,7 @@ const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
 };
 
 const FilledEvents = ({ state }: { state: MyLimitOrdersState }) => {
+    const t = useTranslation();
     const prefix = "https://etherscan.io/tx/";
     return (
         <View>
@@ -205,7 +217,7 @@ const FilledEvents = ({ state }: { state: MyLimitOrdersState }) => {
                 state.filledEvents.map((event, i) => {
                     const hash = event.transactionHash;
                     const tx = hash.substring(0, 10) + "..." + hash.substring(hash.length - 8);
-                    return <Meta key={i} label={"Filled TX #" + i} text={tx} url={prefix + hash} />;
+                    return <Meta key={i} label={t("filled-tx-no") + i} text={tx} url={prefix + hash} />;
                 })}
         </View>
     );
@@ -223,12 +235,13 @@ const Controls = ({ state }: { state: MyLimitOrdersState }) => {
 };
 
 const CancelButton = ({ state, onError }: { state: MyLimitOrdersState; onError: (e) => void }) => {
+    const t = useTranslation();
     const onPress = useCallback(() => {
         onError({});
         state.onCancelOrder().catch(onError);
     }, [state.onCancelOrder, onError]);
     const disabled = !state.selectedOrder || state.selectedOrder.status() !== "Open";
-    return <Button title={"Cancel Order"} loading={state.cancellingOrder} onPress={onPress} disabled={disabled} />;
+    return <Button title={t("cancel-order")} loading={state.cancellingOrder} onPress={onPress} disabled={disabled} />;
 };
 
 export default MyLimitOrdersScreen;

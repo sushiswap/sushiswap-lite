@@ -7,6 +7,7 @@ import { HEADER_HEIGHT, HEADER_WIDTH, IS_DESKTOP, Spacing } from "../../constant
 import { EthersContext } from "../../context/EthersContext";
 import { GlobalContext } from "../../context/GlobalContext";
 import useColors from "../../hooks/useColors";
+import useTranslation from "../../hooks/useTranslation";
 import DarkModeSwitch from "../DarkModeSwitch";
 import FlexView from "../FlexView";
 import SvgLogoDark from "../svg/SvgLogoDark";
@@ -63,18 +64,19 @@ export const Title = () => {
 };
 
 const Menu = () => {
+    const t = useTranslation();
     return (
         <FlexView
             style={{
                 height: "100%",
                 alignItems: "center"
             }}>
-            <MenuItem title={"Home"} path={"/"} />
-            <MenuItem title={"Swap"} path={"/swap"} />
-            <MenuItem title={"Liquidity"} path={"/liquidity"} />
-            <MenuItem title={"Migrate"} path={"/migrate"} />
-            <MenuItem title={"Stake"} path={"/staking"} />
-            <MenuItem title={"Farm"} path={"/farming"} />
+            <MenuItem title={t("menu.home")} path={"/"} />
+            <MenuItem title={t("menu.swap")} path={"/swap"} />
+            <MenuItem title={t("menu.liquidity")} path={"/liquidity"} />
+            <MenuItem title={t("menu.migrate")} path={"/migrate"} />
+            <MenuItem title={t("menu.stake")} path={"/staking"} />
+            <MenuItem title={t("menu.farm")} path={"/farming"} />
             <DarkModeSwitch style={{ marginLeft: Spacing.small }} />
             <Status />
         </FlexView>
@@ -106,15 +108,16 @@ const MenuIcon = ({ onExpand }) => {
 };
 
 const Status = () => {
+    const t = useTranslation();
     const { textLight, green, borderDark } = useColors();
     const { ethereum, chainId, address, ensName } = useContext(EthersContext);
     const connected = chainId === 1 && address;
     const title = connected
         ? ensName || address!.substring(0, 6) + "..." + address!.substring(address!.length - 4, address!.length)
-        : "Not connected";
+        : t("menu.not-connected");
     const color = connected ? green : textLight;
     const onPress = () => {
-        if (confirm("Do you want to disconnect?")) ethereum?.disconnect?.();
+        if (confirm(t("do-you-want-to-disconnect"))) ethereum?.disconnect?.();
     };
     return (
         <TouchableHighlight onPress={onPress} disabled={!ethereum?.isWalletConnect}>

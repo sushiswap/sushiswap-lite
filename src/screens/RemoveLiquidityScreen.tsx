@@ -32,6 +32,7 @@ import { ROUTER } from "../constants/contracts";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import useRemoveLiquidityState, { RemoveLiquidityState } from "../hooks/useRemoveLiquidityState";
 import { FEE } from "../hooks/useSwapRouter";
+import useTranslation from "../hooks/useTranslation";
 import LPToken from "../types/LPToken";
 import MetamaskError from "../types/MetamaskError";
 import Token from "../types/Token";
@@ -39,13 +40,14 @@ import { deduct, formatBalance, isEmptyValue, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const RemoveLiquidityScreen = () => {
+    const t = useTranslation();
     return (
         <Screen>
             <Container>
                 <BackgroundImage />
                 <Content>
-                    <Title text={"Remove Liquidity"} />
-                    <Text light={true}>Scan your liquidity and remove one if needed.</Text>
+                    <Title text={t("remove-liquidity")} />
+                    <Text light={true}>{t("remove-liquidity-desc")}</Text>
                     <RemoveLiquidity />
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
@@ -56,13 +58,14 @@ const RemoveLiquidityScreen = () => {
 };
 
 const RemoveLiquidity = () => {
+    const t = useTranslation();
     const state = useRemoveLiquidityState();
     return (
         <View style={{ marginTop: Spacing.large }}>
             <LPTokenSelect
                 state={state}
-                title={"Your Liquidity"}
-                emptyText={"You don't have any liquidity."}
+                title={t("your-liquidity")}
+                emptyText={t("you-dont-have-liquidity")}
                 Item={LPTokenItem}
             />
             <Border />
@@ -75,13 +78,12 @@ const RemoveLiquidity = () => {
 };
 
 const OutputTokenSelect = ({ state }: { state: RemoveLiquidityState }) => {
-    if (!state.selectedLPToken) {
-        return <Heading text={"Output Token(s)"} disabled={true} />;
-    }
+    const t = useTranslation();
+    if (!state.selectedLPToken) return <Heading text={t("output-tokens")} disabled={true} />;
     const onSelectToken = (token: Token) => () => state.setOutputToken(state.outputToken ? undefined : token);
     return (
         <View>
-            <Heading text={"Output Token(s)"} />
+            <Heading text={t("output-tokens")} />
             <TokenOutputItem
                 token={state.selectedLPToken.tokenA}
                 otherToken={state.selectedLPToken.tokenB}
@@ -113,6 +115,7 @@ const TokenOutputItem = (props: {
     hidden: boolean;
     onSelectToken: () => void;
 }) => {
+    const t = useTranslation();
     if (props.hidden) return <View />;
     return (
         <Selectable
@@ -125,7 +128,11 @@ const TokenOutputItem = (props: {
                 <TokenLogo token={props.token} />
                 <TokenSymbol token={props.token} />
                 <Text note={true} style={{ flex: 1, marginLeft: Spacing.tiny }}>
-                    {IS_DESKTOP && props.otherToken.symbol + " will be converted to " + props.token.symbol}
+                    {IS_DESKTOP &&
+                        t("will-be-converted-to", {
+                            fromSymbol: props.otherToken.symbol,
+                            toSymbol: props.token.symbol
+                        })}
                 </Text>
                 {props.selected ? <CloseIcon /> : <SelectIcon />}
             </FlexView>

@@ -33,18 +33,20 @@ import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 import useFarmingState, { FarmingState } from "../hooks/useFarmingState";
 import useLinker from "../hooks/useLinker";
+import useTranslation from "../hooks/useTranslation";
 import MetamaskError from "../types/MetamaskError";
 import { formatBalance, formatPercentage, formatUSD, isEmptyValue, parseBalance, pow10 } from "../utils";
 import Screen from "./Screen";
 
 const FarmingScreen = () => {
+    const t = useTranslation();
     return (
         <Screen>
             <Container>
                 <BackgroundImage />
                 <Content>
-                    <Title text={"Plant LP Tokens"} />
-                    <Text light={true}>Deposit your LP tokens and earn additional SUSHI rewards.</Text>
+                    <Title text={t("plant-lp-tokens")} />
+                    <Text light={true}>{t("plant-lp-tokens-desc")}</Text>
                     <Farming />
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
@@ -55,21 +57,20 @@ const FarmingScreen = () => {
 };
 
 const Farming = () => {
+    const t = useTranslation();
     const state = useFarmingState(false);
-    const emptyText = "Temporarily unable to load pools.";
     return (
         <View style={{ marginTop: Spacing.large }}>
-            <LPTokenSelect state={state} title={"Active Farms"} emptyText={emptyText} Item={TokenItem} />
+            <LPTokenSelect
+                state={state}
+                title={t("active-farms")}
+                emptyText={t("unable-to-load-farms")}
+                Item={TokenItem}
+            />
             <Border />
             <Deposit state={state} />
             <DepositInfo state={state} />
-            <Notice
-                text={
-                    "⚠️ 2/3 of your SUSHI rewards are vested for 6 months. You can harvest 1/3 immediately and the remaining 2/3 after 6 months of waiting."
-                }
-                clear={true}
-                style={{ marginTop: Spacing.normal }}
-            />
+            <Notice text={t("sushi-vested-notice")} clear={true} style={{ marginTop: Spacing.normal }} />
         </View>
     );
 };
@@ -108,12 +109,13 @@ const TokenItem: FC<LPTokenItemProps> = props => {
 };
 
 const Deposit = ({ state }: { state: FarmingState }) => {
+    const t = useTranslation();
     if (!state.selectedLPToken) {
-        return <Heading text={"Amount"} disabled={true} />;
+        return <Heading text={t("amount")} disabled={true} />;
     }
     return (
         <View>
-            <Heading text={state.selectedLPToken.symbol + " Amount"} />
+            <Heading text={state.selectedLPToken.symbol + " " + t("amount")} />
             {state.selectedLPToken.balance.isZero() ? (
                 <AddLiquidityNotice state={state} />
             ) : (
@@ -129,17 +131,14 @@ const Deposit = ({ state }: { state: FarmingState }) => {
 };
 
 const AddLiquidityNotice = ({ state }: { state: FarmingState }) => {
+    const t = useTranslation();
     const { green } = useColors();
     const onPress = useLinker("/liquidity", "Liquidity");
     return (
         <>
             <Notice
                 color={green}
-                text={
-                    "You need some " +
-                    state.selectedLPToken!.symbol +
-                    " token to start farming. Add liquidity to get the LP token."
-                }
+                text={t("tokens-needed-for-farming-notice", { symbol: state.selectedLPToken!.symbol })}
             />
             <Button
                 color={green}
@@ -152,6 +151,7 @@ const AddLiquidityNotice = ({ state }: { state: FarmingState }) => {
 };
 
 const DepositInfo = ({ state }: { state: FarmingState }) => {
+    const t = useTranslation();
     const disabled = isEmptyValue(state.amount) || !state.selectedLPToken?.sushiRewardedPerYear;
     const sushiPerYear = disabled
         ? 0
@@ -160,19 +160,19 @@ const DepositInfo = ({ state }: { state: FarmingState }) => {
               .div(pow10(18));
     return (
         <InfoBox>
-            <AmountMeta amount={formatBalance(sushiPerYear, 18, 8)} suffix={"SUSHI / 1y"} disabled={disabled} />
+            <AmountMeta amount={formatBalance(sushiPerYear, 18, 8)} suffix={t("sushi-per-year")} disabled={disabled} />
             <Meta
-                label={"My Balance"}
+                label={t("my-balance")}
                 text={formatBalance(state.selectedLPToken?.balance || 0)}
                 disabled={!state.selectedLPToken}
             />
             <Meta
-                label={"Total Value Locked"}
+                label={t("total-value-locked")}
                 text={formatUSD(state.selectedLPToken?.totalValueUSD || 0)}
                 disabled={!state.selectedLPToken}
             />
             <Meta
-                label={"Annual Percentage Yield"}
+                label={t("annual-percentage-yield")}
                 text={formatPercentage(state.selectedLPToken?.apy || 0)}
                 suffix={"%"}
                 disabled={!state.selectedLPToken}
@@ -221,11 +221,12 @@ const DepositButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
+    const t = useTranslation();
     const onPress = useCallback(() => {
         onError({});
         state.onDeposit().catch(onError);
     }, [state.onDeposit, onError]);
-    return <Button title={"Deposit"} disabled={disabled} loading={state.depositing} onPress={onPress} />;
+    return <Button title={t("deposit")} disabled={disabled} loading={state.depositing} onPress={onPress} />;
 };
 
 export default FarmingScreen;

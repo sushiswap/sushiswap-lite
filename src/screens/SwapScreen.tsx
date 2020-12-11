@@ -419,7 +419,7 @@ const LimitOrderControls = ({ state }: { state: SwapState }) => {
             ) : parseBalance(state.fromAmount, state.fromToken!.decimals).gt(state.fromToken!.balance) ? (
                 <InsufficientBalanceButton symbol={state.fromSymbol} />
             ) : !Fraction.parse(state.limitOrderPrice).gt(
-                  Fraction.parse(state.trade!.executionPrice.toFixed(state.toToken!.decimals))
+                  Fraction.parse(state.trade!.executionPrice.invert().toFixed(state.toToken!.decimals))
               ) ? (
                 <PriceTooLowButton />
             ) : state.unsupported ? (

@@ -24,6 +24,7 @@ import { EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
 import useHomeState, { HomeState } from "../hooks/useHomeState";
 import useLinker from "../hooks/useLinker";
+import useTranslation from "../hooks/useTranslation";
 import LPTokenWithValue from "../types/LPTokenWithValue";
 import TokenWithValue from "../types/TokenWithValue";
 import { formatUSD } from "../utils";
@@ -40,6 +41,7 @@ interface LPTokenItemProps {
 }
 
 const HomeScreen = () => {
+    const t = useTranslation();
     const state = useHomeState();
     const { loadingTokens } = useContext(EthersContext);
     const loading = loadingTokens || state.loadingLPTokens || state.loadingPools;
@@ -49,9 +51,9 @@ const HomeScreen = () => {
             <Container>
                 <BackgroundImage />
                 <Content style={{ paddingBottom: Spacing.huge }}>
-                    <Title text={"Total Value"} style={{ flex: 1 }} />
+                    <Title text={t("total-value")} style={{ flex: 1 }} />
                     <Title
-                        text={loading ? "Fetching…" : formatUSD(totalValue, 4)}
+                        text={loading ? t("fetching") : formatUSD(totalValue, 4)}
                         fontWeight={"light"}
                         disabled={loading}
                         style={{ fontSize: IS_DESKTOP ? 32 : 24 }}
@@ -77,21 +79,23 @@ const Home = ({ state }: { state: HomeState }) => {
 };
 
 const MyTokens = ({ state }: { state: HomeState }) => {
+    const t = useTranslation();
     const { loadingTokens, tokens } = useContext(EthersContext);
     const goToSwap = useLinker("/swap", "Swap");
     return (
         <View>
-            <Heading text={"Tokens"} buttonText={"Manage"} onPressButton={goToSwap} />
+            <Heading text={t("tokens")} buttonText={t("manage")} onPressButton={goToSwap} />
             <TokenList loading={loadingTokens} tokens={tokens} TokenItem={TokenItem} />
         </View>
     );
 };
 
 const MyLPTokens = ({ state }: { state: HomeState }) => {
+    const t = useTranslation();
     const goToRemoveLiquidity = useLinker("/liquidity/remove", "RemoveLiquidity");
     return (
         <View>
-            <Heading text={"Liquidity"} buttonText={"Manage"} onPressButton={goToRemoveLiquidity} />
+            <Heading text={t("liquidity")} buttonText={t("manage")} onPressButton={goToRemoveLiquidity} />
             {/* @ts-ignore */}
             <TokenList loading={state.loadingLPTokens} tokens={state.lpTokens} TokenItem={LPTokenItem} />
         </View>
@@ -99,10 +103,11 @@ const MyLPTokens = ({ state }: { state: HomeState }) => {
 };
 
 const Pools = ({ state }: { state: HomeState }) => {
+    const t = useTranslation();
     const goToFarming = useLinker("/farming", "Farming");
     return (
         <View>
-            <Heading text={"Farms"} buttonText={"Manage"} onPressButton={goToFarming} />
+            <Heading text={t("farms")} buttonText={t("manage")} onPressButton={goToFarming} />
             {/* @ts-ignore */}
             <TokenList loading={state.loadingPools} tokens={state.pools} TokenItem={LPTokenItem} />
         </View>
@@ -140,10 +145,11 @@ const TokenList = (props: {
 };
 
 const EmptyList = () => {
+    const t = useTranslation();
     return (
         <View style={{ margin: Spacing.normal }}>
             <Text disabled={true} style={{ textAlign: "center", width: "100%" }}>
-                {"You don't have any matching asset."}
+                {t("you-dont-have-assets")}
             </Text>
         </View>
     );

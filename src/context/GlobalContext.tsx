@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import { useColorScheme } from "react-native-appearance";
 
+import * as Localization from "expo-localization";
+
 import AsyncStorage from "@react-native-community/async-storage";
 
 export const GlobalContext = React.createContext({
     load: async () => {},
     clear: async () => {},
+    locale: "",
+    setLocale: async (_locale: string) => {},
     darkMode: false,
-    setDarkMode: async _darkMode => {},
+    setDarkMode: async (_darkMode: boolean) => {},
     mnemonic: "",
     setMnemonic: (_mnemonic: string) => {}
 });
@@ -15,12 +19,14 @@ export const GlobalContext = React.createContext({
 // tslint:disable-next-line:max-func-body-length
 export const GlobalContextProvider = ({ children }) => {
     const colorScheme = useColorScheme();
+    const [locale, setLocale] = useState(Localization.locale);
     const [darkMode, setDarkMode] = useState(colorScheme === "dark");
     const [mnemonic, setMnemonic] = useState("");
     return (
         <GlobalContext.Provider
             value={{
                 load: async () => {
+                    setLocale((await AsyncStorage.getItem("locale")) || Localization.locale);
                     const mode = await AsyncStorage.getItem("dark_mode");
                     setDarkMode(mode === "true");
                     const mne = await AsyncStorage.getItem("mnemonic");
@@ -32,6 +38,11 @@ export const GlobalContextProvider = ({ children }) => {
                     setDarkMode(false);
                     await AsyncStorage.removeItem("dark_mode");
                     await AsyncStorage.removeItem("mnemonic");
+                },
+                locale,
+                setLocale: async (l: string) => {
+                    await AsyncStorage.setItem("locale", l);
+                    setLocale(l);
                 },
                 darkMode,
                 setDarkMode: async (mode: boolean) => {

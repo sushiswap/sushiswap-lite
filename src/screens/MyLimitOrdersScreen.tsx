@@ -40,7 +40,7 @@ const MyLimitOrdersScreen = () => {
                 <BackgroundImage />
                 <Content>
                     <Title text={t("my-orders")} />
-                    <Text light={true}>Scan limit orders you've placed and cancel them if needed.</Text>
+                    <Text light={true}>{t("my-orders-desc")}</Text>
                     <MyLimitOrders />
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}

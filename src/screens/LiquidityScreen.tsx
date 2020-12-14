@@ -437,9 +437,9 @@ const SupplyButton = ({
     }, [state.onAdd, onError]);
     return (
         <Button
-            title={
-                t("supply") + (state.fromSymbol && state.toSymbol ? " " + state.fromSymbol + "-" + state.toSymbol : "")
-            }
+            title={t("supply-", {
+                symbol: state.fromSymbol && state.toSymbol ? " " + state.fromSymbol + "-" + state.toSymbol : ""
+            })}
             disabled={disabled}
             loading={state.adding}
             onPress={onPress}

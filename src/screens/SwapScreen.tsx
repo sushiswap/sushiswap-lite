@@ -349,9 +349,9 @@ const SwapButton = ({ state, onError, disabled }: { state: SwapState; onError: (
     }, [state.onSwap, onError]);
     return (
         <Button
-            title={
-                t("swap") + (state.fromSymbol && state.toSymbol ? " " + state.fromSymbol + "-" + state.toSymbol : "")
-            }
+            title={t("swap-", {
+                symbol: state.fromSymbol && state.toSymbol ? " " + state.fromSymbol + "-" + state.toSymbol : ""
+            })}
             disabled={disabled}
             loading={state.swapping}
             onPress={onPress}

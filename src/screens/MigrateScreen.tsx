@@ -101,7 +101,7 @@ const UniswapLiquidityScreen = ({ state }: { state: MigrateState }) => {
         <LPTokenSelect
             state={state}
             title={t("your-uniswap-liquidity")}
-            emptyText={"You don't have any liquidity on Uniswap."}
+            emptyText={t("you-dont-have-any-liquidity-on-uniswap")}
             Item={LPTokenItem}
         />
     );

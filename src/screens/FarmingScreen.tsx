@@ -142,7 +142,7 @@ const AddLiquidityNotice = ({ state }: { state: FarmingState }) => {
             />
             <Button
                 color={green}
-                title={"Add Liquidity"}
+                title={t("add-liquidity")}
                 containerStyle={{ marginTop: Spacing.normal }}
                 onPress={onPress}
             />

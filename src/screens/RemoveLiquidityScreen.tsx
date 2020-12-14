@@ -166,12 +166,13 @@ export const LPTokenOutputItem = (props: {
 };
 
 const AmountInput = ({ state }: { state: RemoveLiquidityState }) => {
+    const t = useTranslation();
     if (!state.selectedLPToken || !state.outputToken) {
-        return <Heading text={"Amount of Tokens"} disabled={true} />;
+        return <Heading text={t("amount-of-tokens")} disabled={true} />;
     }
     return (
         <TokenInput
-            title={"Amount of Tokens"}
+            title={t("amount-of-tokens")}
             token={state.selectedLPToken}
             amount={state.amount}
             onAmountChanged={state.setAmount}
@@ -180,6 +181,7 @@ const AmountInput = ({ state }: { state: RemoveLiquidityState }) => {
 };
 
 const AmountInfo = ({ state }: { state: RemoveLiquidityState }) => {
+    const t = useTranslation();
     const disabled = !state.selectedLPToken || !state.fromToken || !state.toToken;
     const outputAmount = useMemo(() => {
         if (state.fromToken && state.outputToken === state.fromToken) {
@@ -196,11 +198,15 @@ const AmountInfo = ({ state }: { state: RemoveLiquidityState }) => {
                 <AmountMeta amount={outputAmount} suffix={state.outputToken?.symbol} disabled={disabled} />
             )}
             <Meta
-                label={state.fromToken ? state.fromToken.symbol : "Token 1"}
+                label={state.fromToken ? state.fromToken.symbol : t("1st-token")}
                 text={state.fromAmount}
                 disabled={disabled}
             />
-            <Meta label={state.toToken ? state.toToken.symbol : "Token 2"} text={state.toAmount} disabled={disabled} />
+            <Meta
+                label={state.toToken ? state.toToken.symbol : t("2nd-token")}
+                text={state.toAmount}
+                disabled={disabled}
+            />
             <Controls state={state} />
         </InfoBox>
     );
@@ -246,11 +252,12 @@ const RemoveButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
+    const t = useTranslation();
     const onPress = useCallback(() => {
         onError({});
         state.onRemove().catch(onError);
     }, [state.onRemove, onError]);
-    return <Button title={"Remove Liquidity"} disabled={disabled} loading={state.removing} onPress={onPress} />;
+    return <Button title={t("remove-liquidity")} disabled={disabled} loading={state.removing} onPress={onPress} />;
 };
 
 export default RemoveLiquidityScreen;

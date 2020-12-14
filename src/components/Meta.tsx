@@ -3,6 +3,7 @@ import React, { FC } from "react";
 import { IS_DESKTOP } from "../constants/dimension";
 import useColors from "../hooks/useColors";
 import useLinker from "../hooks/useLinker";
+import useTranslation from "../hooks/useTranslation";
 import FlexView from "./FlexView";
 import Text from "./Text";
 
@@ -15,13 +16,14 @@ export interface MetaProps {
 }
 
 const Meta: FC<MetaProps> = props => {
+    const t = useTranslation();
     const { textMedium, textLight, placeholder } = useColors();
     const onPress = useLinker(props.url || "", "", "_blank");
     const text = props.disabled
         ? "N/A"
         : props.text
         ? props.text + (props.suffix ? " " + props.suffix : "")
-        : "Fetching…";
+        : t("fetching");
     return (
         <FlexView style={{ justifyContent: "space-between", marginTop: 4 }}>
             <Text note={!IS_DESKTOP} fontWeight={"bold"} style={{ color: props.disabled ? placeholder : textMedium }}>

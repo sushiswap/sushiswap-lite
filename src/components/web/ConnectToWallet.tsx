@@ -8,6 +8,7 @@ import { GlobalContext } from "../../context/GlobalContext";
 import useColors from "../../hooks/useColors";
 import useTranslation from "../../hooks/useTranslation";
 import Button from "../Button";
+import WebFooter from "./WebFooter";
 
 const ConnectWallet = () => {
     const { darkMode } = useContext(GlobalContext);
@@ -25,6 +26,7 @@ const ConnectWallet = () => {
             />
             {window.ethereum && <ConnectButton />}
             <WalletConnectButton />
+            <WebFooter simple={true} />
         </View>
     );
 };

@@ -106,7 +106,7 @@
   "plant-lp-tokens": "Farmer avec vos tokens LP",
   "plant-lp-tokens-desc": "Déposez vos tokens LP pour récolter des tokens SUSHI.",
   "active-farms": "Farms",
-  "unable-load-farms": "Les fermes (farms) n’ont malheureusement pas pu être chargées. Merci de réessayer ultérieurement.",
+  "unable-to-load-farms": "Les fermes (farms) n’ont malheureusement pas pu être chargées. Merci de réessayer ultérieurement.",
   "sushi-vested-notice": "⚠️ 2/3 des récompenses SUSHI sont immobilisées pour 6 mois. Vous pouvez cependant récolter le 1/3 restant quand vous le souhaitez.",
   "tokens-needed-for-farming-notice": "Vous devez disposer du token {{symbol}} pour commencer à farmer. Ajoutez des liquidités pour générer le token LP nécessaire.",
   "sushi-per-year": "SUSHI / an",

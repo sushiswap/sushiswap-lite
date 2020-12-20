@@ -106,7 +106,7 @@
   "plant-lp-tokens": "提供LP流动性",
   "plant-lp-tokens-desc": "质押你的LP凭证获得额外SUSHI奖励",
   "active-farms": "活跃矿池",
-  "unable-load-farms": "暂时无法加载矿池",
+  "unable-to-load-farms": "暂时无法加载矿池",
   "sushi-vested-notice": "⚠️ 您的SUSHI奖励有1/3可以立即收获，剩余2/3将在锁仓6个月后发放",
   "tokens-needed-for-farming-notice": "您需要一些{{symbol}}代币才能开始挖矿，请添加流动性以获得LP凭证",
   "sushi-per-year": "SUSHI / 年",

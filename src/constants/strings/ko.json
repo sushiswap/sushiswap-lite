@@ -106,7 +106,7 @@
   "plant-lp-tokens": "농사 시작",
   "plant-lp-tokens-desc": "LP 토큰을 예치하고 추가 SUSHI 보상을 획득하세요.",
   "active-farms": "활성 유동성 풀",
-  "unable-load-farms": "일시적으로 유동성 풀을 불러올 수 없습니다.",
+  "unable-to-load-farms": "일시적으로 유동성 풀을 불러올 수 없습니다.",
   "sushi-vested-notice": "⚠️ SUSHI 보상의 2/3는 6개월 동안 묶여 있기 때문에, 1/3은 즉시 인출할 수 있지만 나머지는 6개월 후에 가능합니다.",
   "tokens-needed-for-farming-notice": "농사 시작을 위해서는 {{symbol}} 토큰이 필요합니다. LP 토큰을 획득하기 위해 유동성 예치를 시작하세요.",
   "sushi-per-year": "SUSHI / 1년",

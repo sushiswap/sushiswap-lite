@@ -9,7 +9,8 @@ const useTranslation = () => {
         en: require("../constants/strings/en.json"),
         zh: require("../constants/strings/zh.json"),
         ko: require("../constants/strings/ko.json"),
-        fr: require("../constants/strings/fr.json")
+        fr: require("../constants/strings/fr.json"),
+        jp: require("../constants/strings/jp.json")
     };
     i18n.locale = locale;
     i18n.defaultLocale = "en-US";

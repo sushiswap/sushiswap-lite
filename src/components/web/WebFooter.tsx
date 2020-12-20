@@ -14,7 +14,8 @@ const flags = {
     us: require("../../../assets/flags/us.png"),
     cn: require("../../../assets/flags/cn.png"),
     kr: require("../../../assets/flags/kr.png"),
-    fr: require("../../../assets/flags/fr.png")
+    fr: require("../../../assets/flags/fr.png"),
+    jp: require("../../../assets/flags/jp.png")
 };
 
 const WebFooter = ({ simple = false }) => {
@@ -44,6 +45,7 @@ const WebFooter = ({ simple = false }) => {
                 <Flag name={"fr"} locale={"fr"} />
                 <Flag name={"cn"} locale={"zh"} />
                 <Flag name={"kr"} locale={"ko"} />
+                <Flag name={"jp"} locale={"jp"} />
             </FlexView>
         </View>
     );

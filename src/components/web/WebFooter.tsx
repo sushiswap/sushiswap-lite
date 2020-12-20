@@ -10,20 +10,19 @@ import FlexView from "../FlexView";
 import SocialIcons from "../SocialIcons";
 import Text from "../Text";
 
-const flags = {
+const FLAGS = {
     us: require("../../../assets/flags/us.png"),
     cn: require("../../../assets/flags/cn.png"),
     kr: require("../../../assets/flags/kr.png"),
     fr: require("../../../assets/flags/fr.png"),
+    es: require("../../../assets/flags/es.png"),
     jp: require("../../../assets/flags/jp.png")
 };
 
+const ALCHEMY_URL = "https://dashboard.alchemyapi.io/signup?referral=429fb682-0d85-40ab-ad88-daf847cf7c63";
+
 const WebFooter = ({ simple = false }) => {
-    const onPressAlchemy = useLinker(
-        "https://dashboard.alchemyapi.io/signup?referral=429fb682-0d85-40ab-ad88-daf847cf7c63",
-        "",
-        "_blank"
-    );
+    const onPressAlchemy = useLinker(ALCHEMY_URL, "", "_blank");
     return (
         <View style={{ width: "100%", padding: Spacing.normal, alignItems: "center" }}>
             {!simple && (
@@ -42,10 +41,11 @@ const WebFooter = ({ simple = false }) => {
             </Text>
             <FlexView style={{ marginTop: Spacing.small }}>
                 <Flag name={"us"} locale={"en"} />
+                <Flag name={"es"} locale={"es"} />
                 <Flag name={"fr"} locale={"fr"} />
                 <Flag name={"cn"} locale={"zh"} />
-                <Flag name={"kr"} locale={"ko"} />
                 <Flag name={"jp"} locale={"jp"} />
+                <Flag name={"kr"} locale={"ko"} />
             </FlexView>
         </View>
     );
@@ -59,7 +59,7 @@ const Flag = ({ name, locale }) => {
     };
     return (
         <TouchableHighlight onPress={onPress} style={{ marginHorizontal: 4 }}>
-            <Image source={flags[name]} style={{ width: 30, height: 20 }} />
+            <Image source={FLAGS[name]} style={{ width: 30, height: 20 }} />
         </TouchableHighlight>
     );
 };

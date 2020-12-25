@@ -68,8 +68,8 @@ const RemoveLiquidity = () => {
                 emptyText={t("you-dont-have-liquidity")}
                 Item={LPTokenItem}
             />
-            <Border />
-            <OutputTokenSelect state={state} />
+            {/*<Border />*/}
+            {/*<OutputTokenSelect state={state} />*/}
             <Border />
             <AmountInput state={state} />
             <AmountInfo state={state} />
@@ -167,7 +167,7 @@ export const LPTokenOutputItem = (props: {
 
 const AmountInput = ({ state }: { state: RemoveLiquidityState }) => {
     const t = useTranslation();
-    if (!state.selectedLPToken || !state.outputToken) {
+    if (!state.selectedLPToken /* || !state.outputToken*/) {
         return <Heading text={t("amount-of-tokens")} disabled={true} />;
     }
     return (

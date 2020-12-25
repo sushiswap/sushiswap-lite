@@ -27,13 +27,13 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
     const [outputToken, setOutputToken] = useState<Token>();
     const [removing, setRemoving] = useState(false);
 
-    useEffect(() => {
+    /*useEffect(() => {
         setOutputToken(undefined);
     }, [state.selectedLPToken]);
 
     useEffect(() => {
         state.setAmount("");
-    }, [outputToken]);
+    }, [outputToken]);*/
 
     useAsyncEffect(async () => {
         if (signer && state.selectedLPToken) {
@@ -128,19 +128,19 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
             state.toAmount &&
             state.selectedLPToken &&
             state.amount &&
-            outputToken &&
+            // outputToken &&
             provider &&
             signer
         ) {
             setRemoving(true);
             try {
-                if (outputToken === state.selectedLPToken) {
-                    await removeFromRouter();
-                } else {
-                    const amount = parseBalance(state.amount, state.selectedLPToken.decimals);
-                    const tx = await zapOut(state.selectedLPToken, outputToken, amount, provider, signer);
-                    await tx.wait();
-                }
+                // if (outputToken === state.selectedLPToken) {
+                await removeFromRouter();
+                // } else {
+                //     const amount = parseBalance(state.amount, state.selectedLPToken.decimals);
+                //     const tx = await zapOut(state.selectedLPToken, outputToken, amount, provider, signer);
+                //     await tx.wait();
+                // }
                 await updateTokens();
                 await state.updateLPTokens();
                 state.setSelectedLPToken(undefined);
@@ -157,7 +157,7 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
         removeFromRouter,
         zapOut,
         updateTokens,
-        outputToken,
+        // outputToken,
         provider,
         signer
     ]);

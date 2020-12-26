@@ -216,7 +216,7 @@ const AmountInfo = ({ state }: { state: RemoveLiquidityState }) => {
 const Controls = ({ state }: { state: RemoveLiquidityState }) => {
     const [error, setError] = useState<MetamaskError>({});
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
-    const approveRequired = state.outputToken === state.selectedLPToken && !state.selectedLPTokenAllowed;
+    const approveRequired = /*state.outputToken === state.selectedLPToken && */ !state.selectedLPTokenAllowed;
     const disabled = approveRequired || isEmptyValue(state.amount);
     return (
         <View style={{ marginTop: Spacing.normal }}>

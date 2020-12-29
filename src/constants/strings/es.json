@@ -1,7 +1,7 @@
 {
   "menu": {
     "home": "Inicio",
-    "swap": "Cambiar",
+    "swap": "Intercambiar",
     "liquidity": "Liquidez",
     "migrate": "Emigrar",
     "stake": "Estacar",
@@ -19,7 +19,7 @@
   "farms": "Granjas",
   "you-dont-have-assets": "No tienes ningún activo coincidente.",
   "new-order": "Nuevo orden",
-  "new-order-desc": "Cambie ahora o haga una orden limitada con el precio deseado.",
+  "new-order-desc": "Intercambie ahora o haga una orden limitada con el precio deseado.",
   "order-type": "Tipo de orden",
   "market-order": "Orden de mercado",
   "market-order-desc": "Liquidar una orden de inmediato",
@@ -37,8 +37,8 @@
   "price": "El precio",
   "price-impact": "Impacto en el precio",
   "fee-amount": "Cuota (0.30%)",
-  "swap": "Cambiar",
-  "swap-": "Cambiar {{symbol}}",
+  "swap": "Intercambiar",
+  "swap-": "Intercambiar {{symbol}}",
   "wrap": "Envolver",
   "unwrap": "Desenvolver",
   "market-price": "Precio de mercado",

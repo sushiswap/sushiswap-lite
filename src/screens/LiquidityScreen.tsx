@@ -63,21 +63,21 @@ const AddLiquidity = () => {
     const state = useAddLiquidityState();
     return (
         <View style={{ marginTop: Spacing.large }}>
-            <ModeSelect state={state} />
-            <Border />
+            {/*<ModeSelect state={state} />*/}
+            {/*<Border />*/}
             <FromTokenSelect state={state} />
             <Border />
             <ToTokenSelect state={state} />
             <Border />
             <FromTokenInput state={state} />
-            {state.mode === "zapper" ? (
+            {/*{state.mode === "zapper" ? (
                 <ZapNotice state={state} />
-            ) : (
-                <>
-                    <ItemSeparator />
-                    <ToTokenInput state={state} />
-                </>
-            )}
+            ) : (*/}
+            <>
+                <ItemSeparator />
+                <ToTokenInput state={state} />
+            </>
+            {/*)}*/}
             <PriceInfo state={state} />
         </View>
     );
@@ -106,9 +106,6 @@ const ModeSelect = ({ state }: { state: AddLiquidityState }) => {
 const FromTokenSelect = ({ state }: { state: AddLiquidityState }) => {
     const t = useTranslation();
     const { customTokens } = useContext(EthersContext);
-    if (!state.mode) {
-        return <Heading text={t("1st-token")} disabled={true} />;
-    }
     return (
         <TokenSelect
             title={t("1st-token")}
@@ -155,7 +152,7 @@ const FromTokenInput = ({ state }: { state: AddLiquidityState }) => {
     };
     return (
         <TokenInput
-            title={state.mode === "zapper" ? t("amount-of-", { symbol: state.fromSymbol }) : t("amount-of-tokens")}
+            title={/*state.mode === "zapper" ? t("amount-of-", { symbol: state.fromSymbol }) :*/ t("amount-of-tokens")}
             token={state.fromToken}
             amount={state.fromAmount}
             onAmountChanged={onAmountChanged}
@@ -212,21 +209,22 @@ const FirstProviderInfo = ({ state }: { state: AddLiquidityState }) => {
         parseBalance(state.toAmount, state.toToken!.decimals),
         parseBalance(state.fromAmount, state.fromToken!.decimals)
     ).toString(8);
-    const zap = state.mode === "zapper";
+    /*const zap = state.mode === "zapper";*/
     return (
         <View>
-            {!zap && (
-                <InfoBox style={{ marginTop: Spacing.normal }}>
-                    <PriceMeta state={state} price={initialPrice} disabled={noAmount} />
-                    <FirstProviderControls state={state} />
-                </InfoBox>
-            )}
+            {/*{!zap && (*/}
+            <InfoBox style={{ marginTop: Spacing.normal }}>
+                <PriceMeta state={state} price={initialPrice} disabled={noAmount} />
+                <FirstProviderControls state={state} />
+            </InfoBox>
+            {/*)}*/}
             {!isETHWETHPair(state.fromToken, state.toToken) && (
                 <Notice
                     text={
-                        t("first-provider-desc-1") + (zap ? t("first-provider-desc-zap") : t("first-provider-desc-2"))
+                        t("first-provider-desc-1") +
+                        /*zap ? t("first-provider-desc-zap") : */ t("first-provider-desc-2")
                     }
-                    color={zap ? red : green}
+                    color={/*zap ? red : */ green}
                     style={{ marginTop: Spacing.small }}
                 />
             )}
@@ -314,14 +312,16 @@ const useAmountCalculator = (state: AddLiquidityState) => {
             const from = new TokenAmount(
                 convertToken(state.fromToken),
                 parseBalance(state.fromAmount, state.fromToken.decimals)
-                    .div(state.mode === "zapper" ? 2 : 1)
+                    .div(/*state.mode === "zapper" ? 2 : */ 1)
                     .toString()
             );
             setFromAmount(from);
-            const to =
-                state.mode === "zapper"
+            const to = /*state.mode === "zapper"
                     ? state.pair.getOutputAmount(from)[0]
-                    : convertAmount(state.toToken, state.toAmount);
+                    : */ convertAmount(
+                state.toToken,
+                state.toAmount
+            );
             setToAmount(to);
             const minted = await calculateAmountOfLPTokenMinted(state.pair, from, to);
             setAmount(minted ? formatBalance(minted, state.pair.liquidityToken.decimals) : undefined);
@@ -347,13 +347,16 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
     const [error, setError] = useState<MetamaskError>({});
     const { allowed, setAllowed, loading } = useZapTokenAllowance(state.fromToken);
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
-    const zap = state.mode === "zapper";
+    /*const zap = state.mode === "zapper";
     const fromApproveRequired = !isETH(state.fromToken) && ((zap && !allowed) || (!zap && !state.fromTokenAllowed));
-    const toApproveRequired = !isETH(state.toToken) && !zap && !state.toTokenAllowed;
+    const toApproveRequired = !isETH(state.toToken) && !zap && !state.toTokenAllowed;*/
+    const fromApproveRequired = !isETH(state.fromToken) && !state.fromTokenAllowed;
+    const toApproveRequired = !isETH(state.toToken) && !state.toTokenAllowed;
     const disabled =
-        fromApproveRequired ||
-        isEmptyValue(state.fromAmount) ||
-        (!zap && (toApproveRequired || isEmptyValue(state.toAmount)));
+            fromApproveRequired ||
+            isEmptyValue(state.fromAmount) ||
+            /*(!zap && (*/ toApproveRequired ||
+            isEmptyValue(state.toAmount) /*))*/;
     return (
         <View style={{ marginTop: Spacing.normal }}>
             {isETHWETHPair(state.fromToken, state.toToken) ? (
@@ -371,8 +374,8 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
                 <>
                     <ApproveButton
                         token={state.fromToken}
-                        spender={zap ? ZAP_IN : ROUTER}
-                        onSuccess={() => (zap ? setAllowed(true) : state.setFromTokenAllowed(true))}
+                        spender={/*zap ? ZAP_IN : */ ROUTER}
+                        onSuccess={() => /*zap ? setAllowed(true) : */ state.setFromTokenAllowed(true)}
                         onError={setError}
                         hidden={!fromApproveRequired}
                     />

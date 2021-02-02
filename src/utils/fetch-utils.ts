@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 import { LP_TOKEN_SCANNER, MASTER_CHEF, ORDER_BOOK, SETTLEMENT } from "../constants/contracts";
 import Fraction from "../constants/Fraction";
 import { ETH } from "../constants/tokens";
-import { ALCHEMY_PROVIDER } from "../context/EthersContext";
+import { ALCHEMY_PROVIDER, KOVAN_PROVIDER } from "../context/EthersContext";
 import { Order, OrderStatus } from "../hooks/useSettlement";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
@@ -338,11 +338,10 @@ const LIMIT_ORDERS_LIMIT = 20;
 export const fetchMyLimitOrders = async (
     provider: ethers.providers.JsonRpcProvider,
     signer: ethers.Signer,
-    kovanSigner: ethers.Signer,
     tokens?: Token[],
     canceledHashes?: string[]
 ) => {
-    const orderBook = getContract("OrderBook", ORDER_BOOK, kovanSigner);
+    const orderBook = getContract("OrderBook", ORDER_BOOK, KOVAN_PROVIDER);
     const settlement = await getContract("Settlement", SETTLEMENT, provider);
     const maker = await signer.getAddress();
     const length = await orderBook.numberOfHashesOfMaker(maker);
@@ -377,14 +376,4 @@ const compareOrders = (o0, o1) => {
     const status = (s: OrderStatus) => (s === "Open" ? 0 : s === "Filled" ? 1 : 2);
     const compared = status(o0.status()) - status(o1.status());
     return compared === 0 ? o1.deadline.toNumber() - o0.deadline.toNumber() : compared;
-};
-
-export const fetchMyCanceledLimitOrderHashes = async (signer: ethers.providers.JsonRpcSigner) => {
-    const settlement = await getContract("Settlement", SETTLEMENT, signer);
-    const length = await settlement.numberOfCanceledHashesOfMaker(await signer.getAddress());
-    const pages: number[] = [];
-    for (let i = 0; i * LIMIT_ORDERS_LIMIT < length; i++) pages.push(i);
-    return (await Promise.all(pages.map(page => settlement.allCanceledHashes(page, LIMIT_ORDERS_LIMIT))))
-        .flat()
-        .filter(hash => hash !== ethers.constants.HashZero);
 };

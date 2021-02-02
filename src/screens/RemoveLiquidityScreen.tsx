@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
@@ -7,6 +7,7 @@ import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
+import ChangeNetwork from "../components/ChangeNetwork";
 import CloseIcon from "../components/CloseIcon";
 import Container from "../components/Container";
 import Content from "../components/Content";
@@ -30,6 +31,7 @@ import WebFooter from "../components/web/WebFooter";
 import { LiquiditySubMenu } from "../components/web/WebSubMenu";
 import { ROUTER } from "../constants/contracts";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
+import { EthersContext } from "../context/EthersContext";
 import useRemoveLiquidityState, { RemoveLiquidityState } from "../hooks/useRemoveLiquidityState";
 import { FEE } from "../hooks/useSwapRouter";
 import useTranslation from "../hooks/useTranslation";
@@ -58,8 +60,10 @@ const RemoveLiquidityScreen = () => {
 };
 
 const RemoveLiquidity = () => {
+    const { chainId } = useContext(EthersContext);
     const t = useTranslation();
     const state = useRemoveLiquidityState();
+    if (chainId !== 1) return <ChangeNetwork />;
     return (
         <View style={{ marginTop: Spacing.large }}>
             <LPTokenSelect

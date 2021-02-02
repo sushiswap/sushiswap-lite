@@ -1,5 +1,7 @@
 import { useCallback } from "react";
 
+import { _TypedDataEncoder } from "@ethersproject/hash";
+import { signData } from "eth-permit/dist/rpc";
 import { ethers } from "ethers";
 import { ORDER_BOOK, SETTLEMENT } from "../constants/contracts";
 import Fraction from "../constants/Fraction";
@@ -18,13 +20,12 @@ const useSettlement = () => {
             toToken: Token,
             amountIn: ethers.BigNumber,
             amountOutMin: ethers.BigNumber,
-            signer: ethers.Signer,
-            kovanSigner: ethers.Signer
+            signer: ethers.Signer
         ) => {
             const order = new Order(signer, fromToken, toToken, amountIn, amountOutMin, await signer.getAddress());
             const args = await order.toArgs();
 
-            const orderBook = getContract("OrderBook", ORDER_BOOK, kovanSigner);
+            const orderBook = getContract("OrderBook", ORDER_BOOK, signer);
             const gasLimit = await orderBook.estimateGas.createOrder(args);
             const tx = await orderBook.createOrder(args, {
                 gasLimit: gasLimit.mul(120).div(100)
@@ -36,12 +37,19 @@ const useSettlement = () => {
 
     const cancelOrder = useCallback(async (order: Order, signer: ethers.Signer) => {
         const settlement = getContract("Settlement", SETTLEMENT, signer);
-        const args = (await order.toArgs()).slice(0, 7);
-        const gasLimit = await settlement.estimateGas.cancelOrder(...args);
-        const tx = await settlement.cancelOrder(...args, {
+        const args = await order.toArgs();
+
+        const gasLimit = await settlement.estimateGas.cancelOrder(args);
+        const tx = await settlement.cancelOrder(args, {
             gasLimit: gasLimit.mul(120).div(100)
         });
         return await logTransaction(tx, "Settlement.cancelOrder()", ...args.map(arg => arg.toString()));
+    }, []);
+
+    const queryOrderCanceledEvents = useCallback(async (signer: ethers.Signer) => {
+        const settlement = getContract("Settlement", SETTLEMENT, signer);
+        const filter = settlement.filters.OrderCanceled(null);
+        return await settlement.queryFilter(filter);
     }, []);
 
     const queryOrderFilledEvents = useCallback(async (hash: string, signer: ethers.Signer) => {
@@ -65,17 +73,26 @@ const useSettlement = () => {
         const fraction = Fraction.parse(price);
         return swapFeeDeducted
             .mul(pow10(toToken.decimals))
-            .mul(fraction.denominator)
-            .div(fraction.numerator)
+            .mul(fraction.numerator)
+            .div(fraction.denominator)
             .div(pow10(fromToken.decimals));
     };
 
-    return { createOrder, cancelOrder, queryOrderFilledEvents, calculateLimitOrderFee, calculateLimitOrderReturn };
+    return {
+        createOrder,
+        cancelOrder,
+        queryOrderCanceledEvents,
+        queryOrderFilledEvents,
+        calculateLimitOrderFee,
+        calculateLimitOrderReturn
+    };
 };
 
 export type OrderStatus = "Open" | "Expired" | "Filled" | "Canceled";
 
 export class Order {
+    static ORDER_TYPEHASH = "0x7c228c78bd055996a44b5046fb56fa7c28c66bce92d9dc584f742b2cd76a140f";
+
     maker: ethers.Signer;
     fromToken: Token;
     toToken: Token;
@@ -128,22 +145,53 @@ export class Order {
     }
 
     async hash() {
-        const settlement = await getContract("Settlement", SETTLEMENT, this.maker);
-        return await settlement.hashOfOrder(
-            await this.maker.getAddress(),
-            this.fromToken.address,
-            this.toToken.address,
-            this.amountIn,
-            this.amountOutMin,
-            this.recipient,
-            this.deadline
+        return ethers.utils.keccak256(
+            ethers.utils.defaultAbiCoder.encode(
+                ["bytes32", "address", "address", "address", "uint256", "uint256", "address", "uint256"],
+                [
+                    Order.ORDER_TYPEHASH,
+                    await this.maker.getAddress(),
+                    this.fromToken.address,
+                    this.toToken.address,
+                    this.amountIn,
+                    this.amountOutMin,
+                    this.recipient,
+                    this.deadline
+                ]
+            )
         );
     }
 
     async sign() {
-        const hash = await this.hash();
-        const signature = await this.maker.signMessage(ethers.utils.arrayify(hash));
-        return ethers.utils.splitSignature(signature);
+        const address = await this.maker.getAddress();
+        const domain = {
+            name: "OrderBook",
+            version: "1",
+            chainId: 42,
+            verifyingContract: ORDER_BOOK
+        };
+        const types = {
+            Order: [
+                { name: "maker", type: "address" },
+                { name: "fromToken", type: "address" },
+                { name: "toToken", type: "address" },
+                { name: "amountIn", type: "uint256" },
+                { name: "amountOutMin", type: "uint256" },
+                { name: "recipient", type: "address" },
+                { name: "deadline", type: "uint256" }
+            ]
+        };
+        const value = {
+            maker: address,
+            fromToken: this.fromToken.address,
+            toToken: this.toToken.address,
+            amountIn: this.amountIn,
+            amountOutMin: this.amountOutMin,
+            recipient: this.recipient,
+            deadline: this.deadline
+        };
+        const payload = _TypedDataEncoder.getPayload(domain, types, value);
+        return await signData(window.ethereum, address, payload);
     }
 
     async toArgs() {

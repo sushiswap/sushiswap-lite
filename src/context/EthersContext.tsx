@@ -18,12 +18,11 @@ import { fetchTokens, fetchTokenWithValue } from "../utils/fetch-utils";
 
 export type OnBlockListener = (block?: number) => void | Promise<void>;
 
-const PRIVATE_KEY = "0xca417c154948d370f011c5d9ac3fba516d7b15671a069e7d5d48f56b723c9cc1";
 export const ALCHEMY_PROVIDER = new ethers.providers.AlchemyProvider(
     1,
     __DEV__ ? process.env.MAINNET_API_KEY : "DgnfFsj5PXR37FkOmUVJ9GtfDsKws446"
 );
-const KOVAN_PROVIDER = new ethers.providers.AlchemyProvider(
+export const KOVAN_PROVIDER = new ethers.providers.AlchemyProvider(
     42,
     __DEV__ ? process.env.KOVAN_API_KEY : "8a03ORJJcIv8YA49M-cIxg-mBEMJYe0J"
 );
@@ -33,7 +32,6 @@ export const EthersContext = React.createContext({
     setEthereum: (_ethereum: Ethereum | undefined) => {},
     provider: undefined as ethers.providers.JsonRpcProvider | undefined,
     signer: undefined as ethers.providers.JsonRpcSigner | undefined,
-    kovanSigner: undefined as ethers.Signer | undefined,
     chainId: 0,
     address: null as string | null,
     ensName: null as string | null,
@@ -65,7 +63,6 @@ export const EthersContextProvider = ({ children }) => {
     const [ethereum, setEthereum] = useState<Ethereum | undefined>(window.ethereum);
     const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
-    const [kovanSigner, setKovanSigner] = useState<ethers.Signer>();
     const [chainId, setChainId] = useState<number>(1);
     const [address, setAddress] = useState<string | null>(null);
     const [ensName, setENSName] = useState<string | null>(null);
@@ -73,11 +70,6 @@ export const EthersContextProvider = ({ children }) => {
     const [tokens, setTokens] = useState<TokenWithValue[]>([]);
     const [customTokens, setCustomTokens] = useState<Token[]>([]);
     const [loadingTokens, setLoadingTokens] = useState(true);
-
-    useEffect(() => {
-        // Kovan
-        setKovanSigner(new ethers.Wallet(PRIVATE_KEY, KOVAN_PROVIDER));
-    }, [KOVAN_PROVIDER]);
 
     useAsyncEffect(async () => {
         // Mainnet
@@ -87,7 +79,7 @@ export const EthersContextProvider = ({ children }) => {
             setProvider(ethereum.isMetaMask ? web3Signer.provider : ALCHEMY_PROVIDER);
             setSigner(web3Signer);
         }
-    }, [ethereum]);
+    }, [ethereum, chainId]);
 
     useEffect(() => {
         if (ethereum) {
@@ -122,23 +114,22 @@ export const EthersContextProvider = ({ children }) => {
 
     useAsyncEffect(async () => {
         if (provider && address) {
-            const ens = await provider.lookupAddress(address);
+            const ens = await ALCHEMY_PROVIDER.lookupAddress(address);
             setENSName(ens);
         }
     }, [provider, address]);
 
     const updateTokens = async () => {
-        if (address && customTokens) {
+        if (address && chainId && customTokens) {
             try {
                 const list = await fetchTokens(address, customTokens);
                 const weth = list.find(t => isWETH(t));
-                if (list?.length > 0 && weth && provider) {
+                const p = chainId === 1 ? provider : ALCHEMY_PROVIDER;
+                if (list?.length > 0 && weth && p) {
                     const wethPriceUSD = Fraction.parse(String(await sushiData.weth.price()));
                     setTokens(
                         await Promise.all(
-                            list.map(
-                                async token => await fetchTokenWithValue(token, weth, wethPriceUSD, getPair, provider)
-                            )
+                            list.map(async token => await fetchTokenWithValue(token, weth, wethPriceUSD, getPair, p))
                         )
                     );
                 }
@@ -153,11 +144,11 @@ export const EthersContextProvider = ({ children }) => {
     }, []);
 
     useAsyncEffect(async () => {
-        if (address && customTokens) {
+        if (address && chainId && customTokens) {
             setLoadingTokens(true);
             await updateTokens();
         }
-    }, [address, customTokens]);
+    }, [address, chainId, customTokens]);
 
     const addCustomToken = useCallback(
         async (token: Token) => {
@@ -267,7 +258,6 @@ export const EthersContextProvider = ({ children }) => {
                 setEthereum,
                 provider,
                 signer,
-                kovanSigner,
                 chainId,
                 address,
                 ensName,

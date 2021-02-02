@@ -9,6 +9,7 @@
     "not-connected": "Not connected",
     "do-you-want-to-disconnect": "Do you want to disconnect?"
   },
+  "change-network-to": "⚠️ Please switch the network to '{{networkName}}'",
   "n/a": "N/A",
   "loading": "Loading…",
   "fetching": "Fetching…",
@@ -48,6 +49,8 @@
   "24-hours-from-now": "24 Hours From Now",
   "set-price-greater-than-market": "Set Price Greater Than Market",
   "place-limit-order": "Place Limit Order",
+  "get-free-keth-here": "If you don't have enough kovan ETH, you can get free kETH.",
+  "get-keth": "Get kETH",
   "my-orders": "My Orders",
   "my-orders-desc": "Scan limit orders you've placed and cancel them if needed.",
   "limit-orders": "Limit Orders",

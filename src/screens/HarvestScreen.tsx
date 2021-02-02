@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useState } from "react";
+import React, { FC, useCallback, useContext, useState } from "react";
 import { Platform, View } from "react-native";
 
 import useAsyncEffect from "use-async-effect";
@@ -6,6 +6,7 @@ import AmountMeta from "../components/AmountMeta";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
+import ChangeNetwork from "../components/ChangeNetwork";
 import CloseIcon from "../components/CloseIcon";
 import Container from "../components/Container";
 import Content from "../components/Content";
@@ -26,6 +27,7 @@ import TokenLogo from "../components/TokenLogo";
 import WebFooter from "../components/web/WebFooter";
 import { FarmingSubMenu } from "../components/web/WebSubMenu";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
+import { EthersContext } from "../context/EthersContext";
 import useFarmingState, { FarmingState } from "../hooks/useFarmingState";
 import useTranslation from "../hooks/useTranslation";
 import MetamaskError from "../types/MetamaskError";
@@ -52,8 +54,10 @@ const HarvestScreen = () => {
 };
 
 const Harvest = () => {
+    const { chainId } = useContext(EthersContext);
     const t = useTranslation();
     const state = useFarmingState(true);
+    if (chainId !== 1) return <ChangeNetwork />;
     return (
         <View style={{ marginTop: Spacing.large }}>
             <LPTokenSelect

@@ -8,10 +8,10 @@ import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
+import ChangeNetwork from "../components/ChangeNetwork";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
-import ExperimentalNotice from "../components/ExperimentalNotice";
 import FetchingButton from "../components/FetchingButton";
 import Heading from "../components/Heading";
 import InfoBox from "../components/InfoBox";
@@ -29,7 +29,7 @@ import { SwapSubMenu } from "../components/web/WebSubMenu";
 import { ROUTER, SETTLEMENT } from "../constants/contracts";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
-import { EthersContext } from "../context/EthersContext";
+import { ALCHEMY_PROVIDER, EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
 import useDelayedEffect from "../hooks/useDelayedEffect";
 import useLinker from "../hooks/useLinker";
@@ -37,7 +37,7 @@ import useSwapState, { OrderType, SwapState } from "../hooks/useSwapState";
 import useTranslation from "../hooks/useTranslation";
 import MetamaskError from "../types/MetamaskError";
 import Token from "../types/Token";
-import { formatBalance, isEmptyValue, isETH, isETHWETHPair, isWETH, parseBalance } from "../utils";
+import { getContract, isEmptyValue, isETH, isETHWETHPair, isWETH, parseBalance } from "../utils";
 import Screen from "./Screen";
 
 const SwapScreen = () => {
@@ -59,7 +59,9 @@ const SwapScreen = () => {
 };
 
 const Swap = () => {
+    const { chainId } = useContext(EthersContext);
     const state = useSwapState();
+    if (chainId !== 1 && chainId !== 42) return <ChangeNetwork />;
     return (
         <View style={{ marginTop: Spacing.large }}>
             <OrderTypeSelect state={state} />
@@ -71,7 +73,6 @@ const Swap = () => {
             <AmountInput state={state} />
             {state.orderType === "limit" && (
                 <View style={{ marginTop: Spacing.small }}>
-                    <AmountNotice state={state} />
                     <Border />
                     <PriceInput state={state} />
                 </View>
@@ -89,21 +90,14 @@ const OrderTypeSelect = ({ state }: { state: SwapState }) => {
         { key: "limit", title: t("limit-order"), description: t("limit-order-desc") }
     ];
     return (
-        <View>
+        <>
             <Select
                 title={t("order-type")}
                 options={options}
                 option={options.find(option => option.key === state.orderType)}
                 setOption={option => state.setOrderType(option?.key as OrderType | undefined)}
             />
-            {state.orderType === "limit" && (
-                <ExperimentalNotice
-                    contractURL={
-                        "https://github.com/sushiswap/sushiswap-settlement/blob/master/contracts/Settlement.sol"
-                    }
-                />
-            )}
-        </View>
+        </>
     );
 };
 
@@ -172,33 +166,6 @@ const AmountInput = ({ state }: { state: SwapState }) => {
     );
 };
 
-const AmountNotice = ({ state }: { state: SwapState }) => {
-    const t = useTranslation();
-    if (
-        state.priceInETH === undefined ||
-        isEmptyValue(state.fromAmount) ||
-        !state.fromToken ||
-        (state.priceInETH && parseBalance(state.fromAmount, state.fromToken.decimals).lte(state.priceInETH.mul(10)))
-    ) {
-        return <View />;
-    }
-    return (
-        <View>
-            <Notice
-                text={
-                    state.priceInETH === null
-                        ? t("token-not-supported-in-beta")
-                        : t("maximum-allowed-amount-in-beta", {
-                              amount: formatBalance(state.priceInETH.mul(10), state.fromToken!.decimals),
-                              symbol: state.fromSymbol
-                          })
-                }
-                color={"red"}
-            />
-        </View>
-    );
-};
-
 const PriceInput = ({ state }: { state: SwapState }) => {
     const t = useTranslation();
     if (!state.fromSymbol || !state.toSymbol) {
@@ -206,7 +173,7 @@ const PriceInput = ({ state }: { state: SwapState }) => {
     }
     const marketPrice =
         state.toToken && state.trade
-            ? parseBalance(state.trade.executionPrice.invert().toFixed(state.toToken.decimals), state.toToken.decimals)
+            ? parseBalance(state.trade.executionPrice.toFixed(state.toToken.decimals), state.toToken.decimals)
             : ethers.constants.Zero;
     return (
         <TokenInput
@@ -249,19 +216,31 @@ const NoPairNotice = ({ state }: { state: SwapState }) => {
 };
 
 const TradeInfo = ({ state }: { state: SwapState }) => {
-    if (isETHWETHPair(state.fromToken, state.toToken)) {
-        return <WrapInfo state={state} />;
-    }
+    const { chainId } = useContext(EthersContext);
+    const t = useTranslation();
+    if (isETHWETHPair(state.fromToken, state.toToken)) return <WrapInfo state={state} />;
     const disabled =
         state.fromSymbol === "" ||
         state.toSymbol === "" ||
         isEmptyValue(state.fromAmount) ||
         (state.orderType === "limit" && isETH(state.fromToken)) ||
         (!state.loading && !state.trade);
+    const onGetKeth = useLinker("https://faucet.kovan.network/", "", "_blank");
     return (
         <InfoBox>
             {state.orderType === "limit" ? (
-                <LimitOrderInfo state={state} />
+                <>
+                    <LimitOrderInfo state={state} />
+                    {chainId === 42 && (
+                        <Notice
+                            text={t("get-free-keth-here")}
+                            buttonText={t("get-keth")}
+                            onPressButton={onGetKeth}
+                            color={"orange"}
+                            style={{ marginTop: Spacing.small }}
+                        />
+                    )}
+                </>
             ) : (
                 <SwapInfo state={state} disabled={disabled} />
             )}
@@ -389,7 +368,7 @@ const LimitOrderInfo = ({ state }: { state: SwapState }) => {
             </Text>
             <Meta
                 label={t("market-price")}
-                text={state.trade?.executionPrice?.invert().toFixed(8) || undefined}
+                text={state.trade?.executionPrice?.toFixed(8) || undefined}
                 suffix={state.fromSymbol + " / " + state.toSymbol}
                 disabled={d}
             />
@@ -403,7 +382,7 @@ const LimitOrderInfo = ({ state }: { state: SwapState }) => {
 
 // tslint:disable-next-line:max-func-body-length
 const LimitOrderControls = ({ state }: { state: SwapState }) => {
-    const { getTokenAllowance } = useContext(EthersContext);
+    const { address, chainId } = useContext(EthersContext);
     const [error, setError] = useState<MetamaskError>({});
     const [allowed, setAllowed] = useState<boolean>();
     useAsyncEffect(() => setError({}), [state.fromSymbol, state.toSymbol, state.fromAmount]);
@@ -411,7 +390,8 @@ const LimitOrderControls = ({ state }: { state: SwapState }) => {
         async () => {
             if (state.fromToken && !isEmptyValue(state.fromAmount)) {
                 const fromAmount = parseBalance(state.fromAmount, state.fromToken.decimals);
-                const allowance = await getTokenAllowance(state.fromToken.address, SETTLEMENT);
+                const erc20 = getContract("ERC20", state.fromToken.address, ALCHEMY_PROVIDER);
+                const allowance = await erc20.allowance(address, SETTLEMENT);
                 setAllowed(ethers.BigNumber.from(allowance).gte(fromAmount));
             }
         },
@@ -424,8 +404,6 @@ const LimitOrderControls = ({ state }: { state: SwapState }) => {
         !state.fromToken ||
         !state.toToken ||
         isEmptyValue(state.fromAmount) ||
-        !state.priceInETH ||
-        parseBalance(state.fromAmount, state.fromToken!.decimals).gt(state.priceInETH.mul(10)) ||
         !state.trade ||
         isEmptyValue(state.limitOrderPrice);
     return (
@@ -435,7 +413,7 @@ const LimitOrderControls = ({ state }: { state: SwapState }) => {
             ) : parseBalance(state.fromAmount, state.fromToken!.decimals).gt(state.fromToken!.balance) ? (
                 <InsufficientBalanceButton symbol={state.fromSymbol} />
             ) : !Fraction.parse(state.limitOrderPrice).gt(
-                  Fraction.parse(state.trade!.executionPrice.invert().toFixed(state.toToken!.decimals))
+                  Fraction.parse(state.trade!.executionPrice.toFixed(state.toToken!.decimals))
               ) ? (
                 <PriceTooLowButton />
             ) : state.unsupported ? (
@@ -444,13 +422,19 @@ const LimitOrderControls = ({ state }: { state: SwapState }) => {
                 <FetchingButton />
             ) : (
                 <>
-                    <ApproveButton
-                        token={state.fromToken!}
-                        spender={SETTLEMENT}
-                        onSuccess={() => setAllowed(true)}
-                        onError={setError}
-                        hidden={allowed}
-                    />
+                    {chainId === 1 ? (
+                        <ApproveButton
+                            token={state.fromToken!}
+                            spender={SETTLEMENT}
+                            onSuccess={() => setAllowed(true)}
+                            onError={setError}
+                            hidden={allowed}
+                        />
+                    ) : !allowed ? (
+                        <ChangeNetwork />
+                    ) : (
+                        <View />
+                    )}
                     <PlaceOrderButton state={state} onError={setError} disabled={!allowed} />
                 </>
             )}
@@ -473,6 +457,7 @@ const PlaceOrderButton = ({
     onError: (e) => void;
     disabled: boolean;
 }) => {
+    const { chainId } = useContext(EthersContext);
     const t = useTranslation();
     const goToLimitOrders = useLinker("/swap/my-orders", "LimitOrders");
     const onPress = useCallback(async () => {
@@ -484,6 +469,7 @@ const PlaceOrderButton = ({
             onError(e);
         }
     }, [state.onCreateOrder, goToLimitOrders, onError]);
+    if (!disabled && chainId !== 42) return <ChangeNetwork chainId={42} />;
     return (
         <Button title={t("place-limit-order")} disabled={disabled} loading={state.creatingOrder} onPress={onPress} />
     );

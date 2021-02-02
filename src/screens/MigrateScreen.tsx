@@ -6,6 +6,7 @@ import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
+import ChangeNetwork from "../components/ChangeNetwork";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
@@ -50,8 +51,9 @@ const MigrateScreen = () => {
 };
 
 const Migrate = () => {
-    const { ethereum } = useContext(EthersContext);
+    const { ethereum, chainId } = useContext(EthersContext);
     const state = useMigrateState();
+    if (chainId !== 1) return <ChangeNetwork />;
     return (
         <View style={{ marginTop: Spacing.large }}>
             {!ethereum?.isWalletConnect && (

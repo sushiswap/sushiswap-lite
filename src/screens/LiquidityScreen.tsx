@@ -9,6 +9,7 @@ import ApproveButton from "../components/ApproveButton";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
+import ChangeNetwork from "../components/ChangeNetwork";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
@@ -60,7 +61,9 @@ const LiquidityScreen = () => {
 };
 
 const AddLiquidity = () => {
+    const { chainId } = useContext(EthersContext);
     const state = useAddLiquidityState();
+    if (chainId !== 1) return <ChangeNetwork />;
     return (
         <View style={{ marginTop: Spacing.large }}>
             {/*<ModeSelect state={state} />*/}

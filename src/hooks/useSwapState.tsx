@@ -1,12 +1,10 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 
 import { Trade } from "@sushiswap/sdk";
-import { Fetcher, Token, WETH } from "@uniswap/sdk";
-import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import Fraction from "../constants/Fraction";
-import { EthersContext } from "../context/EthersContext";
-import { formatBalance, isEmptyValue, isETH, isWETH, parseBalance, pow10 } from "../utils";
+import { ALCHEMY_PROVIDER, EthersContext } from "../context/EthersContext";
+import { formatBalance, isEmptyValue, isETH, parseBalance, pow10 } from "../utils";
 import useDelayedEffect from "./useDelayedEffect";
 import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
 import useSDK from "./useSDK";
@@ -19,7 +17,6 @@ export type OrderType = "market" | "limit";
 export interface SwapState extends TokenPairState {
     orderType?: OrderType;
     setOrderType: (orderType?: OrderType) => void;
-    priceInETH?: ethers.BigNumber | null;
     trade?: Trade;
     unsupported: boolean;
     limitOrderUnsupported: boolean;
@@ -38,14 +35,13 @@ export interface SwapState extends TokenPairState {
 // tslint:disable-next-line:max-func-body-length
 const useSwapState: () => SwapState = () => {
     const state = useTokenPairState();
-    const { chainId, provider, signer, kovanSigner, updateTokens } = useContext(EthersContext);
+    const { chainId, provider, signer, updateTokens } = useContext(EthersContext);
     const { getTrade } = useSDK();
     const { swap, calculateSwapFee } = useSwapRouter();
     const { calculateLimitOrderFee, calculateLimitOrderReturn } = useSettlement();
     const { createOrder } = useSettlement();
     const [loading, setLoading] = useState(true);
     const [orderType, setOrderType] = useState<OrderType>();
-    const [priceInETH, setPriceInETH] = useState<ethers.BigNumber | null>();
     const [trade, setTrade] = useState<Trade>();
     const [unsupported, setUnsupported] = useState(false);
     const [swapFee, setSwapFee] = useState("");
@@ -63,24 +59,6 @@ const useSwapState: () => SwapState = () => {
         setLimitOrderPrice("");
     }, [orderType]);
 
-    useAsyncEffect(async () => {
-        setPriceInETH(undefined);
-        if (provider && state.fromToken) {
-            if (isWETH(state.fromToken)) {
-                setPriceInETH(ethers.constants.WeiPerEther);
-            } else {
-                try {
-                    const fromToken = new Token(chainId, state.fromToken.address, state.fromToken.decimals);
-                    const toToken = WETH[chainId];
-                    const pair = await Fetcher.fetchPairData(fromToken, toToken, provider);
-                    setPriceInETH(parseBalance(pair.priceOf(toToken).toFixed(), fromToken.decimals));
-                } catch (e) {
-                    setPriceInETH(null);
-                }
-            }
-        }
-    }, [chainId, provider, state.fromToken]);
-
     useDelayedEffect(
         () => {
             if (isEmptyValue(state.fromAmount)) {
@@ -97,12 +75,13 @@ const useSwapState: () => SwapState = () => {
             if (!block) {
                 setLoading(true);
             }
-            if (state.fromToken && state.toToken && state.fromAmount && provider) {
+            const p = chainId === 1 ? provider : ALCHEMY_PROVIDER;
+            if (state.fromToken && state.toToken && state.fromAmount && p) {
                 const amount = parseBalance(state.fromAmount, state.fromToken.decimals);
                 if (!amount.isZero()) {
                     setUnsupported(false);
                     try {
-                        setTrade(await getTrade(state.fromToken, state.toToken, amount, provider));
+                        setTrade(await getTrade(state.fromToken, state.toToken, amount, p));
                     } catch (e) {
                         setUnsupported(true);
                     } finally {
@@ -112,7 +91,7 @@ const useSwapState: () => SwapState = () => {
             }
         },
         () => "getTrade(" + state.fromSymbol + "," + state.toSymbol + "," + state.fromAmount + ")",
-        [state.fromSymbol, state.toSymbol, state.fromAmount]
+        [chainId, provider, state.fromToken, state.toToken, state.fromAmount]
     );
 
     useAsyncEffect(() => {
@@ -166,14 +145,7 @@ const useSwapState: () => SwapState = () => {
     }, [state.fromToken, state.toToken, state.fromAmount, signer, trade]);
 
     const onCreateOrder = useCallback(async () => {
-        if (
-            state.fromToken &&
-            state.toToken &&
-            state.fromAmount &&
-            !isEmptyValue(limitOrderPrice) &&
-            signer &&
-            kovanSigner
-        ) {
+        if (state.fromToken && state.toToken && state.fromAmount && !isEmptyValue(limitOrderPrice) && signer) {
             setCreatingOrder(true);
             try {
                 const amountIn = parseBalance(state.fromAmount, state.fromToken.decimals);
@@ -185,8 +157,7 @@ const useSwapState: () => SwapState = () => {
                         .apply(amountIn)
                         .mul(pow10(state.toToken.decimals))
                         .div(pow10(state.fromToken.decimals)),
-                    signer,
-                    kovanSigner
+                    signer
                 );
                 await tx.wait();
                 setTrade(undefined);
@@ -195,14 +166,13 @@ const useSwapState: () => SwapState = () => {
                 setCreatingOrder(false);
             }
         }
-    }, [state.fromToken, state.toToken, state.fromAmount, signer, kovanSigner, limitOrderPrice]);
+    }, [chainId, state.fromToken, state.toToken, state.fromAmount, signer, limitOrderPrice]);
 
     return {
         ...state,
         loading: loading || state.loading,
         orderType,
         setOrderType,
-        priceInETH,
         trade,
         unsupported,
         swapFee,

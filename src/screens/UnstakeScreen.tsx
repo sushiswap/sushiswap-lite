@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Platform, View } from "react-native";
 
 import AmountMeta from "../components/AmountMeta";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Button from "../components/Button";
+import ChangeNetwork from "../components/ChangeNetwork";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
@@ -19,6 +20,7 @@ import TokenInput from "../components/TokenInput";
 import WebFooter from "../components/web/WebFooter";
 import { StakingSubMenu } from "../components/web/WebSubMenu";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
+import { EthersContext } from "../context/EthersContext";
 import useStakingState, { StakingState } from "../hooks/useStakingState";
 import useTranslation from "../hooks/useTranslation";
 import MetamaskError from "../types/MetamaskError";
@@ -44,8 +46,10 @@ const UnstakeScreen = () => {
 };
 
 const Staking = () => {
+    const { chainId } = useContext(EthersContext);
     const t = useTranslation();
     const state = useStakingState();
+    if (chainId !== 1) return <ChangeNetwork />;
     return (
         <View style={{ marginTop: Spacing.large }}>
             <XSushiBalance state={state} />

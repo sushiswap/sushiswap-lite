@@ -1,10 +1,11 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import { FlatList, Platform, View } from "react-native";
 
 import moment from "moment";
 import useAsyncEffect from "use-async-effect";
 import BackgroundImage from "../components/BackgroundImage";
 import Button from "../components/Button";
+import ChangeNetwork from "../components/ChangeNetwork";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import ErrorMessage from "../components/ErrorMessage";
@@ -24,6 +25,7 @@ import WebFooter from "../components/web/WebFooter";
 import { SwapSubMenu } from "../components/web/WebSubMenu";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
+import { EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
 import useMyLimitOrdersState, { MyLimitOrdersState } from "../hooks/useMyLimitOrdersState";
 import { Order } from "../hooks/useSettlement";
@@ -51,7 +53,9 @@ const MyLimitOrdersScreen = () => {
 };
 
 const MyLimitOrders = () => {
+    const { chainId } = useContext(EthersContext);
     const state = useMyLimitOrdersState();
+    if (chainId !== 1) return <ChangeNetwork />;
     return (
         <View style={{ marginTop: Spacing.large }}>
             <OrderSelect state={state} />
@@ -201,7 +205,7 @@ const OrderInfo = ({ state }: { state: MyLimitOrdersState }) => {
             />
             <Meta label={t("amount-to-sell")} text={amountIn} suffix={order?.fromToken?.symbol} disabled={disabled} />
             <Meta label={t("amount-to-buy")} text={amountOutMin} suffix={order?.toToken?.symbol} disabled={disabled} />
-            {expiry && <Meta label={t("expiration")} text={expiry} disabled={disabled} />}
+            <Meta label={t("expiration")} text={expiry || undefined} disabled={disabled} />
             <FilledEvents state={state} />
             <Controls state={state} />
         </InfoBox>
@@ -224,11 +228,12 @@ const FilledEvents = ({ state }: { state: MyLimitOrdersState }) => {
 };
 
 const Controls = ({ state }: { state: MyLimitOrdersState }) => {
+    const { chainId } = useContext(EthersContext);
     const [error, setError] = useState<MetamaskError>({});
     useAsyncEffect(() => setError({}), [state.selectedOrder]);
     return (
         <View style={{ marginTop: Spacing.normal }}>
-            <CancelButton state={state} onError={setError} />
+            {chainId === 1 ? <CancelButton state={state} onError={setError} /> : <ChangeNetwork />}
             {error.message && error.code !== 4001 && <ErrorMessage error={error} />}
         </View>
     );

@@ -9,6 +9,7 @@
     "not-connected": "연결되지 않음",
     "do-you-want-to-disconnect": "연결하시겠습니까?"
   },
+  "change-network-to": "⚠️ 네트워크를 '{{networkName}}'로 변경해주세요.",
   "n/a": "N/A",
   "loading": "로딩 중…",
   "fetching": "가져오는 중…",
@@ -48,6 +49,8 @@
   "24-hours-from-now": "지금으로부터 24시간",
   "set-price-greater-than-market": "시장가보다 높은 가격 필요",
   "place-limit-order": "제한 주문 제출",
+  "get-free-keth-here": "Kovan ETH가 부족하다면, 여기에서 무료 kETH를 얻을 수 있습니다.",
+  "get-keth": "kETH 얻기",
   "my-orders": "나의 거래",
   "my-orders-desc": "제출한 제한 주문을 확인하고 필요하다면 취소하세요.",
   "limit-orders": "제한 주문",

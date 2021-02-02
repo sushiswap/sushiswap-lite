@@ -111,11 +111,10 @@ const Status = () => {
     const t = useTranslation();
     const { textLight, green, borderDark } = useColors();
     const { ethereum, chainId, address, ensName } = useContext(EthersContext);
-    const connected = chainId === 1 && address;
-    const title = connected
+    const title = !!address
         ? ensName || address!.substring(0, 6) + "..." + address!.substring(address!.length - 4, address!.length)
         : t("menu.not-connected");
-    const color = connected ? green : textLight;
+    const color = chainId === 1 ? green : chainId === 42 ? "#8A2BE2" : textLight;
     const onPress = () => {
         if (confirm(t("do-you-want-to-disconnect"))) ethereum?.disconnect?.();
     };

@@ -4,6 +4,7 @@ import { FlatList, View, ViewStyle } from "react-native";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
 import useDelayedEffect from "../hooks/useDelayedEffect";
+import useTranslation from "../hooks/useTranslation";
 import Token from "../types/Token";
 import TokenWithValue from "../types/TokenWithValue";
 import CloseIcon from "./CloseIcon";
@@ -97,10 +98,11 @@ const TokenList = (props: {
 };
 
 const EmptyList = () => {
+    const t = useTranslation();
     return (
         <View style={{ margin: Spacing.normal }}>
             <Text disabled={true} style={{ textAlign: "center", width: "100%" }}>
-                {"You don't have any matching tokens."}
+                {t("you-dont-have-assets")}
             </Text>
         </View>
     );

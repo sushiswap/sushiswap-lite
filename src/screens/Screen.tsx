@@ -3,7 +3,6 @@ import { Platform, View } from "react-native";
 import { useLocation } from "react-router-dom";
 
 import AppHeader from "../components/app/AppHeader";
-import Text from "../components/Text";
 import ConnectToWallet from "../components/web/ConnectToWallet";
 import { HEADER_HEIGHT } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
@@ -25,16 +24,8 @@ const Screen = props => {
 };
 
 const WebScreen = props => {
-    const { address, chainId } = useContext(EthersContext);
+    const { address } = useContext(EthersContext);
     if (!address) return <ConnectToWallet />;
-    if (chainId !== 1)
-        return (
-            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                <Text light={true} style={{ textAlign: "center" }}>
-                    {"Please switch network to\n'Ethereum Mainnet'"}
-                </Text>
-            </View>
-        );
     return (
         <View
             {...props}

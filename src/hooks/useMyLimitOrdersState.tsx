@@ -3,7 +3,7 @@ import { useCallback, useContext, useState } from "react";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import { EthersContext } from "../context/EthersContext";
-import { fetchMyCanceledLimitOrderHashes, fetchMyLimitOrders } from "../utils/fetch-utils";
+import { fetchMyLimitOrders } from "../utils/fetch-utils";
 import useSettlement, { Order } from "./useSettlement";
 
 export interface MyLimitOrdersState {
@@ -19,8 +19,8 @@ export interface MyLimitOrdersState {
 
 // tslint:disable-next-line:max-func-body-length
 const useMyLimitOrdersState = () => {
-    const { cancelOrder, queryOrderFilledEvents } = useSettlement();
-    const { provider, signer, kovanSigner, address, tokens } = useContext(EthersContext);
+    const { cancelOrder, queryOrderCanceledEvents, queryOrderFilledEvents } = useSettlement();
+    const { chainId, provider, signer, address, tokens } = useContext(EthersContext);
     const [lastTimeRefreshed, setLastTimeRefreshed] = useState(0);
     const [myOrders, setMyOrders] = useState<Order[]>();
     const [selectedOrder, setSelectedOrder] = useState<Order>();
@@ -29,11 +29,11 @@ const useMyLimitOrdersState = () => {
     const [filledEvents, setFilledEvents] = useState<ethers.Event[]>();
 
     const updateOrders = async () => {
-        if (provider && signer && kovanSigner && address && tokens) {
+        if (provider && signer && address && tokens) {
             setLoading(true);
             try {
-                const canceledHashes = await fetchMyCanceledLimitOrderHashes(signer);
-                const orders = await fetchMyLimitOrders(provider, signer, kovanSigner, tokens, canceledHashes);
+                const canceledHashes = (await queryOrderCanceledEvents(signer)).map(event => event.args![0] as string);
+                const orders = await fetchMyLimitOrders(provider, signer, tokens, canceledHashes);
                 setMyOrders(orders);
             } finally {
                 setLoading(false);
@@ -41,7 +41,7 @@ const useMyLimitOrdersState = () => {
         }
     };
 
-    useAsyncEffect(updateOrders, [provider, signer, kovanSigner, address, tokens, lastTimeRefreshed]);
+    useAsyncEffect(updateOrders, [provider, signer, address, tokens, lastTimeRefreshed]);
 
     useAsyncEffect(async () => {
         setFilledEvents(undefined);
@@ -62,7 +62,7 @@ const useMyLimitOrdersState = () => {
                 setCancellingOrder(false);
             }
         }
-    }, [selectedOrder, signer]);
+    }, [chainId, selectedOrder, signer]);
 
     return {
         lastTimeRefreshed,

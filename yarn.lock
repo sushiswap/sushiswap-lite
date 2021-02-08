@@ -2170,10 +2170,10 @@
     tiny-warning "^1.0.3"
     toformat "^2.0.0"
 
-"@sushiswap/settlement@^0.12.0":
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/@sushiswap/settlement/-/settlement-0.12.0.tgz#e9821a6e69ca9121364729d26d461f4d16c165a8"
-  integrity sha512-MPLalMuaG1D4h2kOwgpR4a788wRY4KjLoUjaDl0UIKLLFBYUdmg6dO5jgPBeL9Ec8ODM84429z3kow/3FGGotA==
+"@sushiswap/settlement@^0.13.1":
+  version "0.13.1"
+  resolved "https://registry.yarnpkg.com/@sushiswap/settlement/-/settlement-0.13.1.tgz#145d21dc01cc5f05f410dccd4d447fd0ea5965ce"
+  integrity sha512-1no1aHKf4iNvkwJZUk0SCzpeOJ1UzInNggg5gO8799vclceieZp3k2v1D5N6Eht1dnV25QS6ZLvSL2NC3JrtMw==
   dependencies:
     "@sushiswap/core" "^1.2.1"
 

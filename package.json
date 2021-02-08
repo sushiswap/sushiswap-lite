@@ -20,7 +20,7 @@
     "@react-navigation/native": "^5.7.4",
     "@sushiswap/core": "^1.4.1",
     "@sushiswap/sdk": "^3.0.0",
-    "@sushiswap/settlement": "^0.12.0",
+    "@sushiswap/settlement": "^0.13.1",
     "@sushiswap/sushi-data": "^0.0.8",
     "@sushiswap/zapper": "^0.2.1",
     "@uniswap/sdk": "^3.0.3",

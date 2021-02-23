@@ -7,7 +7,6 @@ import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
 import Container from "../components/Container";
 import Content from "../components/Content";
-import DeprecatedNotice from "../components/DeprecatedNotice";
 import FlexView from "../components/FlexView";
 import Heading from "../components/Heading";
 import Loading from "../components/Loading";
@@ -52,7 +51,6 @@ const HomeScreen = () => {
             <Container>
                 <BackgroundImage />
                 <Content style={{ paddingBottom: Spacing.huge }}>
-                    <DeprecatedNotice />
                     <Title text={t("total-value")} style={{ flex: 1, marginTop: Spacing.normal }} />
                     <Title
                         text={loading ? t("fetching") : formatUSD(totalValue, 4)}

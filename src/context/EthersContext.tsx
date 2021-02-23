@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 
 import * as Analytics from "expo-firebase-analytics";
 
@@ -7,31 +7,22 @@ import sushiData from "@sushiswap/sushi-data";
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
 import Fraction from "../constants/Fraction";
+import { MAINNET_PROVIDER } from "../constants/providers";
 import { ETH } from "../constants/tokens";
-import useSDK from "../hooks/useSDK";
 import Ethereum from "../types/Ethereum";
 import Token from "../types/Token";
 import TokenWithValue from "../types/TokenWithValue";
-import { getContract, isWETH } from "../utils";
-import { logTransaction } from "../utils/analytics-utils";
+import { isWETH } from "../utils";
 import { fetchTokens, fetchTokenWithValue } from "../utils/fetch-utils";
+import { GlobalContext } from "./GlobalContext";
 
 export type OnBlockListener = (block?: number) => void | Promise<void>;
-
-export const ALCHEMY_PROVIDER = new ethers.providers.AlchemyProvider(
-    1,
-    __DEV__ ? process.env.MAINNET_API_KEY : "Em65gXMcaJl7JF9ZxcMwa4r5TcrU8wZV"
-);
-export const KOVAN_PROVIDER = new ethers.providers.AlchemyProvider(
-    42,
-    __DEV__ ? process.env.KOVAN_API_KEY : "MOX3sLJxKwltJjW6XZ8aBtDpenq-18St"
-);
 
 export const EthersContext = React.createContext({
     ethereum: undefined as Ethereum | undefined,
     setEthereum: (_ethereum: Ethereum | undefined) => {},
     provider: undefined as ethers.providers.JsonRpcProvider | undefined,
-    signer: undefined as ethers.providers.JsonRpcSigner | undefined,
+    signer: undefined as ethers.Signer | undefined,
     chainId: 0,
     address: null as string | null,
     ensName: null as string | null,
@@ -42,41 +33,39 @@ export const EthersContext = React.createContext({
     loadingTokens: false,
     customTokens: [ETH] as Token[],
     addCustomToken: (_token: Token) => {},
-    removeCustomToken: (_token: Token) => {},
-    approveToken: async (_token: string, _spender: string, _amount?: ethers.BigNumber) => {
-        return {} as ethers.providers.TransactionResponse | undefined;
-    },
-    getTokenAllowance: async (_token: string, _spender: string) => {
-        return ethers.constants.Zero as ethers.BigNumber | undefined;
-    },
-    getTokenBalance: async (_token: string, _who: string) => {
-        return ethers.constants.Zero as ethers.BigNumber | undefined;
-    },
-    getTotalSupply: async (_token: string) => {
-        return ethers.constants.Zero as ethers.BigNumber | undefined;
-    }
+    removeCustomToken: (_token: Token) => {}
 });
 
 // tslint:disable-next-line:max-func-body-length
 export const EthersContextProvider = ({ children }) => {
-    const { getPair } = useSDK();
+    const { mnemonic } = useContext(GlobalContext);
     const [ethereum, setEthereum] = useState<Ethereum | undefined>(window.ethereum);
     const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
-    const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
+    const [signer, setSigner] = useState<ethers.Signer>();
     const [chainId, setChainId] = useState<number>(1);
     const [address, setAddress] = useState<string | null>(null);
     const [ensName, setENSName] = useState<string | null>(null);
     const [onBlockListeners, setOnBlockListeners] = useState<{ [name: string]: OnBlockListener }>({});
     const [tokens, setTokens] = useState<TokenWithValue[]>([]);
     const [customTokens, setCustomTokens] = useState<Token[]>([]);
-    const [loadingTokens, setLoadingTokens] = useState(true);
+    const [loadingTokens, setLoadingTokens] = useState(false);
+
+    useAsyncEffect(() => {
+        if (mnemonic) {
+            const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+            setProvider(MAINNET_PROVIDER);
+            setSigner(wallet);
+            setChainId(1);
+            setAddress(wallet.address);
+        }
+    }, [mnemonic]);
 
     useAsyncEffect(async () => {
         // Mainnet
         if (ethereum) {
             const web3 = new ethers.providers.Web3Provider(ethereum);
             const web3Signer = await web3.getSigner();
-            setProvider(ethereum.isMetaMask ? web3Signer.provider : ALCHEMY_PROVIDER);
+            setProvider(ethereum.isMetaMask ? web3Signer.provider : MAINNET_PROVIDER);
             setSigner(web3Signer);
         }
     }, [ethereum, chainId]);
@@ -113,23 +102,24 @@ export const EthersContextProvider = ({ children }) => {
     }, [ethereum]);
 
     useAsyncEffect(async () => {
-        if (provider && address) {
-            const ens = await ALCHEMY_PROVIDER.lookupAddress(address);
+        if (address) {
+            const ens = await MAINNET_PROVIDER.lookupAddress(address);
             setENSName(ens);
         }
-    }, [provider, address]);
+    }, [address]);
 
     const updateTokens = async () => {
-        if (address && chainId && customTokens) {
+        if (address && chainId && customTokens && !loadingTokens) {
+            setLoadingTokens(true);
             try {
                 const list = await fetchTokens(address, customTokens);
                 const weth = list.find(t => isWETH(t));
-                const p = chainId === 1 ? provider : ALCHEMY_PROVIDER;
+                const p = chainId === 1 ? provider : MAINNET_PROVIDER;
                 if (list?.length > 0 && weth && p) {
                     const wethPriceUSD = Fraction.parse(String(await sushiData.weth.price()));
                     setTokens(
                         await Promise.all(
-                            list.map(async token => await fetchTokenWithValue(token, weth, wethPriceUSD, getPair, p))
+                            list.map(async token => await fetchTokenWithValue(token, weth, wethPriceUSD, p))
                         )
                     );
                 }
@@ -145,7 +135,6 @@ export const EthersContextProvider = ({ children }) => {
 
     useAsyncEffect(async () => {
         if (address && chainId && customTokens) {
-            setLoadingTokens(true);
             await updateTokens();
         }
     }, [address, chainId, customTokens]);
@@ -173,51 +162,6 @@ export const EthersContextProvider = ({ children }) => {
             }
         },
         [customTokens]
-    );
-
-    const approveToken = useCallback(
-        async (token: string, spender: string, amount?: ethers.BigNumber) => {
-            if (signer) {
-                amount = amount || ethers.constants.MaxUint256;
-                const erc20 = getContract("ERC20", token, signer);
-                const gasLimit = await erc20.estimateGas.approve(spender, amount);
-                const tx = await erc20.approve(spender, amount, {
-                    gasLimit
-                });
-                return await logTransaction(tx, "ERC20.approve()", spender, amount.toString());
-            }
-        },
-        [signer]
-    );
-
-    const getTokenAllowance = useCallback(
-        async (token: string, spender: string) => {
-            if (provider && address) {
-                const erc20 = getContract("ERC20", token, provider);
-                return erc20.allowance(address, spender);
-            }
-        },
-        [provider, address]
-    );
-
-    const getTokenBalance = useCallback(
-        async (token: string, who: string) => {
-            if (provider) {
-                const erc20 = getContract("ERC20", token, provider);
-                return await erc20.balanceOf(who);
-            }
-        },
-        [provider]
-    );
-
-    const getTotalSupply = useCallback(
-        async (token: string) => {
-            if (provider) {
-                const erc20 = getContract("ERC20", token, provider);
-                return await erc20.totalSupply();
-            }
-        },
-        [provider]
     );
 
     const addOnBlockListener = useCallback(
@@ -267,10 +211,6 @@ export const EthersContextProvider = ({ children }) => {
                 customTokens,
                 addCustomToken,
                 removeCustomToken,
-                approveToken,
-                getTokenAllowance,
-                getTokenBalance,
-                getTotalSupply,
                 addOnBlockListener,
                 removeOnBlockListener
             }}>

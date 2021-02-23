@@ -36,7 +36,7 @@ const StakeScreen = () => {
     return (
         <Screen>
             <Container>
-                <BackgroundImage />
+                {Platform.OS === "web" && <BackgroundImage />}
                 <Content>
                     <Title text={t("stake")} />
                     <Text light={true}>{t("stake-desc")}</Text>
@@ -44,7 +44,7 @@ const StakeScreen = () => {
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
             </Container>
-            <StakingSubMenu />
+            {Platform.OS === "web" && <StakingSubMenu />}
         </Screen>
     );
 };

@@ -7,7 +7,6 @@ import { EthersContext } from "../context/EthersContext";
 import LPTokenWithValue from "../types/LPTokenWithValue";
 import { isWETH } from "../utils";
 import { fetchLPTokenWithValue, fetchMyLPTokens, fetchMyPools } from "../utils/fetch-utils";
-import useSDK from "./useSDK";
 
 export interface HomeState {
     loadingLPTokens: boolean;
@@ -23,7 +22,6 @@ const useHomeState = () => {
     const [pools, setPools] = useState<LPTokenWithValue[]>();
     const [loadingLPTokens, setLoadingLPTokens] = useState(true);
     const [loadingPools, setLoadingPools] = useState(true);
-    const { getPair } = useSDK();
 
     useEffect(() => {
         setLPTokens(undefined);
@@ -42,14 +40,14 @@ const useHomeState = () => {
             try {
                 setLPTokens(
                     await Promise.all(
-                        fetched.map(lpToken => fetchLPTokenWithValue(lpToken, weth, wethPriceUSD, getPair, provider))
+                        fetched.map(lpToken => fetchLPTokenWithValue(lpToken, weth, wethPriceUSD, provider))
                     )
                 );
             } finally {
                 setLoadingLPTokens(false);
             }
         }
-    }, [getPair, provider, signer, tokens]);
+    }, [provider, signer, tokens]);
 
     // Load Farming
     useAsyncEffect(async () => {
@@ -61,14 +59,14 @@ const useHomeState = () => {
             try {
                 setPools(
                     await Promise.all(
-                        fetched.map(lpToken => fetchLPTokenWithValue(lpToken, weth, wethPriceUSD, getPair, provider))
+                        fetched.map(lpToken => fetchLPTokenWithValue(lpToken, weth, wethPriceUSD, provider))
                     )
                 );
             } finally {
                 setLoadingPools(false);
             }
         }
-    }, [getPair, provider, signer, tokens, lpTokens]);
+    }, [provider, signer, tokens, lpTokens]);
 
     return {
         loadingLPTokens,

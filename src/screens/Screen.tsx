@@ -1,31 +1,36 @@
-import React, { useContext, useEffect } from "react";
+import React, { lazy, Suspense, useContext, useEffect } from "react";
 import { Platform, View } from "react-native";
 import { useLocation } from "react-router-dom";
 
 import AppHeader from "../components/app/AppHeader";
-import ConnectToWallet from "../components/web/ConnectToWallet";
+import Text from "../components/Text";
 import { HEADER_HEIGHT } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
 import { GlobalContext } from "../context/GlobalContext";
+const ConnectToWallet = lazy(() => import("../components/web/ConnectToWallet"));
 
-const Screen = props => {
+const Screen = props =>
+    Platform.select({
+        web: <WebScreen {...props} />,
+        default: <AppScreen {...props} />
+    });
+
+const WebScreen = props => {
+    const { address } = useContext(EthersContext);
     const { setLocale } = useContext(GlobalContext);
     const query = useQuery();
+    if (!address)
+        return (
+            <Suspense fallback={<Text>Loading...</Text>}>
+                <ConnectToWallet />
+            </Suspense>
+        );
     useEffect(() => {
         const locale = query.get("locale");
         if (locale) {
             setLocale(locale);
         }
     }, [query]);
-    return Platform.select({
-        web: <WebScreen {...props} />,
-        default: <AppScreen {...props} />
-    });
-};
-
-const WebScreen = props => {
-    const { address } = useContext(EthersContext);
-    if (!address) return <ConnectToWallet />;
     return (
         <View
             {...props}

@@ -6,6 +6,7 @@ import useAsyncEffect from "use-async-effect";
 import { MASTER_CHEF } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import { convertToken, parseBalance } from "../utils";
+import useERC20 from "./useERC20";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
 import useMasterChef from "./useMasterChef";
 
@@ -19,7 +20,8 @@ export interface FarmingState extends LPTokensState {
 // tslint:disable-next-line:max-func-body-length
 const useFarmingState: (myPools: boolean) => FarmingState = myPools => {
     const state = useLPTokensState(myPools ? "my-pools" : "pools");
-    const { signer, getTokenAllowance } = useContext(EthersContext);
+    const { signer } = useContext(EthersContext);
+    const { getAllowance } = useERC20();
     const { deposit, withdraw } = useMasterChef();
     const [loading, setLoading] = useState(false);
     const [depositing, setDepositing] = useState(false);
@@ -41,7 +43,7 @@ const useFarmingState: (myPools: boolean) => FarmingState = myPools => {
                 const minAllowance = ethers.BigNumber.from(2)
                     .pow(96)
                     .sub(1);
-                const allowance = await getTokenAllowance(state.selectedLPToken.address, MASTER_CHEF);
+                const allowance = await getAllowance(state.selectedLPToken.address, MASTER_CHEF);
                 state.setSelectedLPTokenAllowed(ethers.BigNumber.from(allowance).gte(minAllowance));
             } finally {
                 setLoading(false);

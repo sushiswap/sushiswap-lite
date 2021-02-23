@@ -5,13 +5,7 @@ import Token from "../types/Token";
 import getContract from "./getContract";
 
 export const formatUSD = (value: number, maxFraction = 0) => {
-    const formatter = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: maxFraction
-    });
-    return formatter.format(value);
+    return "$" + value.toFixed(maxFraction).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
 };
 
 export const formatPercentage = (value: number, maxFraction = 2) => {

@@ -29,7 +29,8 @@ import { SwapSubMenu } from "../components/web/WebSubMenu";
 import { ROUTER, SETTLEMENT } from "../constants/contracts";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import Fraction from "../constants/Fraction";
-import { ALCHEMY_PROVIDER, EthersContext } from "../context/EthersContext";
+import { MAINNET_PROVIDER } from "../constants/providers";
+import { EthersContext } from "../context/EthersContext";
 import useColors from "../hooks/useColors";
 import useDelayedEffect from "../hooks/useDelayedEffect";
 import useLinker from "../hooks/useLinker";
@@ -45,7 +46,7 @@ const SwapScreen = () => {
     return (
         <Screen>
             <Container>
-                <BackgroundImage />
+                {Platform.OS === "web" && <BackgroundImage />}
                 <Content>
                     <Title text={t("new-order")} />
                     <Text light={true}>{t("new-order-desc")}</Text>
@@ -53,7 +54,7 @@ const SwapScreen = () => {
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
             </Container>
-            <SwapSubMenu />
+            {Platform.OS === "web" && <SwapSubMenu />}
         </Screen>
     );
 };
@@ -390,7 +391,7 @@ const LimitOrderControls = ({ state }: { state: SwapState }) => {
         async () => {
             if (state.fromToken && !isEmptyValue(state.fromAmount)) {
                 const fromAmount = parseBalance(state.fromAmount, state.fromToken.decimals);
-                const erc20 = getContract("ERC20", state.fromToken.address, ALCHEMY_PROVIDER);
+                const erc20 = getContract("ERC20", state.fromToken.address, MAINNET_PROVIDER);
                 const allowance = await erc20.allowance(address, SETTLEMENT);
                 setAllowed(ethers.BigNumber.from(allowance).gte(fromAmount));
             }

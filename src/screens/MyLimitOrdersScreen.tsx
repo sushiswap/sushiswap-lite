@@ -39,7 +39,7 @@ const MyLimitOrdersScreen = () => {
     return (
         <Screen>
             <Container>
-                <BackgroundImage />
+                {Platform.OS === "web" && <BackgroundImage />}
                 <Content>
                     <Title text={t("my-orders")} />
                     <Text light={true}>{t("my-orders-desc")}</Text>
@@ -47,7 +47,7 @@ const MyLimitOrdersScreen = () => {
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
             </Container>
-            <SwapSubMenu />
+            {Platform.OS === "web" && <SwapSubMenu />}
         </Screen>
     );
 };

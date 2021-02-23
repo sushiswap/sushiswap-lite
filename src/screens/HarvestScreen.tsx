@@ -40,7 +40,7 @@ const HarvestScreen = () => {
     return (
         <Screen>
             <Container>
-                <BackgroundImage />
+                {Platform.OS === "web" && <BackgroundImage />}
                 <Content>
                     <Title text={t("harvest-sushi")} />
                     <Text light={true}>{t("harvest-sushi-desc")}</Text>
@@ -48,7 +48,7 @@ const HarvestScreen = () => {
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
             </Container>
-            <FarmingSubMenu />
+            {Platform.OS === "web" && <FarmingSubMenu />}
         </Screen>
     );
 };

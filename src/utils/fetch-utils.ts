@@ -1,11 +1,11 @@
-import { FACTORY_ADDRESS as SUSHISWAP_FACTORY, Pair } from "@sushiswap/sdk";
+import { FACTORY_ADDRESS as SUSHISWAP_FACTORY, Fetcher, Pair } from "@sushiswap/sdk";
 import sushiData from "@sushiswap/sushi-data";
 import { FACTORY_ADDRESS as UNISWAP_FACTORY } from "@uniswap/sdk";
 import { ethers } from "ethers";
 import { LP_TOKEN_SCANNER, MASTER_CHEF, ORDER_BOOK, SETTLEMENT } from "../constants/contracts";
 import Fraction from "../constants/Fraction";
+import { KOVAN_PROVIDER, MAINNET_PROVIDER } from "../constants/providers";
 import { ETH } from "../constants/tokens";
-import { ALCHEMY_PROVIDER, KOVAN_PROVIDER } from "../context/EthersContext";
 import { Order, OrderStatus } from "../hooks/useSettlement";
 import LPToken from "../types/LPToken";
 import Token from "../types/Token";
@@ -23,6 +23,12 @@ import {
 
 const blocksPerDay = 6500;
 
+export const fetchPair = async (fromToken: Token, toToken: Token, provider: ethers.providers.BaseProvider) => {
+    const from = convertToken(fromToken);
+    const to = convertToken(toToken);
+    return await Fetcher.fetchPairData(from, to, provider);
+};
+
 export const fetchTokens = async (account: string, customTokens?: Token[]) => {
     const response = await fetch("https://lite.sushiswap.fi/tokens.json");
     const json = await response.json();
@@ -35,7 +41,7 @@ export const fetchTokens = async (account: string, customTokens?: Token[]) => {
     return [
         {
             ...ETH,
-            balance: await ALCHEMY_PROVIDER.getBalance(account)
+            balance: await MAINNET_PROVIDER.getBalance(account)
         },
         ...tokens.map((token, i) => ({
             ...token,
@@ -48,7 +54,6 @@ export const fetchTokenWithValue = async (
     token: Token,
     weth: Token,
     wethPriceUSD: Fraction,
-    getPair: (fromToken: Token, toToken: Token, provider: ethers.providers.BaseProvider) => Promise<Pair>,
     provider: ethers.providers.BaseProvider
 ) => {
     let fetched: TokenWithValue;
@@ -60,7 +65,7 @@ export const fetchTokenWithValue = async (
         } as TokenWithValue;
     } else {
         try {
-            const pair = await getPair(token, weth, provider);
+            const pair = await fetchPair(token, weth, provider);
             const priceETH = Fraction.convert(pair.priceOf(convertToken(token)));
             const priceUSD = priceETH.apply(wethPriceUSD.numerator).div(pow10(18 - token.decimals));
             fetched = {
@@ -263,7 +268,7 @@ export const findOrFetchToken = async (
             return token;
         }
     }
-    let meta = await ALCHEMY_PROVIDER.send("alchemy_getTokenMetadata", [address]);
+    let meta = await MAINNET_PROVIDER.send("alchemy_getTokenMetadata", [address]);
     if (!meta.name || meta.symbol || meta.decimals || meta.logoURI) {
         meta = await fetchTokenMeta(address, provider);
     }
@@ -300,13 +305,12 @@ export const fetchLPTokenWithValue = async (
     lpToken: LPToken,
     weth: Token,
     wethPriceUSD: Fraction,
-    getPair: (fromToken: Token, toToken: Token, provider: ethers.providers.BaseProvider) => Promise<Pair>,
     provider: ethers.providers.BaseProvider
 ) => {
-    const pair = await getPair(lpToken.tokenA, lpToken.tokenB, provider);
+    const pair = await fetchPair(lpToken.tokenA, lpToken.tokenB, provider);
     const values = await Promise.all([
-        await fetchTotalValue(lpToken.tokenA, pair, weth, wethPriceUSD, getPair, provider),
-        await fetchTotalValue(lpToken.tokenB, pair, weth, wethPriceUSD, getPair, provider)
+        await fetchTotalValue(lpToken.tokenA, pair, weth, wethPriceUSD, provider),
+        await fetchTotalValue(lpToken.tokenB, pair, weth, wethPriceUSD, provider)
     ]);
     const priceUSD = values[0]
         .add(values[1])
@@ -321,15 +325,15 @@ export const fetchLPTokenWithValue = async (
     };
 };
 
-const fetchTotalValue = async (token: Token, lpPair: Pair, weth: Token, wethPriceUSD: Fraction, getPair, provider) => {
-    const tokenWithValue = await fetchTokenWithValue(token, weth, wethPriceUSD, getPair, provider);
+const fetchTotalValue = async (token: Token, lpPair: Pair, weth: Token, wethPriceUSD: Fraction, provider) => {
+    const tokenWithValue = await fetchTokenWithValue(token, weth, wethPriceUSD, provider);
     const tokenReserve = parseCurrencyAmount(lpPair.reserveOf(convertToken(token)), token.decimals);
     const tokenPrice = parseBalance(String(tokenWithValue.priceUSD || 0));
     return tokenReserve.mul(tokenPrice).div(pow10(token.decimals));
 };
 
 const fetchTokenBalances = async (account: string, addresses: string[]) => {
-    const balances = await ALCHEMY_PROVIDER.send("alchemy_getTokenBalances", [account, addresses]);
+    const balances = await MAINNET_PROVIDER.send("alchemy_getTokenBalances", [account, addresses]);
     return balances.tokenBalances.map(balance => balance.tokenBalance);
 };
 

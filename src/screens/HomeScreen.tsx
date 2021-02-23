@@ -1,7 +1,8 @@
-import React, { FC, useCallback, useContext, useMemo } from "react";
+import React, { FC, useCallback, useContext, useEffect, useMemo } from "react";
 import { FlatList, Platform, TouchableHighlight, View } from "react-native";
 import { Icon } from "react-native-elements";
 
+import { useNavigation } from "@react-navigation/native";
 import { ethers } from "ethers";
 import BackgroundImage from "../components/BackgroundImage";
 import Border from "../components/Border";
@@ -22,6 +23,7 @@ import TokenValue from "../components/TokenValue";
 import WebFooter from "../components/web/WebFooter";
 import { IS_DESKTOP, Spacing } from "../constants/dimension";
 import { EthersContext } from "../context/EthersContext";
+import { GlobalContext } from "../context/GlobalContext";
 import useColors from "../hooks/useColors";
 import useHomeState, { HomeState } from "../hooks/useHomeState";
 import useLinker from "../hooks/useLinker";
@@ -44,15 +46,18 @@ interface LPTokenItemProps {
 const HomeScreen = () => {
     const t = useTranslation();
     const state = useHomeState();
-    const { loadingTokens } = useContext(EthersContext);
+    const { loadingTokens, updateTokens } = useContext(EthersContext);
+    const navigation = useNavigation();
     const loading = loadingTokens || state.loadingLPTokens || state.loadingPools;
     const totalValue = sum(state.tokens) + sum(state.lpTokens) + sum(state.pools);
+    // @ts-ignore
+    navigation.addListener("tabPress", updateTokens);
     return (
         <Screen>
-            <Container>
-                <BackgroundImage />
+            <Container onRefresh={updateTokens}>
+                {Platform.OS === "web" && <BackgroundImage />}
                 <Content style={{ paddingBottom: Spacing.huge }}>
-                    <DeprecatedNotice />
+                    {Platform.OS === "web" && <DeprecatedNotice />}
                     <Title text={t("total-value")} style={{ flex: 1, marginTop: Spacing.normal }} />
                     <Title
                         text={loading ? t("fetching") : formatUSD(totalValue, 4)}

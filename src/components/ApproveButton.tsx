@@ -1,8 +1,8 @@
-import React, { FC, useCallback, useContext, useState } from "react";
+import React, { FC, useCallback, useState } from "react";
 import { View } from "react-native";
 
 import { Spacing } from "../constants/dimension";
-import { EthersContext } from "../context/EthersContext";
+import useERC20 from "../hooks/useERC20";
 import useTranslation from "../hooks/useTranslation";
 import Token from "../types/Token";
 import Button from "./Button";
@@ -17,14 +17,14 @@ export interface ApproveButtonProps {
 
 const ApproveButton: FC<ApproveButtonProps> = props => {
     const t = useTranslation();
-    const { approveToken } = useContext(EthersContext);
+    const { approve } = useERC20();
     const [loading, setLoading] = useState(false);
     const onPress = useCallback(async () => {
         if (props.token) {
             props.onError({});
             setLoading(true);
             try {
-                const tx = await approveToken(props.token.address, props.spender);
+                const tx = await approve(props.token.address, props.spender);
                 if (tx) {
                     await tx.wait();
                     props.onSuccess();

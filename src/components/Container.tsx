@@ -1,9 +1,15 @@
 import React, { FC } from "react";
-import { Platform, SafeAreaView, ScrollView, ViewProps } from "react-native";
+import { Platform, RefreshControl, SafeAreaView, ScrollView, ViewProps } from "react-native";
 
-export type ContainerProps = ViewProps;
+import useColors from "../hooks/useColors";
+
+export interface ContainerProps extends ViewProps {
+    refreshing?: boolean;
+    onRefresh?: () => void;
+}
 
 const Container: FC<ContainerProps> = props => {
+    const { primary } = useColors();
     return Platform.select({
         web: (
             <ScrollView
@@ -19,7 +25,17 @@ const Container: FC<ContainerProps> = props => {
         ),
         default: (
             <SafeAreaView style={{ flex: 1 }}>
-                <ScrollView {...props} />
+                <ScrollView
+                    {...props}
+                    refreshControl={
+                        <RefreshControl
+                            colors={[primary]}
+                            tintColor={primary}
+                            refreshing={props.refreshing || false}
+                            onRefresh={props.onRefresh}
+                        />
+                    }
+                />
             </SafeAreaView>
         )
     });

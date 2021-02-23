@@ -6,6 +6,7 @@ import { SUSHI_BAR } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import Token from "../types/Token";
 import { getContract, parseBalance } from "../utils";
+import useERC20 from "./useERC20";
 import useSushiBar from "./useSushiBar";
 
 export type StakeAction = "sushi-balance" | "stake";
@@ -32,7 +33,8 @@ export interface StakingState {
 
 // tslint:disable-next-line:max-func-body-length
 const useStakingState: () => StakingState = () => {
-    const { signer, address, getTokenAllowance, tokens, updateTokens } = useContext(EthersContext);
+    const { signer, address, tokens, updateTokens } = useContext(EthersContext);
+    const { getAllowance } = useERC20();
     const { enter, leave } = useSushiBar();
     const [sushiStaked, setSushiStaked] = useState<ethers.BigNumber>();
     const [sushiSupply, setSushiSupply] = useState<ethers.BigNumber>();
@@ -60,9 +62,9 @@ const useStakingState: () => StakingState = () => {
                 const minAllowance = ethers.BigNumber.from(2)
                     .pow(96)
                     .sub(1);
-                const sushiAllowance = await getTokenAllowance(sushi.address, SUSHI_BAR);
+                const sushiAllowance = await getAllowance(sushi.address, SUSHI_BAR);
                 setSushiAllowed(ethers.BigNumber.from(sushiAllowance).gte(minAllowance));
-                const xSushiAllowance = await getTokenAllowance(xSushi.address, SUSHI_BAR);
+                const xSushiAllowance = await getAllowance(xSushi.address, SUSHI_BAR);
                 setXSushiAllowed(ethers.BigNumber.from(xSushiAllowance).gte(minAllowance));
 
                 const sushiContract = getContract("ERC20", sushi.address, signer);

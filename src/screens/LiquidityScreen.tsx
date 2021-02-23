@@ -34,6 +34,7 @@ import Fraction from "../constants/Fraction";
 import { EthersContext } from "../context/EthersContext";
 import useAddLiquidityState, { AddLiquidityMode, AddLiquidityState } from "../hooks/useAddLiquidityState";
 import useColors from "../hooks/useColors";
+import useERC20 from "../hooks/useERC20";
 import useLinker from "../hooks/useLinker";
 import useSDK from "../hooks/useSDK";
 import useTranslation from "../hooks/useTranslation";
@@ -47,7 +48,7 @@ const LiquidityScreen = () => {
     return (
         <Screen>
             <Container>
-                <BackgroundImage />
+                {Platform.OS === "web" && <BackgroundImage />}
                 <Content>
                     <Title text={t("add-liquidity")} />
                     <Text light={true}>{t("add-liquidity-desc")}</Text>
@@ -55,7 +56,7 @@ const LiquidityScreen = () => {
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
             </Container>
-            <LiquiditySubMenu />
+            {Platform.OS === "web" && <LiquiditySubMenu />}
         </Screen>
     );
 };
@@ -398,7 +399,8 @@ const Controls = ({ state }: { state: AddLiquidityState }) => {
 };
 
 const useZapTokenAllowance = (zapToken?: Token) => {
-    const { signer, getTokenAllowance } = useContext(EthersContext);
+    const { signer } = useContext(EthersContext);
+    const { getAllowance } = useERC20();
     const [allowed, setAllowed] = useState(false);
     const [loading, setLoading] = useState(false);
     useAsyncEffect(async () => {
@@ -410,7 +412,7 @@ const useZapTokenAllowance = (zapToken?: Token) => {
                     .pow(96)
                     .sub(1);
                 if (isETH(zapToken)) {
-                    const fromAllowance = await getTokenAllowance(zapToken.address, ZAP_IN);
+                    const fromAllowance = await getAllowance(zapToken.address, ZAP_IN);
                     setAllowed(ethers.BigNumber.from(fromAllowance).gte(minAllowance));
                 }
             } finally {

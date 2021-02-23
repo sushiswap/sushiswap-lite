@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { ChainId, Currency, ETHER, Fetcher, Pair, Token, WETH } from "@sushiswap/sdk";
 import { ethers } from "ethers";
 
-const WBTC = new Token(ChainId.MAINNET, "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", 8, "WBTC", "Wrapped BTC");
+const WBTC = new Token(ChainId.MAINNET, "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", 8, "WBTC", "Wrapped BTC");
 const DAI = new Token(ChainId.MAINNET, "0x6B175474E89094C44Da98b954EedeAC495271d0F", 18, "DAI", "Dai Stablecoin");
 const USDC = new Token(ChainId.MAINNET, "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", 6, "USDC", "USD//C");
 const USDT = new Token(ChainId.MAINNET, "0xdAC17F958D2ee523a2206206994597C13D831ec7", 6, "USDT", "Tether USD");

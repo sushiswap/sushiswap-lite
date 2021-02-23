@@ -3,7 +3,8 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { Trade } from "@sushiswap/sdk";
 import useAsyncEffect from "use-async-effect";
 import Fraction from "../constants/Fraction";
-import { ALCHEMY_PROVIDER, EthersContext } from "../context/EthersContext";
+import { MAINNET_PROVIDER } from "../constants/providers";
+import { EthersContext } from "../context/EthersContext";
 import { formatBalance, isEmptyValue, isETH, parseBalance, pow10 } from "../utils";
 import useDelayedEffect from "./useDelayedEffect";
 import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
@@ -75,7 +76,7 @@ const useSwapState: () => SwapState = () => {
             if (!block) {
                 setLoading(true);
             }
-            const p = chainId === 1 ? provider : ALCHEMY_PROVIDER;
+            const p = chainId === 1 ? provider : MAINNET_PROVIDER;
             if (state.fromToken && state.toToken && state.fromAmount && p) {
                 const amount = parseBalance(state.fromAmount, state.fromToken.decimals);
                 if (!amount.isZero()) {

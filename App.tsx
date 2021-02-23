@@ -1,5 +1,5 @@
 /* tslint:disable:ordered-imports */
-import "./globals";
+import "node-libs-expo/globals";
 import React from "react";
 
 import { OpenSans_300Light, OpenSans_400Regular, OpenSans_600SemiBold } from "@expo-google-fonts/open-sans";
@@ -7,11 +7,11 @@ import { AppLoading } from "expo";
 import { useFonts } from "expo-font";
 
 import { ContextProvider } from "./src/context";
-import { Screens } from "./src/screens";
-import { YellowBox } from "react-native";
+import Screens from "./src/screens";
+import { LogBox } from "react-native";
 
 if (__DEV__) {
-    YellowBox.ignoreWarnings(["Setting a timer", "VirtualizedLists should never be nested"]);
+    LogBox.ignoreLogs(["Setting a timer", "VirtualizedLists should never be nested"]);
 }
 
 const App = () => {

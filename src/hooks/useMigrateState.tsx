@@ -5,6 +5,7 @@ import useAsyncEffect from "use-async-effect";
 import { SUSHI_ROLL } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import { parseBalance } from "../utils";
+import useERC20 from "./useERC20";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
 import useSushiRoll from "./useSushiRoll";
 
@@ -21,7 +22,8 @@ export interface MigrateState extends LPTokensState {
 const useMigrateState: () => MigrateState = () => {
     const { ethereum } = useContext(EthersContext);
     const state = useLPTokensState("my-uniswap-lp-tokens");
-    const { provider, signer, getTokenAllowance, updateTokens } = useContext(EthersContext);
+    const { provider, signer, updateTokens } = useContext(EthersContext);
+    const { getAllowance } = useERC20();
     const { migrate, migrateWithPermit } = useSushiRoll();
     const [loading, setLoading] = useState(false);
     const [mode, setMode] = useState<MigrateMode>();
@@ -47,7 +49,7 @@ const useMigrateState: () => MigrateState = () => {
                 const minAllowance = ethers.BigNumber.from(2)
                     .pow(96)
                     .sub(1);
-                const allowance = await getTokenAllowance(state.selectedLPToken.address, SUSHI_ROLL);
+                const allowance = await getAllowance(state.selectedLPToken.address, SUSHI_ROLL);
                 state.setSelectedLPTokenAllowed(ethers.BigNumber.from(allowance).gte(minAllowance));
             } finally {
                 setLoading(false);

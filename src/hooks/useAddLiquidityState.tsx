@@ -3,8 +3,8 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { Pair } from "@sushiswap/sdk";
 import { EthersContext } from "../context/EthersContext";
 import { convertToken, isETH, parseBalance } from "../utils";
+import { fetchPair } from "../utils/fetch-utils";
 import useDelayedOnBlockEffect from "./useDelayedOnBlockEffect";
-import useSDK from "./useSDK";
 import useSwapRouter from "./useSwapRouter";
 import useTokenPairState, { TokenPairState } from "./useTokenPairState";
 import useZapper from "./useZapper";
@@ -28,7 +28,6 @@ const useAddLiquidityState: () => AddLiquidityState = () => {
     const [mode, setMode] = useState<AddLiquidityMode>();
     const [pair, setPair] = useState<Pair>();
     const [adding, setAdding] = useState(false);
-    const { getPair } = useSDK();
     const { addLiquidity, addLiquidityETH } = useSwapRouter();
     const { zapIn } = useZapper();
     const priceDetermined =
@@ -52,7 +51,7 @@ const useAddLiquidityState: () => AddLiquidityState = () => {
             }
             if (state.fromToken && state.toToken && provider) {
                 try {
-                    setPair(await getPair(state.fromToken, state.toToken, provider));
+                    setPair(await fetchPair(state.fromToken, state.toToken, provider));
                 } catch (e) {
                 } finally {
                     setLoading(false);
@@ -61,7 +60,7 @@ const useAddLiquidityState: () => AddLiquidityState = () => {
                 setLoading(false);
             }
         },
-        () => "getPair(" + state.fromSymbol + "," + state.toSymbol + ")",
+        () => "fetchPair(" + state.fromSymbol + "," + state.toSymbol + ")",
         [state.fromSymbol, state.toSymbol, provider],
         0
     );

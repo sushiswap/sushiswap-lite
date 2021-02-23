@@ -9,13 +9,14 @@ import LPToken from "../types/LPToken";
 import Token from "../types/Token";
 import { convertToken, deduct, getContract, isETH, parseCurrencyAmount } from "../utils";
 import { logTransaction } from "../utils/analytics-utils";
+import { fetchPair } from "../utils/fetch-utils";
 import useSDK from "./useSDK";
 import useSwapRouter from "./useSwapRouter";
 
 // tslint:disable-next-line:max-func-body-length
 const useZapper = () => {
     const { ethereum } = useContext(EthersContext);
-    const { getPair, getTrade, calculateAmountOfLPTokenMinted } = useSDK();
+    const { getTrade, calculateAmountOfLPTokenMinted } = useSDK();
     const { allowedSlippage, ttl } = useSwapRouter();
     const zapSlippage = new Percent("3", "100"); // 3.0%
 
@@ -47,7 +48,7 @@ const useZapper = () => {
             provider: ethers.providers.BaseProvider,
             signer: ethers.Signer
         ) => {
-            const pair = await getPair(fromToken, toToken, provider);
+            const pair = await fetchPair(fromToken, toToken, provider);
             const amount = new TokenAmount(convertToken(fromToken), fromAmount.div(2).toString());
             const lpTokenAmount = await calculateAmountOfLPTokenMinted(pair, amount, pair.getOutputAmount(amount)[0]);
             if (!lpTokenAmount) throw new Error("Cannot calculate LP token amount");
@@ -89,7 +90,7 @@ const useZapper = () => {
         } else {
             throw new Error("Wrong outputToken");
         }
-        const pair = await getPair(fromToken, toToken, provider);
+        const pair = await fetchPair(fromToken, toToken, provider);
         const fromReserve = parseCurrencyAmount(pair.reserveOf(convertToken(fromToken)), fromToken.decimals);
         const fromAmount = lpTokenAmount.mul(fromReserve).div(lpToken.totalSupply);
         const trade = await getTrade(fromToken, toToken, fromAmount, provider);

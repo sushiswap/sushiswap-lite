@@ -32,7 +32,7 @@ const UnstakeScreen = () => {
     return (
         <Screen>
             <Container>
-                <BackgroundImage />
+                {Platform.OS === "web" && <BackgroundImage />}
                 <Content>
                     <Title text={t("unstake")} />
                     <Text light={true}>{t("unstake-desc")}</Text>
@@ -40,7 +40,7 @@ const UnstakeScreen = () => {
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
             </Container>
-            <StakingSubMenu />
+            {Platform.OS === "web" && <StakingSubMenu />}
         </Screen>
     );
 };

@@ -6,6 +6,7 @@ import { ROUTER } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import Token from "../types/Token";
 import { isETH, parseBalance } from "../utils";
+import useERC20 from "./useERC20";
 import useWeth from "./useWeth";
 
 export interface TokenPairState {
@@ -32,7 +33,8 @@ export interface TokenPairState {
 
 // tslint:disable-next-line:max-func-body-length
 const useTokenPairState: () => TokenPairState = () => {
-    const { signer, address, tokens, updateTokens, getTokenAllowance } = useContext(EthersContext);
+    const { signer, address, tokens, updateTokens } = useContext(EthersContext);
+    const { getAllowance } = useERC20();
     const { wrapETH, unwrapETH } = useWeth();
     const [fromSymbol, setFromSymbol] = useState("");
     const [toSymbol, setToSymbol] = useState("");
@@ -69,11 +71,11 @@ const useTokenPairState: () => TokenPairState = () => {
                     .pow(96)
                     .sub(1);
                 if (!isETH(fromToken)) {
-                    const fromAllowance = await getTokenAllowance(fromToken.address, ROUTER);
+                    const fromAllowance = await getAllowance(fromToken.address, ROUTER);
                     setFromTokenAllowed(ethers.BigNumber.from(fromAllowance).gte(minAllowance));
                 }
                 if (!isETH(toToken)) {
-                    const toAllowance = await getTokenAllowance(toToken.address, ROUTER);
+                    const toAllowance = await getAllowance(toToken.address, ROUTER);
                     setToTokenAllowed(ethers.BigNumber.from(toAllowance).gte(minAllowance));
                 }
             } finally {

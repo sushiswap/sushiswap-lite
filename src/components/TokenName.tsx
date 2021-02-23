@@ -9,7 +9,7 @@ const TokenName = (props: { token: Token; disabled?: boolean }) => (
         caption={true}
         numberOfLines={1}
         ellipsizeMode={"tail"}
-        style={{ marginLeft: Spacing.small, width: 180 }}
+        style={{ marginLeft: Spacing.small, width: IS_DESKTOP ? 180 : undefined }}
         disabled={props.disabled}>
         {IS_DESKTOP ? props.token.name : props.token.symbol}
     </Text>

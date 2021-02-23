@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 
 import { ethers } from "ethers";
 import useAsyncEffect from "use-async-effect";
@@ -6,6 +6,7 @@ import { ROUTER } from "../constants/contracts";
 import { EthersContext } from "../context/EthersContext";
 import Token from "../types/Token";
 import { convertToken, formatBalance, isWETH, parseBalance, parseCurrencyAmount } from "../utils";
+import useERC20 from "./useERC20";
 import useLPTokensState, { LPTokensState } from "./useLPTokensState";
 import useSwapRouter from "./useSwapRouter";
 import useZapper from "./useZapper";
@@ -20,7 +21,8 @@ export interface RemoveLiquidityState extends LPTokensState {
 // tslint:disable-next-line:max-func-body-length
 const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
     const state = useLPTokensState("my-lp-tokens");
-    const { provider, signer, getTokenAllowance, updateTokens } = useContext(EthersContext);
+    const { provider, signer, updateTokens } = useContext(EthersContext);
+    const { getAllowance } = useERC20();
     const { removeLiquidity, removeLiquidityETH } = useSwapRouter();
     const { zapOut } = useZapper();
     const [loading, setLoading] = useState(false);
@@ -46,7 +48,7 @@ const useRemoveLiquidityState: () => RemoveLiquidityState = () => {
                 const minAllowance = ethers.BigNumber.from(2)
                     .pow(96)
                     .sub(1);
-                const allowance = await getTokenAllowance(state.selectedLPToken.address, ROUTER);
+                const allowance = await getAllowance(state.selectedLPToken.address, ROUTER);
                 state.setSelectedLPTokenAllowed(ethers.BigNumber.from(allowance).gte(minAllowance));
             } finally {
                 setLoading(false);

@@ -46,7 +46,7 @@ const RemoveLiquidityScreen = () => {
     return (
         <Screen>
             <Container>
-                <BackgroundImage />
+                {Platform.OS === "web" && <BackgroundImage />}
                 <Content>
                     <Title text={t("remove-liquidity")} />
                     <Text light={true}>{t("remove-liquidity-desc")}</Text>
@@ -54,7 +54,7 @@ const RemoveLiquidityScreen = () => {
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
             </Container>
-            <LiquiditySubMenu />
+            {Platform.OS === "web" && <LiquiditySubMenu />}
         </Screen>
     );
 };

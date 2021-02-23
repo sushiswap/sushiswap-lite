@@ -37,7 +37,7 @@ const MigrateScreen = () => {
     return (
         <Screen>
             <Container>
-                <BackgroundImage />
+                {Platform.OS === "web" && <BackgroundImage />}
                 <Content>
                     <Title text={t("migrate-liquidity")} />
                     <Text light={true}>{t("migrate-liquidity-desc")}</Text>
@@ -45,7 +45,7 @@ const MigrateScreen = () => {
                 </Content>
                 {Platform.OS === "web" && <WebFooter />}
             </Container>
-            <MigrateSubMenu />
+            {Platform.OS === "web" && <MigrateSubMenu />}
         </Screen>
     );
 };

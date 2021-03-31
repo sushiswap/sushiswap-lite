@@ -163,13 +163,13 @@ export const fetchMyPools = async (account: string, tokens: Token[], provider: e
 
 const calcAPY = (derivedETH, sushiPerBlock, allocPoint, totalAllocPoint, totalValueETH, slpBalance, totalSupply) => {
     return (
-        (derivedETH * blocksPerDay * sushiPerBlock * 3 * 365 * (allocPoint / totalAllocPoint)) /
+        (derivedETH * blocksPerDay * sushiPerBlock * 365 * (allocPoint / totalAllocPoint)) /
         (totalValueETH * (slpBalance / totalSupply))
     );
 };
 
 const calcSushiRewardedPerYear = (sushiPerBlock, allocPoint, totalAllocPoint, totalSupply) => {
-    return ethers.BigNumber.from(blocksPerDay * sushiPerBlock * 3 * 365 * allocPoint)
+    return ethers.BigNumber.from(blocksPerDay * sushiPerBlock * 365 * allocPoint)
         .mul(pow10(36))
         .div(totalAllocPoint)
         .div(parseBalance(String(totalSupply)));
